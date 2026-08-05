@@ -123,8 +123,12 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                # 💡 gemini-1.5-flash 모델로 표준화
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                
+                # 💡 호환성 높은 모델명 지정
+                try:
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                except:
+                    model = genai.GenerativeModel("gemini-pro")
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -154,10 +158,7 @@ with tab1:
                     st.success("AI 스크리닝 판정 완료!")
                     st.markdown(res.text)
                 except Exception as e:
-                    if "429" in str(e):
-                        st.error("⏳ API 무료 사용량이 초과되었습니다. 약 1분 후 다시 시도해 주세요!")
-                    else:
-                        st.error(f"AI 통신 에러 발생: {str(e)}")
+                    st.error(f"AI 통신 에러 발생: {str(e)}")
 
 # --------------------------------------------------
 # TAB 2: CSV 파일 PMID 일괄 스크리닝
@@ -179,7 +180,11 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                
+                try:
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                except:
+                    model = genai.GenerativeModel("gemini-pro")
                 
                 titles = []
                 abstracts = []
@@ -234,13 +239,9 @@ with tab2:
                             reasons.append(ans.split("사유:")[-1].strip() if "사유:" in ans else ans)
                         except Exception as e:
                             results.append("Error")
-                            if "429" in str(e):
-                                reasons.append("할당량 초과 (1분 후 재시도 필요)")
-                            else:
-                                reasons.append(f"AI 통신 에러: {str(e)}")
+                            reasons.append(f"AI 통신 에러: {str(e)}")
                     
                     progress_bar.progress((idx + 1) / total)
-                    # 💡 무료 플랜 초과 방지를 위한 4초 안전 대기
                     time.sleep(4.0)
                 
                 df['논문 제목'] = titles
@@ -251,7 +252,6 @@ with tab2:
                 st.success(f"[{due_category}] PMID 기반 일괄 스크리닝이 완료되었습니다!")
                 st.dataframe(df)
                 
-                # 결과 CSV 다운로드
                 csv_data = df.to_csv(index=False).encode('utf-8-sig')
                 st.download_button(
                     label="📥 스크리닝 결과 CSV 다운로드",
