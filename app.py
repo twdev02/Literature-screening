@@ -35,17 +35,18 @@ with st.sidebar:
         
     st.markdown("---")
     st.subheader("🤖 AI 모델 선택")
-    # 💡 모델 선택 옵션 추가 (할당량 소진 시 1.5-flash로 전환 가능)
+    
+    # 💡 404 에러가 나지 않는 최신 정식 모델 목록
     selected_model_name = st.selectbox(
         "사용할 AI 모델을 선택하세요",
         [
-            "gemini-1.5-flash (추천: 하루 1500회)",
+            "gemini-2.5-flash (추천: 하루 1500회)",
             "gemini-3.6-flash (제한: 하루 20회)"
         ]
     )
     
-    # 실제 API 호출용 모델명 매핑
-    model_code = "gemini-1.5-flash" if "1.5" in selected_model_name else "gemini-3.6-flash"
+    # 실제 API 호출용 모델명 지정
+    model_code = "gemini-2.5-flash" if "2.5" in selected_model_name else "gemini-3.6-flash"
     
     st.markdown("---")
     st.subheader("📋 제품 / 적응증 (DUE) 선택")
@@ -168,7 +169,7 @@ with tab1:
                     st.markdown(res.text)
                 except Exception as e:
                     if "429" in str(e):
-                        st.error("⏳ 해당 모델의 무료 사용량이 초과되었습니다. 사이드바에서 'gemini-1.5-flash'로 변경 후 시도해 보세요!")
+                        st.error("⏳ 사용량이 초과되었습니다. 1분 후 다시 시도하시거나 모델을 변경해 보세요.")
                     else:
                         st.error(f"AI 통신 에러 발생: {str(e)}")
 
@@ -248,7 +249,7 @@ with tab2:
                         except Exception as e:
                             results.append("Error")
                             if "429" in str(e):
-                                reasons.append("할당량 초과 (사이드바에서 1.5-flash 선택 추천)")
+                                reasons.append("할당량 초과 (1분 후 재시도 필요)")
                             else:
                                 reasons.append(f"AI 통신 에러: {str(e)}")
                     
