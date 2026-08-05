@@ -9,7 +9,7 @@ st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
 st.title("PubMed PMID 기반 문헌 스크리닝 시스템")
 
 # --------------------------------------------------
-# ⚙️ 사이드바: API Key 및 DUE 분류 설정
+# ⚙️ 사이드바: API Key 및 모델/DUE 분류 설정
 # --------------------------------------------------
 with st.sidebar:
     st.header("⚙️ 시스템 설정")
@@ -32,6 +32,20 @@ with st.sidebar:
         st.success("🟢 API Key가 정상 등록되었습니다.")
     else:
         st.error("🔴 API Key가 없습니다. Secrets 등록 또는 키를 입력하세요.")
+        
+    st.markdown("---")
+    st.subheader("🤖 AI 모델 선택")
+    # 💡 모델 선택 옵션 추가 (할당량 소진 시 1.5-flash로 전환 가능)
+    selected_model_name = st.selectbox(
+        "사용할 AI 모델을 선택하세요",
+        [
+            "gemini-1.5-flash (추천: 하루 1500회)",
+            "gemini-3.6-flash (제한: 하루 20회)"
+        ]
+    )
+    
+    # 실제 API 호출용 모델명 매핑
+    model_code = "gemini-1.5-flash" if "1.5" in selected_model_name else "gemini-3.6-flash"
     
     st.markdown("---")
     st.subheader("📋 제품 / 적응증 (DUE) 선택")
@@ -123,8 +137,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                # 📌 gemini-3.6-flash 사용
-                model = genai.GenerativeModel("gemini-3.6-flash")
+                model = genai.GenerativeModel(model_code)
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -155,7 +168,7 @@ with tab1:
                     st.markdown(res.text)
                 except Exception as e:
                     if "429" in str(e):
-                        st.error("⏳ gemini-3.6-flash 모델의 무료 호출 사용량이 초과되었습니다. 잠시 후 다시 시도해 주세요!")
+                        st.error("⏳ 해당 모델의 무료 사용량이 초과되었습니다. 사이드바에서 'gemini-1.5-flash'로 변경 후 시도해 보세요!")
                     else:
                         st.error(f"AI 통신 에러 발생: {str(e)}")
 
@@ -179,8 +192,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                # 📌 gemini-3.6-flash 사용
-                model = genai.GenerativeModel("gemini-3.6-flash")
+                model = genai.GenerativeModel(model_code)
                 
                 titles = []
                 abstracts = []
@@ -236,7 +248,7 @@ with tab2:
                         except Exception as e:
                             results.append("Error")
                             if "429" in str(e):
-                                reasons.append("gemini-3.6-flash 할당량 초과 (일일/분당 제한)")
+                                reasons.append("할당량 초과 (사이드바에서 1.5-flash 선택 추천)")
                             else:
                                 reasons.append(f"AI 통신 에러: {str(e)}")
                     
