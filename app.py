@@ -99,18 +99,6 @@ def fetch_pubmed_by_pmid(pmid):
     except Exception as e:
         return None, None, f"데이터 파싱 에러: {str(e)}"
 
-# 모델 생성 안전 로드 함수
-def get_gemini_model(api_key):
-    genai.configure(api_key=api_key)
-    # 호환성 있는 최신 모델명을 순차적으로 시도
-    model_candidates = ["gemini-2.5-flash", "models/gemini-2.5-flash", "gemini-3.6-flash", "models/gemini-3.6-flash", "gemini-2.0-flash"]
-    for m in model_candidates:
-        try:
-            return genai.GenerativeModel(m)
-        except Exception:
-            continue
-    return genai.GenerativeModel("gemini-2.5-flash")
-
 # 탭 구성
 tab1, tab2 = st.tabs(["🔢 단일 PMID 입력", "📁 PMID 리스트 CSV 업로드"])
 
@@ -134,7 +122,9 @@ with tab1:
                 st.success(f"📌 **논문 제목:** {title}")
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
-                model = get_gemini_model(api_key)
+                genai.configure(api_key=api_key)
+                # 📌 gemini-3.6-flash 사용
+                model = genai.GenerativeModel("gemini-3.6-flash")
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -165,7 +155,7 @@ with tab1:
                     st.markdown(res.text)
                 except Exception as e:
                     if "429" in str(e):
-                        st.error("⏳ API 요청 한도가 초과되었습니다. 약 1분 후 다시 시도해 주세요!")
+                        st.error("⏳ gemini-3.6-flash 모델의 무료 호출 사용량이 초과되었습니다. 잠시 후 다시 시도해 주세요!")
                     else:
                         st.error(f"AI 통신 에러 발생: {str(e)}")
 
@@ -188,7 +178,9 @@ with tab2:
             if 'PMID' not in df.columns:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
-                model = get_gemini_model(api_key)
+                genai.configure(api_key=api_key)
+                # 📌 gemini-3.6-flash 사용
+                model = genai.GenerativeModel("gemini-3.6-flash")
                 
                 titles = []
                 abstracts = []
@@ -244,7 +236,7 @@ with tab2:
                         except Exception as e:
                             results.append("Error")
                             if "429" in str(e):
-                                reasons.append("할당량 초과 (1분 후 재시도 필요)")
+                                reasons.append("gemini-3.6-flash 할당량 초과 (일일/분당 제한)")
                             else:
                                 reasons.append(f"AI 통신 에러: {str(e)}")
                     
