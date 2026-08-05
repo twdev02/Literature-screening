@@ -9,7 +9,7 @@ st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
 st.title("PubMed PMID 기반 문헌 스크리닝 시스템")
 
 # --------------------------------------------------
-# ⚙️ 사이드바: API Key 및 모델/DUE 분류 설정
+# ⚙️ 사이드바: API Key 및 DUE 분류 설정
 # --------------------------------------------------
 with st.sidebar:
     st.header("⚙️ 시스템 설정")
@@ -33,27 +33,6 @@ with st.sidebar:
     else:
         st.error("🔴 API Key가 없습니다. Secrets 등록 또는 키를 입력하세요.")
         
-    st.markdown("---")
-    st.subheader("🤖 AI 모델 선택")
-    
-    # 💡 404 에러를 방지하는 공식 지원 모델선택
-    selected_model_option = st.selectbox(
-        "사용할 AI 모델을 선택하세요",
-        [
-            "gemini-2.5-flash (권장: 하루 1500회)",
-            "gemini-2.0-flash (안정: 하루 1500회)",
-            "gemini-3.6-flash (실험용: 하루 20회)"
-        ]
-    )
-    
-    # 모델 매핑 (정확한 API 명칭)
-    if "2.5" in selected_model_option:
-        model_code = "gemini-2.5-flash"
-    elif "2.0" in selected_model_option:
-        model_code = "gemini-2.0-flash"
-    else:
-        model_code = "gemini-3.6-flash"
-    
     st.markdown("---")
     st.subheader("📋 제품 / 적응증 (DUE) 선택")
     
@@ -144,7 +123,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel(model_code)
+                model = genai.GenerativeModel("gemini-3.6-flash")
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -175,7 +154,7 @@ with tab1:
                     st.markdown(res.text)
                 except Exception as e:
                     if "429" in str(e):
-                        st.error("⏳ 해당 모델 사용량이 초과되었습니다. 사이드바에서 다른 모델로 변경해 보세요!")
+                        st.warning("⏳ 무료 일일 사용량(Quota) 초과 에러입니다. 구글 AI Studio에서 결제 수단(Pay-as-you-go)을 등록하시거나 대기시간 후 재시도해 주세요.")
                     else:
                         st.error(f"AI 통신 에러 발생: {str(e)}")
 
@@ -199,7 +178,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel(model_code)
+                model = genai.GenerativeModel("gemini-3.6-flash")
                 
                 titles = []
                 abstracts = []
@@ -255,7 +234,7 @@ with tab2:
                         except Exception as e:
                             results.append("Error")
                             if "429" in str(e):
-                                reasons.append("할당량 초과 (다른 모델 선택 추천)")
+                                reasons.append("일일 무료 한도 초과")
                             else:
                                 reasons.append(f"AI 통신 에러: {str(e)}")
                     
