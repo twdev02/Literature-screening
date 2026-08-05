@@ -9,16 +9,33 @@ st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
 st.title("PubMed PMID 기반 문헌 스크리닝 시스템")
 
 # --------------------------------------------------
-# ⚙️ 사이드바: 5대 DUE 분류 선택 및 기준 설정
+# ⚙️ 사이드바: API Key 및 DUE 분류 설정
 # --------------------------------------------------
 with st.sidebar:
     st.header("⚙️ 시스템 설정")
-    api_key = st.text_input("Gemini API Key 입력", type="password")
+    
+    # 🔑 Streamlit Secrets 안전 조회
+    default_api_key = ""
+    try:
+        if "GEMINI_API_KEY" in st.secrets:
+            default_api_key = str(st.secrets["GEMINI_API_KEY"]).strip()
+    except Exception:
+        default_api_key = ""
+    
+    # 사용자 직접 입력란
+    user_api_key = st.text_input("Gemini API Key (미입력 시 서버 기본키 적용)", type="password")
+    
+    # 최종 적용할 API Key
+    api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
+    
+    if api_key:
+        st.success("🟢 API Key가 정상 등록되었습니다.")
+    else:
+        st.error("🔴 API Key가 없습니다. Secrets 등록 또는 키를 입력하세요.")
     
     st.markdown("---")
-    st.subheader("📋 품목 선택")
+    st.subheader("📋 제품 / 적응증 (DUE) 선택")
     
-    # 5가지 분류 선택 드롭다운
     due_category = st.selectbox(
         "카테고리를 선택하세요",
         [
@@ -31,7 +48,6 @@ with st.sidebar:
         ]
     )
     
-    # 카테고리별 기본 포함/제외 기준 템플릿 정의
     if due_category == "1. Biliary (담도)":
         default_inc = "1. 담도(Biliary tract) 질환 또는 담도 협착/폐색 환자 대상\n2. 담도 스텐트/카테터 임상적 유효성 및 안전성 평가\n3. 18세 이상 성인 환자"
         default_exc = "1. 췌장/식도/혈관 등 타 부위 단독 연구 (Different target area)\n2. 동물 실험 (Animal study, In vivo)\n3. 소아/청소년 대상 (Under 18 years old)\n4. 리뷰 논문 (Review article, Meta-analysis)"
@@ -47,18 +63,17 @@ with st.sidebar:
     elif due_category == "5. Drainage (배액/배설)":
         default_inc = "1. 배액(Drainage) 관급/카테터/튜브 적용 체액/농양 배액 환자 대상\n2. 배액 성능, 개통성(Patency), 합병증 임상 평가\n3. 18세 이상 성인 환자"
         default_exc = "1. 단순 혈관 카테터 또는 주입 전용 기기\n2. 동물 실험 (Animal study)\n3. 소아 대상 (Under 18 years old)\n4. 리뷰 논문 (Review article)"
-    else: # 직접 입력 (Custom)
+    else:
         default_inc = "1. 대상 환자군 조건 입력\n2. 임상 평가 목적 입력"
         default_exc = "1. 동물 실험 (Animal study)\n2. 소아 대상 (Under 18 years old)\n3. 리뷰 논문 (Review article)"
 
-    # 선택된 카테고리의 템플릿이 자동으로 채워짐 (수정도 가능)
     st.markdown("---")
     include_criteria = st.text_area("🔵 포함 기준 (Inclusion Criteria)", value=default_inc, height=170)
     exclude_criteria = st.text_area("🔴 제외 기준 (Exclusion Criteria)", value=default_exc, height=170)
 
-# 🌐 NCBI 공식 API를 통해 PMID로 초록(Abstract) 및 제목 가져오는 함수
+# 🌐 PubMed API 조회 함수
 def fetch_pubmed_by_pmid(pmid):
-    pmid = str(pmid).strip()
+    pmid = str(pmid).replace('.0', '').strip()
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml"
     try:
         response = requests.get(url, timeout=10)
@@ -94,9 +109,9 @@ with tab1:
     single_pmid = st.text_input("PubMed PMID 번호를 입력하세요 (예: 31234567)")
     if st.button("단일 PMID 스크리닝 실행"):
         if not api_key:
-            st.error("API Key를 입력해 주세요!")
+            st.error("❌ API Key가 설정되지 않았습니다! 사이드바에서 키를 입력하거나 Secrets를 확인해 주세요.")
         elif not single_pmid:
-            st.error("PMID 번호를 입력해 주세요!")
+            st.error("❌ PMID 번호를 입력해 주세요!")
         else:
             with st.spinner("PubMed 공식 API에서 논문 정보 조회 중..."):
                 title, abstract_text, status = fetch_pubmed_by_pmid(single_pmid)
@@ -108,7 +123,8 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("models/gemini-3.6-flash")
+                # 💡 gemini-1.5-flash 모델로 표준화
+                model = genai.GenerativeModel("gemini-1.5-flash")
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -138,7 +154,10 @@ with tab1:
                     st.success("AI 스크리닝 판정 완료!")
                     st.markdown(res.text)
                 except Exception as e:
-                    st.error(f"AI 통신 에러 발생: {str(e)}")
+                    if "429" in str(e):
+                        st.error("⏳ API 무료 사용량이 초과되었습니다. 약 1분 후 다시 시도해 주세요!")
+                    else:
+                        st.error(f"AI 통신 에러 발생: {str(e)}")
 
 # --------------------------------------------------
 # TAB 2: CSV 파일 PMID 일괄 스크리닝
@@ -146,8 +165,10 @@ with tab1:
 with tab2:
     uploaded_file = st.file_uploader("PMID가 적힌 CSV 업로드 ('PMID' 열 필수)", type=['csv'])
     if st.button("PMID 일괄 스크리닝 실행"):
-        if not api_key or not uploaded_file:
-            st.error("API Key와 CSV 파일을 모두 준비해 주세요!")
+        if not api_key:
+            st.error("❌ API Key가 설정되지 않았습니다! 사이드바에서 키를 입력하거나 Secrets를 확인해 주세요.")
+        elif not uploaded_file:
+            st.error("❌ CSV 파일을 업로드해 주세요!")
         else:
             try:
                 df = pd.read_csv(uploaded_file, encoding='utf-8')
@@ -158,7 +179,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("models/gemini-3.6-flash")
+                model = genai.GenerativeModel("gemini-1.5-flash")
                 
                 titles = []
                 abstracts = []
@@ -213,10 +234,14 @@ with tab2:
                             reasons.append(ans.split("사유:")[-1].strip() if "사유:" in ans else ans)
                         except Exception as e:
                             results.append("Error")
-                            reasons.append(f"AI 통신 에러: {str(e)}")
+                            if "429" in str(e):
+                                reasons.append("할당량 초과 (1분 후 재시도 필요)")
+                            else:
+                                reasons.append(f"AI 통신 에러: {str(e)}")
                     
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(4.0) # 무료 API 안전 대기시간 (RPM 제한 대응)
+                    # 💡 무료 플랜 초과 방지를 위한 4초 안전 대기
+                    time.sleep(4.0)
                 
                 df['논문 제목'] = titles
                 df['초록 요약'] = abstracts
@@ -225,3 +250,12 @@ with tab2:
                 
                 st.success(f"[{due_category}] PMID 기반 일괄 스크리닝이 완료되었습니다!")
                 st.dataframe(df)
+                
+                # 결과 CSV 다운로드
+                csv_data = df.to_csv(index=False).encode('utf-8-sig')
+                st.download_button(
+                    label="📥 스크리닝 결과 CSV 다운로드",
+                    data=csv_data,
+                    file_name="cer_screening_result.csv",
+                    mime="text/csv"
+                )
