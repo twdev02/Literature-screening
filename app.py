@@ -51,7 +51,6 @@ with st.sidebar:
 
     # 아무것도 선택되지 않았을 때의 예외 처리 (에러 방지)
     if not due_category:
-        st.info("👆 위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
         st.stop() # 카테고리를 선택하기 전까지 아래 코드는 실행하지 않음
     
     # UI에 보여주지 않고 내부 프롬프트용으로만 사용하는 상세 기준 데이터
@@ -225,7 +224,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                model = genai.GenerativeModel("gemini-3.6-flash")
                 
                 prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abstract_text)
                 
@@ -259,7 +258,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                model = genai.GenerativeModel("gemini-3.6-flash")
                 
                 titles = []
                 abstracts = []
