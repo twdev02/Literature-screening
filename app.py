@@ -34,21 +34,21 @@ with st.sidebar:
         st.error("🔴 API Key가 없습니다. Secrets 등록 또는 키를 입력하세요.")
         
     st.markdown("---")
-    st.subheader("📋 제품 / 적응증 (DUE) 선택")
+    st.subheader("📋 제품 선택")
     
     due_category = st.selectbox(
-        "카테고리를 선택하세요",
+        "스크리닝할 카테고리를 선택하세요",
         [
-            "직접 입력 (Custom)",
-            "1. Biliary (담도)",
-            "2. Esophageal (식도)",
-            "3. Colonic (대장/결장)",
-            "4. Pyloric (유문/위출구)",
-            "5. Drainage (배액/배설)"
+            "1. Biliary Stent",
+            "2. Esophageal Stent",
+            "3. Colonic Stent",
+            "4. Pyloric/Duodenal Stent",
+            "5. Drainage Stent",
+            "직접 입력"
         ]
     )
     
-    # 이전에 추출한 상세 포함/제외 기준 적용
+    # UI에 보여주지 않고 내부 프롬프트용으로만 사용하는 상세 기준 데이터
     if due_category == "1. Biliary (담도)":
         default_inc = """1. Text availability: Full text / Original articles
 2. Species: Human (not animal, artificial simulation)
@@ -99,7 +99,7 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, esophageal, colonic, or vascular stents without duodenal/gastric outlet involvement)
 3. Irrelevant articles: Articles not related to pyloric/duodenal stenting or GOO management
-4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+4. Non-study publications: Editorials, letters, comments, case reports (N < 가 5), reviews, meta-analysis"""
 
     elif due_category == "5. Drainage (배액/배설)":
         default_inc = """1. Text availability: Full text / Original articles
@@ -117,9 +117,9 @@ with st.sidebar:
         default_inc = "1. 대상 환자군 조건 입력\n2. 임상 평가 목적 입력\n3. 개입(Intervention) 및 대조군(Comparator) 설정"
         default_exc = "1. 동물 실험 (Animal test, artificial simulation, in vitro test)\n2. 상관없는 적응증 또는 다른 타겟 부위\n3. 리뷰 논문, 메타분석, 증례보고(N<5), 사설 등"
 
-    st.markdown("---")
-    include_criteria = st.text_area("🔵 포함 기준 (Inclusion Criteria)", value=default_inc, height=250)
-    exclude_criteria = st.text_area("🔴 제외 기준 (Exclusion Criteria)", value=default_exc, height=170)
+    # UI 노출용 st.text_area를 제거하고 내부 변수로 바로 매핑
+    include_criteria = default_inc
+    exclude_criteria = default_exc
 
 # 🌐 PubMed API 조회 함수
 def fetch_pubmed_by_pmid(pmid):
@@ -173,7 +173,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") # 최신 모델명으로 업데이트 (gemini-3.6-flash는 오타일 가능성이 높음)
+                model = genai.GenerativeModel("gemini-1.5-flash") 
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -228,7 +228,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") # 최신 모델명으로 업데이트
+                model = genai.GenerativeModel("gemini-1.5-flash") 
                 
                 titles = []
                 abstracts = []
