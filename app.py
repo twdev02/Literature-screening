@@ -34,22 +34,27 @@ with st.sidebar:
         st.error("🔴 API Key가 없습니다. Secrets 등록 또는 키를 입력하세요.")
         
     st.markdown("---")
-    st.subheader("📋 제품 선택")
+    st.subheader("📋 품목 선택")
     
-    due_category = st.selectbox(
+    due_category = st.pills(
         "스크리닝할 카테고리를 선택하세요",
-        [
+        options=[
             "1. Biliary Stent",
             "2. Esophageal Stent",
-            "3. Colonic Stent",
-            "4. Pyloric/Duodenal Stent",
-            "5. Drainage Stent",
-            "직접 입력"
-        ]
+            "3. Pyloric/Duodenal Stent",
+            "4. Colonic Stent",
+            "5. Drainage Stent"
+        ],
+        default=None  # 핵심: 처음에 아무것도 선택되지 않음
     )
+
+    # 아무것도 선택되지 않았을 때의 예외 처리 (에러 방지)
+    if not due_category:
+        st.info("👆 위에서 스크리닝할 카테고리 버튼을 먼저 선택해 주세요.")
+        st.stop() # 카테고리를 선택하기 전까지 아래 코드는 실행하지 않음
     
     # UI에 보여주지 않고 내부 프롬프트용으로만 사용하는 상세 기준 데이터
-    if due_category == "1. Biliary (담도)":
+    if due_category == "1. Biliary Stent":
         default_inc = """1. Text availability: Full text / Original articles
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
@@ -60,9 +65,9 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-biliary/pancreatic target areas only (e.g., vascular, esophageal, colonic, tracheal)
 3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management
-4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+4. Non-study publications: Editorials, letters, comments"""
 
-    elif due_category == "2. Esophageal (식도)":
+    elif due_category == "2. Esophageal Stent":
         default_inc = """1. Text availability: Full text / Original articles
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
@@ -73,22 +78,9 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-esophageal target areas only (e.g., pure biliary, colonic, duodenal, vascular)
 3. Irrelevant articles: Articles not related to esophageal stenting, stricture dilation, or TE fistula management
-4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+4. Non-study publications: Editorials, letters, comments"""
 
-    elif due_category == "3. Colonic (대장/결장)":
-        default_inc = """1. Text availability: Full text / Original articles
-2. Species: Human (not animal, artificial simulation)
-3. Patient population: Adult patients, irrespective of gender
-4. Clinical Conditions: Colonic/Colorectal stricture or obstruction (Malignant or Benign for Covered types)
-5. Intervention: Colonic SEMS, Uncovered or Covered type. Specific Taewoong Medical models: Niti-S Enteral Colonic (S-Type, D-Type, Full Covered, Both Bare, End Bare), ComVi Enteral Colonic (Both Bare-Type)
-6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, WallFlex Soft, Hanarostent, Micro-Tech, Bonastent)
-7. Outcomes: Stent patency, Obstruction relief/resolution/improvement, Technical/Clinical success, Complications, Stent removal (for benign strictures)"""
-        default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
-2. Different indication: Non-colonic target areas only (e.g., pure biliary, esophageal, pyloric/duodenal, or vascular stents without colonic/colorectal involvement)
-3. Irrelevant articles: Articles not related to colonic stenting or colorectal obstruction management
-4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
-
-    elif due_category == "4. Pyloric (유문/위출구)":
+    elif due_category == "3. Pyloric/Duodenal Stent":
         default_inc = """1. Text availability: Full text / Original articles
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
@@ -99,9 +91,22 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, esophageal, colonic, or vascular stents without duodenal/gastric outlet involvement)
 3. Irrelevant articles: Articles not related to pyloric/duodenal stenting or GOO management
-4. Non-study publications: Editorials, letters, comments, case reports (N < 가 5), reviews, meta-analysis"""
+4. Non-study publications: Editorials, letters, comments"""
 
-    elif due_category == "5. Drainage (배액/배설)":
+    elif due_category == "4. Colonic Stent":
+        default_inc = """1. Text availability: Full text / Original articles
+2. Species: Human (not animal, artificial simulation)
+3. Patient population: Adult patients, irrespective of gender
+4. Clinical Conditions: Colonic/Colorectal stricture or obstruction (Malignant or Benign for Covered types)
+5. Intervention: Colonic SEMS, Uncovered or Covered type. Specific Taewoong Medical models: Niti-S Enteral Colonic (S-Type, D-Type, Full Covered, Both Bare, End Bare), ComVi Enteral Colonic (Both Bare-Type)
+6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, WallFlex Soft, Hanarostent, Micro-Tech, Bonastent)
+7. Outcomes: Stent patency, Obstruction relief/resolution/improvement, Technical/Clinical success, Complications, Stent removal (for benign strictures)"""
+        default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
+2. Different indication: Non-colonic target areas only (e.g., pure biliary, esophageal, pyloric/duodenal, or vascular stents without colonic/colorectal involvement)
+3. Irrelevant articles: Articles not related to colonic stenting or colorectal obstruction management
+4. Non-study publications: Editorials, letters, comments"""
+
+    elif due_category == "5. Drainage Stent":
         default_inc = """1. Text availability: Full text / Original articles
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
@@ -111,11 +116,11 @@ with st.sidebar:
 7. Outcomes: Technical/Clinical success rate, Drainage efficacy, Resolution of pseudocyst/necrosis, Complications (Bleeding, Stent migration, Perforation, Occlusion), Removal rate"""
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication/Irrelevant: Non-drainage target indications or vascular/intraluminal stenting without transluminal/EUS drainage purpose
-3. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+3. Non-study publications: Editorials, letters, comments"""
 
     else:
         default_inc = "1. 대상 환자군 조건 입력\n2. 임상 평가 목적 입력\n3. 개입(Intervention) 및 대조군(Comparator) 설정"
-        default_exc = "1. 동물 실험 (Animal test, artificial simulation, in vitro test)\n2. 상관없는 적응증 또는 다른 타겟 부위\n3. 리뷰 논문, 메타분석, 증례보고(N<5), 사설 등"
+        default_exc = "1. 동물 실험 (Animal test, artificial simulation, in vitro test)\n2. 상관없는 적응증 또는 다른 타겟 부위"
 
     # UI 노출용 st.text_area를 제거하고 내부 변수로 바로 매핑
     include_criteria = default_inc
