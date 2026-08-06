@@ -51,11 +51,12 @@ with st.sidebar:
 
     # 아무것도 선택되지 않았을 때의 예외 처리 (에러 방지)
     if not due_category:
+        st.info("👆 위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
         st.stop() # 카테고리를 선택하기 전까지 아래 코드는 실행하지 않음
     
-    # UI에 보여주지 않고 내부 프롬프트용으로만 사용하는 상세 기준 데이터
+    # UI에 보여주지 않고 내부 프롬프트용으로만 사용하는 상세 기준 데이터 (리뷰/케이스 포함 명시)
     if due_category == "1. Biliary Stent":
-        default_inc = """1. Text availability: Full text / Original articles
+        default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
 4. Clinical Conditions: Malignant biliary obstruction/stricture, Benign biliary obstruction/stricture (Covered types only), Benign pancreatic duct stricture (Niti-S Bumpy type only)
@@ -65,10 +66,10 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-biliary/pancreatic target areas only (e.g., vascular, esophageal, colonic, tracheal)
 3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management
-4. Non-study publications: Editorials, letters, comments"""
+4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
     elif due_category == "2. Esophageal Stent":
-        default_inc = """1. Text availability: Full text / Original articles
+        default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
 4. Clinical Conditions: Esophageal stricture/obstruction (Malignant or Benign), Refractory benign esophageal stricture, Tracheoesophageal fistula (TEF / TE fistula)
@@ -78,10 +79,10 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-esophageal target areas only (e.g., pure biliary, colonic, duodenal, vascular)
 3. Irrelevant articles: Articles not related to esophageal stenting, stricture dilation, or TE fistula management
-4. Non-study publications: Editorials, letters, comments"""
+4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
     elif due_category == "3. Pyloric/Duodenal Stent":
-        default_inc = """1. Text availability: Full text / Original articles
+        default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
 4. Clinical Conditions: Pyloric/Duodenal stricture or obstruction, Gastric Outlet Obstruction (GOO), Malignant or Benign (for Covered types)
@@ -91,10 +92,10 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, esophageal, colonic, or vascular stents without duodenal/gastric outlet involvement)
 3. Irrelevant articles: Articles not related to pyloric/duodenal stenting or GOO management
-4. Non-study publications: Editorials, letters, comments"""
+4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
     elif due_category == "4. Colonic Stent":
-        default_inc = """1. Text availability: Full text / Original articles
+        default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
 4. Clinical Conditions: Colonic/Colorectal stricture or obstruction (Malignant or Benign for Covered types)
@@ -104,10 +105,10 @@ with st.sidebar:
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-colonic target areas only (e.g., pure biliary, esophageal, pyloric/duodenal, or vascular stents without colonic/colorectal involvement)
 3. Irrelevant articles: Articles not related to colonic stenting or colorectal obstruction management
-4. Non-study publications: Editorials, letters, comments"""
+4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
     elif due_category == "5. Drainage Stent":
-        default_inc = """1. Text availability: Full text / Original articles
+        default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
 4. Clinical Conditions: Pancreatic pseudocyst, Walled-off necrosis (WON) / Pancreatic necrosis, Gallbladder drainage (Cholecystitis) / Biliary tract drainage, Transgastric or transduodenal drainage indications
@@ -116,7 +117,7 @@ with st.sidebar:
 7. Outcomes: Technical/Clinical success rate, Drainage efficacy, Resolution of pseudocyst/necrosis, Complications (Bleeding, Stent migration, Perforation, Occlusion), Removal rate"""
         default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication/Irrelevant: Non-drainage target indications or vascular/intraluminal stenting without transluminal/EUS drainage purpose
-3. Non-study publications: Editorials, letters, comments"""
+3. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
     else:
         default_inc = "1. 대상 환자군 조건 입력\n2. 임상 평가 목적 입력\n3. 개입(Intervention) 및 대조군(Comparator) 설정"
@@ -166,6 +167,7 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     [판정 규칙]:
     1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
     2. [포함기준]을 하나라도 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
+    3. 중요: 종설(Review) 논문이나 증례 보고(Case report/series)라 하더라도, 대상 적응증과 관련 내용이 일치한다면 포함(Include) 대상으로 간주한다. 절대 '논문 유형'만을 이유로 Exclude 판정을 내리지 마라.
 
     [포함기준]:
     {include_criteria}
@@ -176,22 +178,27 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     [논문 제목]: {title}
     [논문 초록]: {abstract_text}
 
-    답변형식 (반드시 아래 형식을 그대로 지켜서 작성할 것):
+    답변형식 (마크다운 환경에서 텍스트가 뭉치지 않도록 반드시 항목과 항목 사이에 **빈 줄(Enter 2번)**을 넣어 작성할 것):
+
     판정: (Include 또는 Exclude)
+
     사유:
-    (항목별로 반드시 줄바꿈(엔터)을 하여 한 줄씩 보기 좋게 작성)
+    **(항목명):** (내용)
+
+    **(항목명):** (내용)
 
     **Conclusion**
-    (이곳에 영어로 최종 결론 요약 작성 - 아래 가이드 필수 준수)
+    **(Conclusion 영작 항목명):** (내용)
 
     [사유 및 Conclusion 작성 가이드 - 매우 중요!]
     1. 사유 (한국어 설명 부분):
        - "기준 4", "제외기준 2", "- 1" 같은 **번호나 숫자는 절대 표기하지 마라.**
        - 각 사유의 항목명은 반드시 **볼드 처리(**)**하여 작성할 것. (예시: "**적응증 (Clinical Conditions):** ...", "**중재시술 (Intervention):** ...")
-       - 각 사유는 한 줄에 하나씩 나타나도록 반드시 줄바꿈(Enter)을 명확하게 넣어라.
+       - 화면에 한 줄씩 예쁘게 보이도록, 각 사유 항목이 끝날 때마다 **반드시 한 줄을 띄우고(빈 줄 삽입)** 다음 사유를 작성하라.
     
     2. Conclusion (영어 요약 부분):
-       - 맨 마지막에 **Conclusion** 이라고 볼드 처리하여 적고, 그 다음 줄에 영어(English)로 한 문장 작성한다.
+       - 한국어 사유 작성이 모두 끝난 후 **한 줄을 띄우고** 맨 마지막에 **Conclusion** 이라고 볼드 처리하여 적어라.
+       - 그 다음 줄에 영어(English)로 한 문장 작성한다.
        - 판정이 'Include'인 경우: 논문이 포함된 핵심 이유를 자연스러운 영어 문장으로 작성.
        - 판정이 'Exclude'인 경우: 제외된 핵심 이유를 반드시 아래 4가지 [배제 해당사항] 중 가장 적절한 하나를 골라 "**배제해당사항:** 영어 문장" 형식으로 작성할 것. (이 때도 배제해당사항 이름은 볼드 처리)
          * **Different indication:**
