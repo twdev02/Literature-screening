@@ -51,6 +51,7 @@ with st.sidebar:
 
     # 아무것도 선택되지 않았을 때의 예외 처리 (에러 방지)
     if not due_category:
+        st.info("👆 위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
         st.stop() # 카테고리를 선택하기 전까지 아래 코드는 실행하지 않음
     
     # UI에 보여주지 않고 내부 프롬프트용으로만 사용하는 상세 기준 데이터
@@ -176,28 +177,29 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     [논문 제목]: {title}
     [논문 초록]: {abstract_text}
 
-    답변형식:
+    답변형식 (반드시 아래 형식을 그대로 지켜서 작성할 것):
     판정: (Include 또는 Exclude)
     사유:
-    (이곳에 한국어로 상세 사유 작성 - 아래 가이드 필수 준수)
+    (항목별로 반드시 줄바꿈(엔터)을 하여 한 줄씩 보기 좋게 작성)
 
-    [Conclusion]
+    **Conclusion**
     (이곳에 영어로 최종 결론 요약 작성 - 아래 가이드 필수 준수)
 
     [사유 및 Conclusion 작성 가이드 - 매우 중요!]
     1. 사유 (한국어 설명 부분):
        - "기준 4", "제외기준 2", "- 1" 같은 **번호나 숫자는 절대 표기하지 마라.**
-       - 오직 항목명 자체만 사용할 것. (예시: "적응증 (Clinical Conditions): ...", "중재시술 (Intervention): ...", "Different indication: ...", "Irrelevant articles: ...")
+       - 각 사유의 항목명은 반드시 **볼드 처리(**)**하여 작성할 것. (예시: "**적응증 (Clinical Conditions):** ...", "**중재시술 (Intervention):** ...")
+       - 각 사유는 한 줄에 하나씩 나타나도록 반드시 줄바꿈(Enter)을 명확하게 넣어라.
     
-    2. [Conclusion] (영어 요약 부분):
-       - 반드시 영어(English)로 한 문장 정도로 작성한다.
+    2. Conclusion (영어 요약 부분):
+       - 맨 마지막에 **Conclusion** 이라고 볼드 처리하여 적고, 그 다음 줄에 영어(English)로 한 문장 작성한다.
        - 판정이 'Include'인 경우: 논문이 포함된 핵심 이유를 자연스러운 영어 문장으로 작성.
-       - 판정이 'Exclude'인 경우: 제외된 핵심 이유를 반드시 아래 4가지 [배제 해당사항] 중 가장 적절한 하나를 골라 "배제해당사항: 영어 문장" 형식으로 작성할 것.
-         * Different indication
-         * Irrelevant article
-         * Insufficient information
-         * Literature without human clinical data
-         (작성 예시: Different indication: The study concerns WON drainage for pancreatic and peripheral diseases, and corresponds to a study on a non-esophageal target area.)
+       - 판정이 'Exclude'인 경우: 제외된 핵심 이유를 반드시 아래 4가지 [배제 해당사항] 중 가장 적절한 하나를 골라 "**배제해당사항:** 영어 문장" 형식으로 작성할 것. (이 때도 배제해당사항 이름은 볼드 처리)
+         * **Different indication:**
+         * **Irrelevant article:**
+         * **Insufficient information:**
+         * **Literature without human clinical data:**
+         (작성 예시: **Different indication:** The study concerns WON drainage for pancreatic and peripheral diseases, and corresponds to a study on a non-esophageal target area.)
     """
 
 # 탭 구성
@@ -224,7 +226,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash")
+                model = genai.GenerativeModel("gemini-3.6-flash") 
                 
                 prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abstract_text)
                 
@@ -258,7 +260,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash")
+                model = genai.GenerativeModel("gemini-3.6-flash") 
                 
                 titles = []
                 abstracts = []
