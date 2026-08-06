@@ -36,7 +36,8 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("📋 품목 선택")
     
-    due_category = st.pills(
+    # st.pills 대신 st.radio를 사용하여 한 행에 하나씩 세로로 출력
+    due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=[
             "1. Biliary Stent",
@@ -45,12 +46,12 @@ with st.sidebar:
             "4. Colonic Stent",
             "5. Drainage Stent"
         ],
-        default=None  # 핵심: 처음에 아무것도 선택되지 않음
+        index=None  # 핵심: 처음에 아무것도 선택되지 않음
     )
 
     # 아무것도 선택되지 않았을 때의 예외 처리 (에러 방지)
     if not due_category:
-        st.info("👆 위에서 스크리닝할 카테고리 버튼을 먼저 선택해 주세요.")
+        st.info("👆 위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
         st.stop() # 카테고리를 선택하기 전까지 아래 코드는 실행하지 않음
     
     # UI에 보여주지 않고 내부 프롬프트용으로만 사용하는 상세 기준 데이터
@@ -178,7 +179,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") 
+                model = genai.GenerativeModel("gemini-3.6-flash") 
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -233,7 +234,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") 
+                model = genai.GenerativeModel("gemini-3.6-flash") 
                 
                 titles = []
                 abstracts = []
