@@ -48,27 +48,77 @@ with st.sidebar:
         ]
     )
     
+    # 이전에 추출한 상세 포함/제외 기준 적용
     if due_category == "1. Biliary (담도)":
-        default_inc = "1. 담도(Biliary tract) 질환 또는 담도 협착/폐색 환자 대상\n2. 담도 스텐트/카테터 임상적 유효성 및 안전성 평가\n3. 18세 이상 성인 환자"
-        default_exc = "1. 췌장/식도/혈관 등 타 부위 단독 연구 (Different target area)\n2. 동물 실험 (Animal study, In vivo)\n3. 소아/청소년 대상 (Under 18 years old)\n4. 리뷰 논문 (Review article, Meta-analysis)"
+        default_inc = """1. Text availability: Full text / Original articles
+2. Species: Human (not animal, artificial simulation)
+3. Patient population: Adult patients, irrespective of gender
+4. Clinical Conditions: Malignant biliary obstruction/stricture, Benign biliary obstruction/stricture (Covered types only), Benign pancreatic duct stricture (Niti-S Bumpy type only)
+5. Intervention: Biliary SEMS (Uncovered or Covered). Specific Taewoong Medical models: Niti-S (S, D, M, LCD, Full Covered, Both Bare, Giobor, Flare, Kaffes, Bumpy), ComVi (Full Covered, Both Bare, End Bare)
+6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (e.g., WallFlex, Evolution, EGIS, Bonastent, Hanarostent)
+7. Outcomes: Stent patency, Decreased bilirubin, Technical/Clinical success, Complications, Stent removal (for benign cases)"""
+        default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
+2. Different indication: Non-biliary/pancreatic target areas only (e.g., vascular, esophageal, colonic, tracheal)
+3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management
+4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+
     elif due_category == "2. Esophageal (식도)":
-        default_inc = "1. 식도(Esophagus) 협착, 천공, 종양 환자 대상\n2. 식도 스텐트/치료 기기 임상 데이터\n3. 18세 이상 성인 환자"
-        default_exc = "1. 위/대장/담도 등 타 장기 단독 연구 (Different target area)\n2. 동물 실험 (Animal study)\n3. 소아 대상 (Under 18 years old)\n4. 리뷰 논문 (Review article)"
+        default_inc = """1. Text availability: Full text / Original articles
+2. Species: Human (not animal, artificial simulation)
+3. Patient population: Adult patients, irrespective of gender
+4. Clinical Conditions: Esophageal stricture/obstruction (Malignant or Benign), Refractory benign esophageal stricture, Tracheoesophageal fistula (TEF / TE fistula)
+5. Intervention: Esophageal SEMS, Covered type. Specific Taewoong Medical models: Niti-S Esophageal (Full covered, Cervical, Both bare type, Conio, Anti reflux, Double anti reflux, Double type, Beta-2)
+6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, Ultraflex, Evolution, Hanarostent, Aixstent, EGIS, Bonastent, Micro-Tech)
+7. Outcomes: Stent patency, Dysphagia improvement, Fistula closure, Removal (in benign strictures)"""
+        default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
+2. Different indication: Non-esophageal target areas only (e.g., pure biliary, colonic, duodenal, vascular)
+3. Irrelevant articles: Articles not related to esophageal stenting, stricture dilation, or TE fistula management
+4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+
     elif due_category == "3. Colonic (대장/결장)":
-        default_inc = "1. 결장 및 대장(Colorectal/Colon) 협착 또는 폐색 환자 대상\n2. 대장 스텐트/처치 기기 유효성 및 안전성 평가\n3. 18세 이상 성인 환자"
-        default_exc = "1. 소장/식도/담도 등 타 장기 단독 연구\n2. 동물 실험 (Animal study)\n3. 소아 대상 (Under 18 years old)\n4. 리뷰 논문 (Review article)"
+        default_inc = """1. Text availability: Full text / Original articles
+2. Species: Human (not animal, artificial simulation)
+3. Patient population: Adult patients, irrespective of gender
+4. Clinical Conditions: Colonic/Colorectal stricture or obstruction (Malignant or Benign for Covered types)
+5. Intervention: Colonic SEMS, Uncovered or Covered type. Specific Taewoong Medical models: Niti-S Enteral Colonic (S-Type, D-Type, Full Covered, Both Bare, End Bare), ComVi Enteral Colonic (Both Bare-Type)
+6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, WallFlex Soft, Hanarostent, Micro-Tech, Bonastent)
+7. Outcomes: Stent patency, Obstruction relief/resolution/improvement, Technical/Clinical success, Complications, Stent removal (for benign strictures)"""
+        default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
+2. Different indication: Non-colonic target areas only (e.g., pure biliary, esophageal, pyloric/duodenal, or vascular stents without colonic/colorectal involvement)
+3. Irrelevant articles: Articles not related to colonic stenting or colorectal obstruction management
+4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+
     elif due_category == "4. Pyloric (유문/위출구)":
-        default_inc = "1. 위출구 폐색(Gastric Outlet Obstruction, GOO) 및 유문(Pylorus) 협착 환자 대상\n2. 유문/십이지장 스텐트 임상 성과 데이터\n3. 18세 이상 성인 환자"
-        default_exc = "1. 식도/하부 대장/혈관 단독 연구\n2. 동물 실험 (Animal study)\n3. 소아 대상 (Under 18 years old)\n4. 리뷰 논문 (Review article)"
+        default_inc = """1. Text availability: Full text / Original articles
+2. Species: Human (not animal, artificial simulation)
+3. Patient population: Adult patients, irrespective of gender
+4. Clinical Conditions: Pyloric/Duodenal stricture or obstruction, Gastric Outlet Obstruction (GOO), Malignant or Benign (for Covered types)
+5. Intervention: Pyloric/Duodenal SEMS, Uncovered or Covered type. Specific Taewoong Medical models: Niti-S Pyloric/Duodenal (D-Type, Full Covered, Both Bare, End Bare), ComVi Pyloric/Duodenal (Flare-Type, Both Bare)
+6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, WallFlex Soft, Hanarostent, Evolution, EGIS, Bonastent)
+7. Outcomes: Stent patency, Obstruction relief/resolution/improvement, GOOSS score / Oral intake, Technical/Clinical success, Complications, Stent removal (for benign strictures)"""
+        default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
+2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, esophageal, colonic, or vascular stents without duodenal/gastric outlet involvement)
+3. Irrelevant articles: Articles not related to pyloric/duodenal stenting or GOO management
+4. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+
     elif due_category == "5. Drainage (배액/배설)":
-        default_inc = "1. 배액(Drainage) 관급/카테터/튜브 적용 체액/농양 배액 환자 대상\n2. 배액 성능, 개통성(Patency), 합병증 임상 평가\n3. 18세 이상 성인 환자"
-        default_exc = "1. 단순 혈관 카테터 또는 주입 전용 기기\n2. 동물 실험 (Animal study)\n3. 소아 대상 (Under 18 years old)\n4. 리뷰 논문 (Review article)"
+        default_inc = """1. Text availability: Full text / Original articles
+2. Species: Human (not animal, artificial simulation)
+3. Patient population: Adult patients, irrespective of gender
+4. Clinical Conditions: Pancreatic pseudocyst, Walled-off necrosis (WON) / Pancreatic necrosis, Gallbladder drainage (Cholecystitis) / Biliary tract drainage, Transgastric or transduodenal drainage indications
+5. Intervention: Lumen-apposing metal stents (LAMS) or EUS-guided drainage stents. Specific Taewoong Medical models: Niti-S Nagi, Niti-S SPAXUS, Niti-S Hot SPAXUS (Electrocautery Delivery System)
+6. Comparators: Surgery, Percutaneous drainage, Plastic double-pigtail stents, or competitor LAMS (e.g., AXIOS / Hot AXIOS)
+7. Outcomes: Technical/Clinical success rate, Drainage efficacy, Resolution of pseudocyst/necrosis, Complications (Bleeding, Stent migration, Perforation, Occlusion), Removal rate"""
+        default_exc = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
+2. Different indication/Irrelevant: Non-drainage target indications or vascular/intraluminal stenting without transluminal/EUS drainage purpose
+3. Non-study publications: Editorials, letters, comments, case reports (N < 5), reviews, meta-analysis"""
+
     else:
-        default_inc = "1. 대상 환자군 조건 입력\n2. 임상 평가 목적 입력"
-        default_exc = "1. 동물 실험 (Animal study)\n2. 소아 대상 (Under 18 years old)\n3. 리뷰 논문 (Review article)"
+        default_inc = "1. 대상 환자군 조건 입력\n2. 임상 평가 목적 입력\n3. 개입(Intervention) 및 대조군(Comparator) 설정"
+        default_exc = "1. 동물 실험 (Animal test, artificial simulation, in vitro test)\n2. 상관없는 적응증 또는 다른 타겟 부위\n3. 리뷰 논문, 메타분석, 증례보고(N<5), 사설 등"
 
     st.markdown("---")
-    include_criteria = st.text_area("🔵 포함 기준 (Inclusion Criteria)", value=default_inc, height=170)
+    include_criteria = st.text_area("🔵 포함 기준 (Inclusion Criteria)", value=default_inc, height=250)
     exclude_criteria = st.text_area("🔴 제외 기준 (Exclusion Criteria)", value=default_exc, height=170)
 
 # 🌐 PubMed API 조회 함수
@@ -123,7 +173,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash")
+                model = genai.GenerativeModel("gemini-1.5-flash") # 최신 모델명으로 업데이트 (gemini-3.6-flash는 오타일 가능성이 높음)
                 
                 prompt = f"""
                 너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
@@ -131,8 +181,8 @@ with tab1:
                 [선택된 카테고리/분류]: {due_category}
 
                 [판정 규칙]:
-                1. [포함기준]을 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
-                2. [포함기준]을 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
+                1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
+                2. [포함기준]을 하나라도 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
 
                 [포함기준]:
                 {include_criteria}
@@ -178,7 +228,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash")
+                model = genai.GenerativeModel("gemini-1.5-flash") # 최신 모델명으로 업데이트
                 
                 titles = []
                 abstracts = []
@@ -210,8 +260,8 @@ with tab2:
                         [선택된 카테고리/분류]: {due_category}
 
                         [판정 규칙]:
-                        1. [포함기준]을 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
-                        2. [포함기준]을 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
+                        1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
+                        2. [포함기준]을 하나라도 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
 
                         [포함기준]:
                         {include_criteria}
