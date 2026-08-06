@@ -36,7 +36,7 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("📋 품목 선택")
     
-    # st.pills 대신 st.radio를 사용하여 한 행에 하나씩 세로로 출력
+    # st.radio를 사용하여 한 행에 하나씩 세로로 출력
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=[
@@ -155,6 +155,52 @@ def fetch_pubmed_by_pmid(pmid):
     except Exception as e:
         return None, None, f"데이터 파싱 에러: {str(e)}"
 
+# --------------------------------------------------
+# 공통 프롬프트 생성 함수
+# --------------------------------------------------
+def generate_prompt(due_category, include_criteria, exclude_criteria, title, abstract_text):
+    return f"""
+    너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
+
+    [선택된 카테고리/분류]: {due_category}
+
+    [판정 규칙]:
+    1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
+    2. [포함기준]을 하나라도 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
+
+    [포함기준]:
+    {include_criteria}
+
+    [제외기준]:
+    {exclude_criteria}
+
+    [논문 제목]: {title}
+    [논문 초록]: {abstract_text}
+
+    답변형식:
+    판정: (Include 또는 Exclude)
+    사유:
+    (이곳에 한국어로 상세 사유 작성 - 아래 가이드 필수 준수)
+
+    [Conclusion]
+    (이곳에 영어로 최종 결론 요약 작성 - 아래 가이드 필수 준수)
+
+    [사유 및 Conclusion 작성 가이드 - 매우 중요!]
+    1. 사유 (한국어 설명 부분):
+       - "기준 4", "제외기준 2", "- 1" 같은 **번호나 숫자는 절대 표기하지 마라.**
+       - 오직 항목명 자체만 사용할 것. (예시: "적응증 (Clinical Conditions): ...", "중재시술 (Intervention): ...", "Different indication: ...", "Irrelevant articles: ...")
+    
+    2. [Conclusion] (영어 요약 부분):
+       - 반드시 영어(English)로 한 문장 정도로 작성한다.
+       - 판정이 'Include'인 경우: 논문이 포함된 핵심 이유를 자연스러운 영어 문장으로 작성.
+       - 판정이 'Exclude'인 경우: 제외된 핵심 이유를 반드시 아래 4가지 [배제 해당사항] 중 가장 적절한 하나를 골라 "배제해당사항: 영어 문장" 형식으로 작성할 것.
+         * Different indication
+         * Irrelevant article
+         * Insufficient information
+         * Literature without human clinical data
+         (작성 예시: Different indication: The study concerns WON drainage for pancreatic and peripheral diseases, and corresponds to a study on a non-esophageal target area.)
+    """
+
 # 탭 구성
 tab1, tab2 = st.tabs(["🔢 단일 PMID 입력", "📁 PMID 리스트 CSV 업로드"])
 
@@ -179,30 +225,9 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash") 
+                model = genai.GenerativeModel("gemini-1.5-flash")
                 
-                prompt = f"""
-                너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
-
-                [선택된 카테고리/분류]: {due_category}
-
-                [판정 규칙]:
-                1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
-                2. [포함기준]을 하나라도 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
-
-                [포함기준]:
-                {include_criteria}
-
-                [제외기준]:
-                {exclude_criteria}
-
-                [논문 제목]: {title}
-                [논문 초록]: {abstract_text}
-
-                답변형식:
-                판정: (Include 또는 Exclude)
-                사유: (포함/제외 기준 중 어떤 조건 때문인지 구체적 사유 및 근거 작성)
-                """
+                prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abstract_text)
                 
                 try:
                     res = model.generate_content(prompt)
@@ -234,7 +259,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash") 
+                model = genai.GenerativeModel("gemini-1.5-flash")
                 
                 titles = []
                 abstracts = []
@@ -260,28 +285,8 @@ with tab2:
                         titles.append(title)
                         abstracts.append(abs_text[:150] + "...")
                         
-                        prompt = f"""
-                        너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
-
-                        [선택된 카테고리/분류]: {due_category}
-
-                        [판정 규칙]:
-                        1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
-                        2. [포함기준]을 하나라도 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
-
-                        [포함기준]:
-                        {include_criteria}
-
-                        [제외기준]:
-                        {exclude_criteria}
-
-                        [논문 제목]: {title}
-                        [논문 초록]: {abs_text}
-
-                        답변형식:
-                        판정: (Include 또는 Exclude)
-                        사유: (포함/제외 기준 중 어떤 조건 때문인지 구체적 사유 작성)
-                        """
+                        prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abs_text)
+                        
                         try:
                             res = model.generate_content(prompt)
                             ans = res.text
