@@ -45,7 +45,7 @@ with st.sidebar:
             "4. Colonic Stent",
             "5. Drainage Stent"
         ],
-        index=None
+        index=None  # 처음에 아무것도 선택되지 않음
     )
 
     if not due_category:
@@ -128,22 +128,48 @@ with st.sidebar:
 # 🌐 PubMed API 기능 함수들
 # --------------------------------------------------
 
-# 1. PICO + 연도 기준 PMID 자동 검색 함수 (NEW!)
-def search_pubmed_pmids(population="", intervention="", comparison="", outcome="", 
-                        start_year=2016, end_year=2026, max_results=100):
+# 1. PICO 다중 키워드 파싱 함수 (줄바꿈/쉼표 구분 -> OR 결합)
+def parse_pico_input(text):
+    if not text or not text.strip():
+        return ""
+    
+    raw_keywords = text.replace(',', '\n').split('\n')
+    keywords = [kw.strip() for kw in raw_keywords if kw.strip()]
+    
+    if not keywords:
+        return ""
+    
+    formatted = [f'"{kw}"[Title/Abstract]' if '"' not in kw else f'{kw}[Title/Abstract]' for kw in keywords]
+    
+    if len(formatted) == 1:
+        return formatted[0]
+    else:
+        return f"({' OR '.join(formatted)})"
+
+# 2. PubMed PICO 쿼리 조합 및 연/월 검색 함수
+def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="", 
+                            start_year=2016, start_month=1, 
+                            end_year=2026, end_month=12, max_results=100):
     query_parts = []
-    if population.strip():
-        query_parts.append(f"({population.strip()}[Title/Abstract])")
-    if intervention.strip():
-        query_parts.append(f"({intervention.strip()}[Title/Abstract])")
-    if comparison.strip():
-        query_parts.append(f"({comparison.strip()}[Title/Abstract])")
-    if outcome.strip():
-        query_parts.append(f"({outcome.strip()}[Title/Abstract])")
+    
+    p_query = parse_pico_input(p_text)
+    i_query = parse_pico_input(i_text)
+    c_query = parse_pico_input(c_text)
+    o_query = parse_pico_input(o_text)
+    
+    if p_query: query_parts.append(p_query)
+    if i_query: query_parts.append(i_query)
+    if c_query: query_parts.append(c_query)
+    if o_query: query_parts.append(o_query)
     
     full_query = " AND ".join(query_parts)
+    
     if not full_query:
         return [], ""
+
+    # 연/월 포맷팅 (예: 2016/01/01 ~ 2026/08/31)
+    min_date_str = f"{start_year}/{int(start_month):02d}/01"
+    max_date_str = f"{end_year}/{int(end_month):02d}/31"
 
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     params = {
@@ -152,8 +178,8 @@ def search_pubmed_pmids(population="", intervention="", comparison="", outcome="
         "retmode": "json",
         "retmax": max_results,
         "datetype": "pdat",
-        "mindate": f"{start_year}/01/01",
-        "maxdate": f"{end_year}/12/31"
+        "mindate": min_date_str,
+        "maxdate": max_date_str
     }
     
     try:
@@ -165,7 +191,7 @@ def search_pubmed_pmids(population="", intervention="", comparison="", outcome="
         st.error(f"PubMed 검색 도중 오류 발생: {str(e)}")
         return [], full_query
 
-# 2. PMID 단일 초록 수집 함수
+# 3. PMID 단일 초록 수집 함수
 def fetch_pubmed_by_pmid(pmid):
     pmid = str(pmid).replace('.0', '').strip()
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml"
@@ -247,12 +273,12 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     """
 
 # --------------------------------------------------
-# 📌 탭 UI 구성 (NEW: Tab 3 추가)
+# 📌 탭 UI 구성
 # --------------------------------------------------
 tab1, tab2, tab3 = st.tabs([
     "🔢 단일 PMID 입력", 
     "📁 PMID 리스트 CSV 업로드", 
-    "🔍 PICO 검색어 기반 자동 추출"
+    "🔍 PICO 다중 검색어 기반 자동 추출"
 ])
 
 # --------------------------------------------------
@@ -358,48 +384,82 @@ with tab2:
                 st.download_button("📥 결과 CSV 다운로드", data=csv_data, file_name="cer_screening_result.csv", mime="text/csv")
 
 # --------------------------------------------------
-# TAB 3: PICO 키워드 기반 자동 검색 & 스크리닝 (NEW!)
+# TAB 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
 # --------------------------------------------------
 with tab3:
-    st.subheader("🔍 PICO 키워드 및 검색 기간 입력")
+    st.subheader("🔍 PICO 다중 키워드 입력")
+    st.caption("💡 각 입력창 안에서 **줄바꿈(Enter)**이나 **쉼표(,)**로 동의어 키워드를 여러 개 적으시면 자동으로 **(A OR B OR C)** 형태의 쿼리가 생성됩니다.")
     
+    # 카테고리별 기본 PICO 조합 키워드 매핑
+    if due_category == "1. Biliary Stent":
+        default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent"
+    elif due_category == "2. Esophageal Stent":
+        default_p = "Esophageal stricture\nEsophageal obstruction\nRefractory benign esophageal stricture\nTracheoesophageal fistula"
+        default_i = "Esophageal SEMS\nCovered stent\nNiti-S Esophageal\nTaewoong"
+    elif due_category == "3. Pyloric/Duodenal Stent":
+        default_p = "Pyloric stricture\nDuodenal stricture\nGastric Outlet Obstruction\nGOO"
+        default_i = "Pyloric SEMS\nDuodenal SEMS\nNiti-S Pyloric\nComVi Pyloric"
+    elif due_category == "4. Colonic Stent":
+        default_p = "Colonic stricture\nColorectal obstruction\nColonic obstruction"
+        default_i = "Colonic SEMS\nEnteral Colonic\nNiti-S Enteral Colonic"
+    elif due_category == "5. Drainage Stent":
+        default_p = "Pancreatic pseudocyst\nWalled-off necrosis\nWON\nGallbladder drainage"
+        default_i = "Lumen-apposing metal stents\nLAMS\nNiti-S SPAXUS\nSPAXUS"
+    else:
+        default_p = "Obstructive Jaundice\nBiliary Stricture"
+        default_i = "Biliary Stent\nSEMS"
+
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
-        p_val = st.text_input("P (Population / 환자군·질환)", value="Obstructive Jaundice", help="예: Biliary obstruction, Esophageal stricture")
-        i_val = st.text_input("I (Intervention / 시술·중재법)", value="Biliary Stent", help="예: Metal stent, SEMS, SPAXUS")
+        p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=130,
+                             help="엔터(Enter)나 쉼표(,)로 동의어를 구분하여 입력하세요.")
+        i_val = st.text_area("I (Intervention / 시술·중재법)", value=default_i, height=130,
+                             help="엔터(Enter)나 쉼표(,)로 동의어를 구분하여 입력하세요.")
     with col_pico2:
-        c_val = st.text_input("C (Comparison / 대조군 - 선택사항)", value="", help="예: Plastic stent, Surgery")
-        o_val = st.text_input("O (Outcome / 평가지표 - 선택사항)", value="", help="예: Patency, Success rate")
+        c_val = st.text_area("C (Comparison / 대조군 - 선택사항)", value="", height=130, placeholder="예: Plastic stent\nSurgery")
+        o_val = st.text_area("O (Outcome / 평가지표 - 선택사항)", value="", height=130, placeholder="예: Stent patency\nTechnical success")
         
     st.markdown("---")
-    st.subheader("🗓️ 문헌 검색 기간 및 추출 개수 설정")
+    st.subheader("🗓️ 문헌 검색 기간(연/월) 및 추출 개수 설정")
     
-    col_date1, col_date2, col_date3 = st.columns(3)
-    with col_date1:
+    col_s1, col_s2, col_e1, col_e2 = st.columns(4)
+    with col_s1:
         start_year = st.number_input("시작 연도", min_value=1990, max_value=2026, value=2016)
-    with col_date2:
+    with col_s2:
+        start_month = st.number_input("시작 월", min_value=1, max_value=12, value=1)
+        
+    with col_e1:
         end_year = st.number_input("종료 연도", min_value=1990, max_value=2026, value=2026)
-    with col_date3:
-        max_limit = st.number_input("가져올 최대 논문 수", min_value=1, max_value=500, value=20)
+    with col_e2:
+        end_month = st.number_input("종료 월", min_value=1, max_value=12, value=8)
 
-    if st.button("🚀 PICO 자동 검색 및 AI 스크리닝 실행"):
+    max_limit = st.number_input("가져올 최대 논문 수", min_value=1, max_value=500, value=20)
+
+    if st.button("🚀 PICO 다중 조합 검색 및 AI 스크리닝 실행"):
         if not api_key:
             st.error("❌ API Key가 설정되지 않았습니다! 사이드바를 확인해 주세요.")
-        elif not p_val or not i_val:
-            st.error("❌ 최소한 P(환자군)와 I(시술법) 항목은 입력해야 합니다!")
+        elif not p_val.strip() or not i_val.strip():
+            st.error("❌ 최소한 P(환자군)와 I(시술법) 키워드는 입력해야 합니다!")
         else:
-            with st.spinner(f"PubMed에서 {start_year}년~{end_year}년 조건에 부합하는 PMID를 검색 중..."):
-                found_pmids, used_query = search_pubmed_pmids(
-                    population=p_val, intervention=i_val, comparison=c_val, outcome=o_val,
-                    start_year=start_year, end_year=end_year, max_results=max_limit
+            date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
+            with st.spinner(f"PubMed에서 [{date_range_label}] 기간의 PICO 조합 조건으로 검색 중..."):
+                found_pmids, used_query = search_pubmed_pmids_pico(
+                    p_text=p_val, i_text=i_val, c_text=c_val, o_text=o_val,
+                    start_year=start_year, start_month=start_month,
+                    end_year=end_year, end_month=end_month, 
+                    max_results=max_limit
                 )
             
             if not found_pmids:
-                st.warning("⚠️ 입력하신 PICO 조건 및 검색 기간에 부합하는 PubMed 논문이 없습니다.")
-                st.caption(f"적용된 쿼리: `{used_query}`")
+                st.warning(f"⚠️ [{date_range_label}] 기간 및 입력하신 PICO 조건에 부합하는 PubMed 논문이 없습니다.")
+                st.info(f"🔍 **생성된 조합 쿼리:**\n`{used_query}`")
             else:
-                st.success(f"🎉 총 **{len(found_pmids)}건**의 PMID가 성공적으로 자동 추출되었습니다!")
-                st.caption(f"📌 적용된 PubMed 쿼리: `{used_query}`")
+                st.success(f"🎉 **[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의 PMID가 추출되었습니다!")
+                
+                with st.expander("📄 자동 생성된 PubMed 조합 쿼리식 확인 (CER 제출용)", expanded=True):
+                    st.code(used_query, language="sql")
+                
                 st.write("📋 추출된 PMID 목록:", found_pmids[:10], "... (이하 생략)" if len(found_pmids) > 10 else "")
                 
                 st.markdown("---")
@@ -417,7 +477,7 @@ with tab3:
                 
                 for idx, row in auto_df.iterrows():
                     pmid = str(row['PMID'])
-                    status_text.text(f"[{idx+1}/{total}] PubMed 분석 중... PMID: {pmid}")
+                    status_text.text(f"[{idx+1}/{total}] PubMed 초록 분석 중... PMID: {pmid}")
                     
                     title, abs_text, status = fetch_pubmed_by_pmid(pmid)
                     
@@ -453,4 +513,4 @@ with tab3:
                 st.dataframe(auto_df)
                 
                 csv_data = auto_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button("📥 PICO 스크리닝 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}_{end_year}.csv", mime="text/csv")
+                st.download_button("📥 PICO 스크리닝 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv", mime="text/csv")
