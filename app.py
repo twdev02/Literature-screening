@@ -128,7 +128,7 @@ with st.sidebar:
 # 🌐 PubMed API 기능 함수들
 # --------------------------------------------------
 
-# 1. PICO 유연한 키워드 파싱 함수 (개선: 0건 검색 방지를 위해 유연 매핑 적용)
+# 1. PICO 유연한 키워드 파싱 함수 (OR 결합 및 유연 매핑 적용)
 def parse_pico_input(text):
     if not text or not text.strip():
         return ""
@@ -151,10 +151,11 @@ def parse_pico_input(text):
     else:
         return f"({' OR '.join(formatted)})"
 
-# 2. PubMed PICO 쿼리 조합 및 연/월 검색 함수
+# 2. PubMed PICO 쿼리 조합 및 연/월 검색 함수 (전체 가져오기 지원)
 def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="", 
                             start_year=2016, start_month=1, 
-                            end_year=2026, end_month=12, max_results=100):
+                            end_year=2026, end_month=12, 
+                            fetch_all=False, max_results=20):
     query_parts = []
     
     p_query = parse_pico_input(p_text)
@@ -176,21 +177,44 @@ def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="",
     max_date_str = f"{end_year}/{int(end_month):02d}/31"
 
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-    params = {
+    
+    # 1차 요청: 전체 검색 결과 개수(Count) 확인
+    params_count = {
         "db": "pubmed",
         "term": full_query,
         "retmode": "json",
-        "retmax": max_results,
+        "retmax": 0,
         "datetype": "pdat",
         "mindate": min_date_str,
         "maxdate": max_date_str
     }
     
     try:
-        response = requests.get(url, params=params, timeout=10)
+        res_count = requests.get(url, params=params_count, timeout=10).json()
+        total_found = int(res_count.get("esearchresult", {}).get("count", 0))
+        
+        # '전체 가져오기' 체크 시 retmax를 검색된 전체 개수로 지정
+        actual_retmax = total_found if fetch_all else min(max_results, total_found)
+        
+        if actual_retmax == 0:
+            return [], full_query
+
+        # 2차 요청: 실제 PMID 수집
+        params_fetch = {
+            "db": "pubmed",
+            "term": full_query,
+            "retmode": "json",
+            "retmax": actual_retmax,
+            "datetype": "pdat",
+            "mindate": min_date_str,
+            "maxdate": max_date_str
+        }
+        
+        response = requests.get(url, params=params_fetch, timeout=10)
         data = response.json()
         pmid_list = data.get("esearchresult", {}).get("idlist", [])
         return pmid_list, full_query
+        
     except Exception as e:
         st.error(f"PubMed 검색 도중 오류 발생: {str(e)}")
         return [], full_query
@@ -438,7 +462,15 @@ with tab3:
     with col_e2:
         end_month = st.number_input("종료 월", min_value=1, max_value=12, value=8)
 
-    max_limit = st.number_input("가져올 최대 논문 수", min_value=1, max_value=500, value=20)
+    col_opt1, col_opt2 = st.columns([1, 1])
+    with col_opt1:
+        fetch_all_toggle = st.checkbox("🔥 검색된 전체 논문 수집 (개수 제한 없음)", value=False)
+    with col_opt2:
+        if not fetch_all_toggle:
+            max_limit = st.number_input("가져올 최대 논문 수", min_value=1, max_value=2000, value=20)
+        else:
+            max_limit = 0
+            st.info("ℹ️ 조건에 맞는 PubMed의 **전체 PMID**를 가져옵니다.")
 
     if st.button("🚀 PICO 다중 조합 검색 및 AI 스크리닝 실행"):
         if not api_key:
@@ -452,7 +484,7 @@ with tab3:
                     p_text=p_val, i_text=i_val, c_text=c_val, o_text=o_val,
                     start_year=start_year, start_month=start_month,
                     end_year=end_year, end_month=end_month, 
-                    max_results=max_limit
+                    fetch_all=fetch_all_toggle, max_results=max_limit
                 )
             
             if not found_pmids:
