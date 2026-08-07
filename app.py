@@ -343,7 +343,7 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") 
+                model = genai.GenerativeModel("gemini-3.6-flash") 
                 prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abstract_text)
                 
                 ans_text, err = call_gemini_with_retry(model, prompt)
@@ -373,7 +373,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") 
+                model = genai.GenerativeModel("gemini-3.6-flash") 
                 
                 titles, abstracts, results, reasons = [], [], [], []
                 progress_bar = st.progress(0)
@@ -511,7 +511,7 @@ with tab3:
                 st.subheader("🤖 추출된 PMID 기반 AI 스크리닝 진행 중...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash") 
+                model = genai.GenerativeModel("gemini-3.6-flash") 
                 
                 auto_df = pd.DataFrame({"PMID": found_pmids})
                 titles, abstracts, results, reasons = [], [], [], []
