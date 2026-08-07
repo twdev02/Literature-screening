@@ -217,7 +217,6 @@ def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="",
         st.error(f"PubMed 검색 도중 오류 발생: {str(e)}")
         return [], full_query
 
-# 💡 초록 추출 파싱 보완 (itertext 적용)
 def fetch_pubmed_by_pmid(pmid):
     pmid = str(pmid).replace('.0', '').strip()
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml"
@@ -248,7 +247,6 @@ def fetch_pubmed_by_pmid(pmid):
     except Exception as e:
         return None, None, f"데이터 파싱 에러: {str(e)}"
 
-# 💡 429 Quota Error 발생 시 자동 재시도(Retry) 함수
 def call_gemini_with_retry(model, prompt, max_retries=3):
     for attempt in range(max_retries):
         try:
@@ -406,16 +404,19 @@ with tab2:
                             reasons.append(f"AI 에러: {err}")
                     
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(4.5)  # API 쿼터 안전 대기시간
+                    time.sleep(4.5)
                 
                 df['논문 제목'] = titles
                 df['초록 요약'] = abstracts
                 df['AI 판정'] = results
                 df['상세 사유'] = reasons
                 
+                # 💡 'No' 순번 컬럼 1번부터 생성 및 인덱스 1부터 시작 지정
+                df.insert(0, 'No', range(1, len(df) + 1))
+                df.index = df.index + 1
+                
                 st.session_state["tab2_result"] = df
 
-    # Session State 보관 데이터 출력 (다운로드 시 사라짐 방지)
     if st.session_state["tab2_result"] is not None:
         st.success(f"[{due_category}] 일괄 스크리닝 결과")
         st.dataframe(st.session_state["tab2_result"])
@@ -546,17 +547,19 @@ with tab3:
                             reasons.append(f"AI 에러: {err}")
                     
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(4.5)  # API 쿼터 안전 대기시간
+                    time.sleep(4.5)
                 
                 auto_df['논문 제목'] = titles
                 auto_df['초록 요약'] = abstracts
                 auto_df['AI 판정'] = results
                 auto_df['상세 사유'] = reasons
                 
-                # Session state 저장
+                # 💡 'No' 순번 컬럼 1번부터 생성 및 인덱스 1부터 시작 지정
+                auto_df.insert(0, 'No', range(1, len(auto_df) + 1))
+                auto_df.index = auto_df.index + 1
+                
                 st.session_state["tab3_result"] = auto_df
 
-    # Session State 보관 데이터 출력 (다운로드 시 사라짐 방지)
     if st.session_state["tab3_result"] is not None:
         st.success(f"✅ [{due_category}] PICO 기반 자동 스크리닝 완료 결과")
         st.dataframe(st.session_state["tab3_result"])
