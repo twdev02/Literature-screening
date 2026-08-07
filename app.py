@@ -506,7 +506,9 @@ with tab3:
                 with st.expander("📄 자동 생성된 PubMed 조합 쿼리식 확인 (CER 제출용)", expanded=True):
                     st.code(used_query, language="sql")
                 
-                st.write("📋 추출된 PMID 목록:", found_pmids[:10], "... (이하 생략)" if len(found_pmids) > 10 else "")
+                # 💡 0번 인덱스 없이 깔끔하게 쉼표(,) 형태로 미리보기 출력
+                pmid_summary = ", ".join(found_pmids[:10])
+                st.write(f"📋 **추출된 PMID 목록 (상위 10개):** {pmid_summary}" + (" ... (이하 생략)" if len(found_pmids) > 10 else ""))
                 
                 st.markdown("---")
                 st.subheader("🤖 추출된 PMID 기반 AI 스크리닝 진행 중...")
