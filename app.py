@@ -9,12 +9,21 @@ st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
 st.title("PubMed PMID 기반 AI 문헌 스크리닝 시스템")
 
 # --------------------------------------------------
+# ⚙️ Session State 메모리 저장소 초기화 (화면 초기화 방지)
+# --------------------------------------------------
+if "tab1_result" not in st.session_state:
+    st.session_state["tab1_result"] = None
+if "tab2_result" not in st.session_state:
+    st.session_state["tab2_result"] = None
+if "tab3_result" not in st.session_state:
+    st.session_state["tab3_result"] = None
+
+# --------------------------------------------------
 # ⚙️ 사이드바: API Key 및 DUE 분류 설정
 # --------------------------------------------------
 with st.sidebar:
     st.header("⚙️ 시스템 설정")
     
-    # 🔑 Streamlit Secrets 안전 조회
     default_api_key = ""
     try:
         if "GEMINI_API_KEY" in st.secrets:
@@ -22,10 +31,7 @@ with st.sidebar:
     except Exception:
         default_api_key = ""
     
-    # 사용자 직접 입력란
     user_api_key = st.text_input("Gemini API Key (미입력 시 서버 기본키 적용)", type="password")
-    
-    # 최종 적용할 API Key
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
     
     if api_key:
@@ -45,14 +51,13 @@ with st.sidebar:
             "4. Colonic Stent",
             "5. Drainage Stent"
         ],
-        index=None  # 처음에 아무것도 선택되지 않음
+        index=None
     )
 
     if not due_category:
         st.info("위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
         st.stop()
     
-    # 카테고리별 상세 기준 매핑
     if due_category == "1. Biliary Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
@@ -125,10 +130,9 @@ with st.sidebar:
     exclude_criteria = default_exc
 
 # --------------------------------------------------
-# 🌐 PubMed API 기능 함수들
+# 🌐 PubMed API 기능 및 개선된 XML 파싱 함수
 # --------------------------------------------------
 
-# 1. PICO 유연한 키워드 파싱 함수 (OR 결합 및 유연 매핑 적용)
 def parse_pico_input(text):
     if not text or not text.strip():
         return ""
@@ -151,7 +155,6 @@ def parse_pico_input(text):
     else:
         return f"({' OR '.join(formatted)})"
 
-# 2. PubMed PICO 쿼리 조합 및 연/월 검색 함수 (전체 가져오기 지원)
 def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="", 
                             start_year=2016, start_month=1, 
                             end_year=2026, end_month=12, 
@@ -169,7 +172,6 @@ def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="",
     if o_query: query_parts.append(o_query)
     
     full_query = " AND ".join(query_parts)
-    
     if not full_query:
         return [], ""
 
@@ -178,7 +180,6 @@ def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="",
 
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     
-    # 1차 요청: 전체 검색 결과 개수(Count) 확인
     params_count = {
         "db": "pubmed",
         "term": full_query,
@@ -193,13 +194,10 @@ def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="",
         res_count = requests.get(url, params=params_count, timeout=10).json()
         total_found = int(res_count.get("esearchresult", {}).get("count", 0))
         
-        # '전체 가져오기' 체크 시 retmax를 검색된 전체 개수로 지정
         actual_retmax = total_found if fetch_all else min(max_results, total_found)
-        
         if actual_retmax == 0:
             return [], full_query
 
-        # 2차 요청: 실제 PMID 수집
         params_fetch = {
             "db": "pubmed",
             "term": full_query,
@@ -219,7 +217,7 @@ def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="",
         st.error(f"PubMed 검색 도중 오류 발생: {str(e)}")
         return [], full_query
 
-# 3. PMID 단일 초록 수집 함수
+# 💡 초록 추출 파싱 보완 (itertext 적용)
 def fetch_pubmed_by_pmid(pmid):
     pmid = str(pmid).replace('.0', '').strip()
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml"
@@ -235,17 +233,33 @@ def fetch_pubmed_by_pmid(pmid):
             return None, None, "존재하지 않는 PMID이거나 논문 정보를 찾을 수 없습니다."
             
         title_elem = article.find('.//ArticleTitle')
-        title = title_elem.text if title_elem is not None else "제목 없음"
+        title = "".join(title_elem.itertext()).strip() if title_elem is not None else "제목 없음"
         
-        abstract_elems = article.findall('.//AbstractText')
-        if not abstract_elems:
+        abstract_elem = article.find('.//Abstract')
+        if abstract_elem is None:
             return title, None, "초록(Abstract)이 없는 문헌입니다."
             
-        abstract_text = " ".join([elem.text for elem in abstract_elems if elem.text])
+        abstract_text = "".join(abstract_elem.itertext()).strip()
+        if not abstract_text:
+            return title, None, "초록(Abstract) 내용이 비어있습니다."
+
         return title, abstract_text, "성공"
         
     except Exception as e:
         return None, None, f"데이터 파싱 에러: {str(e)}"
+
+# 💡 429 Quota Error 발생 시 자동 재시도(Retry) 함수
+def call_gemini_with_retry(model, prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            res = model.generate_content(prompt)
+            return res.text, None
+        except Exception as e:
+            err_msg = str(e)
+            if "429" in err_msg and attempt < max_retries - 1:
+                time.sleep(10)  # 429 에러 시 10초 대기 후 재시도
+                continue
+            return None, err_msg
 
 # --------------------------------------------------
 # 🤖 공통 AI 프롬프트 생성 함수
@@ -297,7 +311,6 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
          * **Irrelevant article:**
          * **Insufficient information:**
          * **Literature without human clinical data:**
-         (작성 예시: **Different indication:** The study concerns WON drainage for pancreatic and peripheral diseases, and corresponds to a study on a non-esophageal target area.)
     """
 
 # --------------------------------------------------
@@ -316,7 +329,7 @@ with tab1:
     single_pmid = st.text_input("PubMed PMID 번호를 입력하세요 (예: 31234567)")
     if st.button("단일 PMID 스크리닝 실행"):
         if not api_key:
-            st.error("❌ API Key가 설정되지 않았습니다! 사이드바를 확인해 주세요.")
+            st.error("❌ API Key가 설정되지 않았습니다!")
         elif not single_pmid:
             st.error("❌ PMID 번호를 입력해 주세요!")
         else:
@@ -330,19 +343,15 @@ with tab1:
                 st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash") 
-                
+                model = genai.GenerativeModel("gemini-1.5-flash") 
                 prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abstract_text)
                 
-                try:
-                    res = model.generate_content(prompt)
+                ans_text, err = call_gemini_with_retry(model, prompt)
+                if ans_text:
                     st.success("AI 스크리닝 판정 완료!")
-                    st.markdown(res.text)
-                except Exception as e:
-                    if "429" in str(e):
-                        st.warning("⏳ 무료 일일 사용량(Quota) 초과 에러입니다.")
-                    else:
-                        st.error(f"AI 통신 에러 발생: {str(e)}")
+                    st.markdown(ans_text)
+                else:
+                    st.error(f"AI 통신 에러 발생: {err}")
 
 # --------------------------------------------------
 # TAB 2: CSV 파일 PMID 일괄 스크리닝
@@ -364,7 +373,7 @@ with tab2:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash") 
+                model = genai.GenerativeModel("gemini-1.5-flash") 
                 
                 titles, abstracts, results, reasons = [], [], [], []
                 progress_bar = st.progress(0)
@@ -380,36 +389,39 @@ with tab2:
                     if not abs_text:
                         titles.append(title if title else "조회 실패")
                         abstracts.append(status)
-                        results.append("Error")
+                        results.append("Exclude (초록없음)" if "초록" in status else "Error")
                         reasons.append(status)
                     else:
                         titles.append(title)
                         abstracts.append(abs_text[:150] + "...")
                         
                         prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abs_text)
+                        ans, err = call_gemini_with_retry(model, prompt)
                         
-                        try:
-                            res = model.generate_content(prompt)
-                            ans = res.text
+                        if ans:
                             results.append("Include (포함)" if "Include" in ans and "Exclude" not in ans.split("판정:")[1] else "Exclude (제외)")
                             reasons.append(ans.split("사유:")[-1].strip() if "사유:" in ans else ans)
-                        except Exception as e:
+                        else:
                             results.append("Error")
-                            reasons.append("429 Quota Error" if "429" in str(e) else f"AI 에러: {str(e)}")
+                            reasons.append(f"AI 에러: {err}")
                     
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(4.0)
+                    time.sleep(4.5)  # API 쿼터 안전 대기시간
                 
                 df['논문 제목'] = titles
                 df['초록 요약'] = abstracts
                 df['AI 판정'] = results
                 df['상세 사유'] = reasons
                 
-                st.success(f"[{due_category}] 스크리닝이 완료되었습니다!")
-                st.dataframe(df)
-                
-                csv_data = df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button("📥 결과 CSV 다운로드", data=csv_data, file_name="cer_screening_result.csv", mime="text/csv")
+                st.session_state["tab2_result"] = df
+
+    # Session State 보관 데이터 출력 (다운로드 시 사라짐 방지)
+    if st.session_state["tab2_result"] is not None:
+        st.success(f"[{due_category}] 일괄 스크리닝 결과")
+        st.dataframe(st.session_state["tab2_result"])
+        
+        csv_data = st.session_state["tab2_result"].to_csv(index=False).encode('utf-8-sig')
+        st.download_button("📥 결과 CSV 다운로드", data=csv_data, file_name="cer_screening_result.csv", mime="text/csv")
 
 # --------------------------------------------------
 # TAB 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
@@ -418,7 +430,6 @@ with tab3:
     st.subheader("🔍 PICO 다중 키워드 입력")
     st.caption("💡 각 입력창 안에서 **줄바꿈(Enter)**이나 **쉼표(,)**로 동의어 키워드를 여러 개 적으시면 자동으로 **(A OR B OR C)** 형태의 쿼리가 생성됩니다.")
     
-    # 카테고리별 기본 PICO 조합 키워드 매핑
     if due_category == "1. Biliary Stent":
         default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
         default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent"
@@ -440,10 +451,8 @@ with tab3:
 
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
-        p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=130,
-                             help="엔터(Enter)나 쉼표(,)로 동의어를 구분하여 입력하세요.")
-        i_val = st.text_area("I (Intervention / 시술·중재법)", value=default_i, height=130,
-                             help="엔터(Enter)나 쉼표(,)로 동의어를 구분하여 입력하세요.")
+        p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=130)
+        i_val = st.text_area("I (Intervention / 시술·중재법)", value=default_i, height=130)
     with col_pico2:
         c_val = st.text_area("C (Comparison / 대조군 - 선택사항)", value="", height=130, placeholder="예: Plastic stent\nSurgery")
         o_val = st.text_area("O (Outcome / 평가지표 - 선택사항)", value="", height=130, placeholder="예: Stent patency\nTechnical success")
@@ -474,7 +483,7 @@ with tab3:
 
     if st.button("🚀 PICO 다중 조합 검색 및 AI 스크리닝 실행"):
         if not api_key:
-            st.error("❌ API Key가 설정되지 않았습니다! 사이드바를 확인해 주세요.")
+            st.error("❌ API Key가 설정되지 않았습니다!")
         elif not p_val.strip() or not i_val.strip():
             st.error("❌ 최소한 P(환자군)와 I(시술법) 키워드는 입력해야 합니다!")
         else:
@@ -502,7 +511,7 @@ with tab3:
                 st.subheader("🤖 추출된 PMID 기반 AI 스크리닝 진행 중...")
                 
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash") 
+                model = genai.GenerativeModel("gemini-1.5-flash") 
                 
                 auto_df = pd.DataFrame({"PMID": found_pmids})
                 titles, abstracts, results, reasons = [], [], [], []
@@ -520,33 +529,37 @@ with tab3:
                     if not abs_text:
                         titles.append(title if title else "조회 실패")
                         abstracts.append(status)
-                        results.append("Error")
+                        results.append("Exclude (초록없음)" if "초록" in status else "Error")
                         reasons.append(status)
                     else:
                         titles.append(title)
                         abstracts.append(abs_text[:150] + "...")
                         
                         prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abs_text)
+                        ans, err = call_gemini_with_retry(model, prompt)
                         
-                        try:
-                            res = model.generate_content(prompt)
-                            ans = res.text
+                        if ans:
                             results.append("Include (포함)" if "Include" in ans and "Exclude" not in ans.split("판정:")[1] else "Exclude (제외)")
                             reasons.append(ans.split("사유:")[-1].strip() if "사유:" in ans else ans)
-                        except Exception as e:
+                        else:
                             results.append("Error")
-                            reasons.append("429 Quota Error" if "429" in str(e) else f"AI 에러: {str(e)}")
+                            reasons.append(f"AI 에러: {err}")
                     
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(4.0)
+                    time.sleep(4.5)  # API 쿼터 안전 대기시간
                 
                 auto_df['논문 제목'] = titles
                 auto_df['초록 요약'] = abstracts
                 auto_df['AI 판정'] = results
                 auto_df['상세 사유'] = reasons
                 
-                st.success(f"✅ [{due_category}] PICO 기반 자동 스크리닝이 완료되었습니다!")
-                st.dataframe(auto_df)
-                
-                csv_data = auto_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button("📥 PICO 스크리닝 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv", mime="text/csv")
+                # Session state 저장
+                st.session_state["tab3_result"] = auto_df
+
+    # Session State 보관 데이터 출력 (다운로드 시 사라짐 방지)
+    if st.session_state["tab3_result"] is not None:
+        st.success(f"✅ [{due_category}] PICO 기반 자동 스크리닝 완료 결과")
+        st.dataframe(st.session_state["tab3_result"])
+        
+        csv_data = st.session_state["tab3_result"].to_csv(index=False).encode('utf-8-sig')
+        st.download_button("📥 PICO 스크리닝 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv", mime="text/csv")
