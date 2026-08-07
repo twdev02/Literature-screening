@@ -128,7 +128,7 @@ with st.sidebar:
 # 🌐 PubMed API 기능 함수들
 # --------------------------------------------------
 
-# 1. PICO 다중 키워드 파싱 함수 (줄바꿈/쉼표 구분 -> OR 결합)
+# 1. PICO 유연한 키워드 파싱 함수 (개선: 0건 검색 방지를 위해 유연 매핑 적용)
 def parse_pico_input(text):
     if not text or not text.strip():
         return ""
@@ -139,7 +139,12 @@ def parse_pico_input(text):
     if not keywords:
         return ""
     
-    formatted = [f'"{kw}"[Title/Abstract]' if '"' not in kw else f'{kw}[Title/Abstract]' for kw in keywords]
+    formatted = []
+    for kw in keywords:
+        if '"' in kw or '[' in kw:
+            formatted.append(kw)
+        else:
+            formatted.append(f"({kw})")
     
     if len(formatted) == 1:
         return formatted[0]
@@ -167,7 +172,6 @@ def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="",
     if not full_query:
         return [], ""
 
-    # 연/월 포맷팅 (예: 2016/01/01 ~ 2026/08/31)
     min_date_str = f"{start_year}/{int(start_month):02d}/01"
     max_date_str = f"{end_year}/{int(end_month):02d}/31"
 
