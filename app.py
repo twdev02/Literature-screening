@@ -156,7 +156,7 @@ def parse_pico_input(text):
         return f"({' OR '.join(formatted)})"
 
 def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="", 
-                            start_year=2016, start_month=1, 
+                            start_year=2026, start_month=1, 
                             end_year=2026, end_month=12, 
                             fetch_all=False, max_results=20):
     query_parts = []
@@ -432,20 +432,31 @@ with tab3:
     st.caption("💡 각 입력창 안에서 **줄바꿈(Enter)**이나 **쉼표(,)**로 동의어 키워드를 여러 개 적으시면 자동으로 **(A OR B OR C)** 형태의 쿼리가 생성됩니다.")
     
     if due_category == "1. Biliary Stent":
-        default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
-        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent"
+        default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign biliary obstruction\nBenign biliary stricture\nBenign pancreatic duct stricture"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
+        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
+        default_o = "Stent patency\nDecreased bilirubin\nRemoval"
     elif due_category == "2. Esophageal Stent":
-        default_p = "Esophageal stricture\nEsophageal obstruction\nRefractory benign esophageal stricture\nTracheoesophageal fistula"
-        default_i = "Esophageal SEMS\nCovered stent\nNiti-S Esophageal\nTaewoong"
+        default_p = "Esophageal stricture\nEsophageal obstruction\nMalignant esophageal stricture\nMalignant esophageal obstruction\nBenign esophageal stricture\nRefractory benign esophageal stricture\nBenign esophgeal obstruction\nTracheoesophageal fistula"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent"
+        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex
+nUltraflex\nEvolution\nHanarostent\nAixstent\nEGIS\nBonastent\nMicro-tech"
+        default_o = "Stent patency\nDysphagia improvement\nFistula closure\nRemoval"
     elif due_category == "3. Pyloric/Duodenal Stent":
-        default_p = "Pyloric stricture\nDuodenal stricture\nGastric Outlet Obstruction\nGOO"
-        default_i = "Pyloric SEMS\nDuodenal SEMS\nNiti-S Pyloric\nComVi Pyloric"
+        default_p = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction\nBenign pyloric stricture\nBenign pyloric obstruction\nBenign duodenal stricture\nBenign duodenal obstruction"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nCovered stent\nUncovered stent"
+        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent"
+        default_o = "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
     elif due_category == "4. Colonic Stent":
-        default_p = "Colonic stricture\nColorectal obstruction\nColonic obstruction"
-        default_i = "Colonic SEMS\nEnteral Colonic\nNiti-S Enteral Colonic"
+        default_p = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction\nBenign colonic stricture\nBenign colonic obstruction\nBenign colorectal stricture\nBenign colorectal obstruction"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
+        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-tech\nBonastent"
+        default_o = "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
     elif due_category == "5. Drainage Stent":
         default_p = "Pancreatic pseudocyst\nWalled-off necrosis\nWON\nGallbladder drainage"
         default_i = "Lumen-apposing metal stents\nLAMS\nNiti-S SPAXUS\nSPAXUS"
+        default_c = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
+        default_o = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
     else:
         default_p = "Obstructive Jaundice\nBiliary Stricture"
         default_i = "Biliary Stent\nSEMS"
@@ -453,10 +464,10 @@ with tab3:
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
         p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=130)
-        i_val = st.text_area("I (Intervention / 시술·중재법)", value=default_i, height=130)
+        i_val = st.text_area("I (Intervention)", value=default_i, height=130)
     with col_pico2:
-        c_val = st.text_area("C (Comparison / 대조군 - 선택사항)", value="", height=130, placeholder="예: Plastic stent\nSurgery")
-        o_val = st.text_area("O (Outcome / 평가지표 - 선택사항)", value="", height=130, placeholder="예: Stent patency\nTechnical success")
+        c_val = st.text_area("C (Comparison)", value=default_c, height=130)
+        o_val = st.text_area("O (Outcome", value=default_o, height=130)
         
     st.markdown("---")
     st.subheader("🗓️ 문헌 검색 기간(연/월) 및 추출 개수 설정")
