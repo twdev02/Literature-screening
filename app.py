@@ -19,7 +19,7 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
 # --------------------------------------------------
-# ⚙️ 사이드바: API Key 및 DUE 분류 설정
+# ⚙️ 사이드바: API Key 및 품목 / 세부 모델 분류 설정
 # --------------------------------------------------
 with st.sidebar:
     st.header("⚙️ 시스템 설정")
@@ -57,7 +57,60 @@ with st.sidebar:
     if not due_category:
         st.info("위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
         st.stop()
+
+    # 💡 [NEW] 2차 세부 모델/유형 선택 서브 메뉴 (카테고리별 분기)
+    sub_model = "전체 (All Models)"
     
+    if due_category == "1. Biliary Stent":
+        sub_model = st.selectbox(
+            "🔎 세부 모델/유형을 선택하세요",
+            options=[
+                "전체 (All Models)",
+                "Niti-S Covered Stent",
+                "Niti-S Uncovered Stent",
+                "ComVi Covered Stent"
+            ]
+        )
+    elif due_category == "2. Esophageal Stent":
+        sub_model = st.selectbox(
+            "🔎 세부 모델/유형을 선택하세요",
+            options=[
+                "전체 (All Models)",
+                "Niti-S Esophageal Full Covered",
+                "Niti-S Esophageal Both Bare / Cervical"
+            ]
+        )
+    elif due_category == "3. Pyloric/Duodenal Stent":
+        sub_model = st.selectbox(
+            "🔎 세부 모델/유형을 선택하세요",
+            options=[
+                "전체 (All Models)",
+                "Niti-S Pyloric/Duodenal D-Type",
+                "ComVi Pyloric/Duodenal"
+            ]
+        )
+    elif due_category == "4. Colonic Stent":
+        sub_model = st.selectbox(
+            "🔎 세부 모델/유형을 선택하세요",
+            options=[
+                "전체 (All Models)",
+                "Niti-S Enteral Colonic",
+                "ComVi Enteral Colonic"
+            ]
+        )
+    elif due_category == "5. Drainage Stent":
+        sub_model = st.selectbox(
+            "🔎 세부 모델/유형을 선택하세요",
+            options=[
+                "전체 (All Models)",
+                "Niti-S SPAXUS / Hot SPAXUS",
+                "Niti-S NAGI"
+            ]
+        )
+
+    # --------------------------------------------------
+    # 💡 선택된 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
+    # --------------------------------------------------
     if due_category == "1. Biliary Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
@@ -70,6 +123,28 @@ with st.sidebar:
 2. Different indication: Non-biliary/pancreatic target areas only (e.g., vascular, esophageal, colonic, tracheal)
 3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management
 4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
+
+        # PICO 세부 기본값 매핑
+        if sub_model == "Niti-S Covered Stent":
+            default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nBenign biliary stricture"
+            default_i = "Niti-S Covered\nNiti-S Full Covered\nCovered biliary SEMS\nCovered metal stent\nTaewoong Covered"
+            default_c = "Uncovered stent\nPlastic stent\nSurgery\nWallFlex Covered"
+            default_o = "Stent patency\nDecreased bilirubin\nStent removal\nComplications"
+        elif sub_model == "Niti-S Uncovered Stent":
+            default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
+            default_i = "Niti-S Uncovered\nNiti-S Bare\nUncovered biliary SEMS\nUncovered metal stent\nBoth Bare"
+            default_c = "Covered stent\nPlastic stent\nSurgery\nWallFlex Uncovered"
+            default_o = "Stent patency\nDecreased bilirubin\nTumor ingrowth\nComplications"
+        elif sub_model == "ComVi Covered Stent":
+            default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
+            default_i = "ComVi\nComVi Biliary\nComVi Covered\nTaewoong ComVi"
+            default_c = "Single layer Covered SEMS\nUncovered stent\nPlastic stent\nWallFlex"
+            default_o = "Stent patency\nTumor ingrowth prevention\nTechnical success\nClinical success"
+        else: # 전체 (All Models)
+            default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign biliary obstruction\nBenign biliary stricture\nBenign pancreatic duct stricture"
+            default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
+            default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
+            default_o = "Stent patency\nDecreased bilirubin\nRemoval"
 
     elif due_category == "2. Esophageal Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -84,6 +159,22 @@ with st.sidebar:
 3. Irrelevant articles: Articles not related to esophageal stenting, stricture dilation, or TE fistula management
 4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
+        if sub_model == "Niti-S Esophageal Full Covered":
+            default_p = "Esophageal stricture\nEsophageal obstruction\nRefractory benign esophageal stricture\nTracheoesophageal fistula"
+            default_i = "Niti-S Esophageal Full Covered\nNiti-S Full Covered Esophageal\nCovered Esophageal SEMS"
+            default_c = "Uncovered Esophageal Stent\nPlastic stent\nSurgery\nUltraflex"
+            default_o = "Dysphagia improvement\nFistula closure\nMigration\nRemoval"
+        elif sub_model == "Niti-S Esophageal Both Bare / Cervical":
+            default_p = "Esophageal stricture\nEsophageal obstruction\nCervical esophageal stricture"
+            default_i = "Niti-S Cervical\nNiti-S Both Bare Esophageal\nBare type Esophageal SEMS"
+            default_c = "Full Covered Esophageal Stent\nSurgery\nPlastic stent"
+            default_o = "Dysphagia improvement\nMigration prevention\nTechnical success"
+        else:
+            default_p = "Esophageal stricture\nEsophageal obstruction\nMalignant esophageal stricture\nMalignant esophageal obstruction\nBenign esophageal stricture\nRefractory benign esophageal stricture\nBenign esophgeal obstruction\nTracheoesophageal fistula"
+            default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent"
+            default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nUltraflex\nEvolution\nHanarostent\nAixstent\nEGIS\nBonastent\nMicro-tech"
+            default_o = "Stent patency\nDysphagia improvement\nFistula closure\nRemoval"
+
     elif due_category == "3. Pyloric/Duodenal Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
@@ -96,6 +187,22 @@ with st.sidebar:
 2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, esophageal, colonic, or vascular stents without duodenal/gastric outlet involvement)
 3. Irrelevant articles: Articles not related to pyloric/duodenal stenting or GOO management
 4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
+
+        if sub_model == "Niti-S Pyloric/Duodenal D-Type":
+            default_p = "Pyloric stricture\nDuodenal stricture\nGastric outlet obstruction\nGOO"
+            default_i = "Niti-S D-Type\nNiti-S Pyloric D-Type\nNiti-S Duodenal D-Type"
+            default_c = "Gastrojejunostomy\nSurgery\nWallFlex Duodenal"
+            default_o = "GOOSS score\nOral intake\nStent patency\nTechnical success"
+        elif sub_model == "ComVi Pyloric/Duodenal":
+            default_p = "Pyloric stricture\nDuodenal stricture\nGastric outlet obstruction\nGOO"
+            default_i = "ComVi Pyloric\nComVi Duodenal\nComVi Flare-Type"
+            default_c = "Uncovered enteral stent\nSurgery\nWallFlex Soft"
+            default_o = "Obstruction relief\nTumor ingrowth prevention\nPatency"
+        else:
+            default_p = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction\nBenign pyloric stricture\nBenign pyloric obstruction\nBenign duodenal stricture\nBenign duodenal obstruction"
+            default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nCovered stent\nUncovered stent"
+            default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent"
+            default_o = "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
 
     elif due_category == "4. Colonic Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -110,6 +217,22 @@ with st.sidebar:
 3. Irrelevant articles: Articles not related to colonic stenting or colorectal obstruction management
 4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
+        if sub_model == "Niti-S Enteral Colonic":
+            default_p = "Colonic stricture\nColonic obstruction\nColorectal obstruction\nBridge to surgery"
+            default_i = "Niti-S Enteral Colonic\nNiti-S Colonic\nNiti-S Colorectal"
+            default_c = "Emergency surgery\nDecompressing stoma\nWallFlex Colonic"
+            default_o = "Bridge to surgery success\nObstruction relief\nPerforation rate"
+        elif sub_model == "ComVi Enteral Colonic":
+            default_p = "Colonic stricture\nColorectal obstruction\nMalignant colonic obstruction"
+            default_i = "ComVi Colonic\nComVi Enteral Colonic\nComVi Colorectal"
+            default_c = "Uncovered Colonic SEMS\nSurgery\nHanarostent Colonic"
+            default_o = "Obstruction relief\nTumor ingrowth\nClinical success"
+        else:
+            default_p = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction\nBenign colonic stricture\nBenign colonic obstruction\nBenign colorectal stricture\nBenign colorectal obstruction"
+            default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
+            default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-tech\nBonastent"
+            default_o = "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
+
     elif due_category == "5. Drainage Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
@@ -122,9 +245,27 @@ with st.sidebar:
 2. Different indication/Irrelevant: Non-drainage target indications or vascular/intraluminal stenting without transluminal/EUS drainage purpose
 3. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
+        if sub_model == "Niti-S SPAXUS / Hot SPAXUS":
+            default_p = "Pancreatic pseudocyst\nWalled-off necrosis\nWON\nGallbladder drainage\nEUS-guided drainage"
+            default_i = "SPAXUS\nHot SPAXUS\nNiti-S SPAXUS\nLAMS SPAXUS"
+            default_c = "AXIOS\nHot AXIOS\nPlastic double-pigtail stent\nPercutaneous drainage"
+            default_o = "Clinical success\nResolution rate\nAdverse events\nBleeding"
+        elif sub_model == "Niti-S NAGI":
+            default_p = "Pancreatic pseudocyst\nPancreatic fluid collection\nPFC"
+            default_i = "NAGI\nNAGI stent\nNiti-S NAGI\nNagi LAMS"
+            default_c = "AXIOS\nPlastic stents\nPercutaneous drainage"
+            default_o = "Technical success\nResolution of pseudocyst\nComplications"
+        else:
+            default_p = "Pancreatic pseudocyst\nWalled-off necrosis\nWON\nGallbladder drainage"
+            default_i = "Lumen-apposing metal stents\nLAMS\nNiti-S SPAXUS\nSPAXUS"
+            default_c = "Surgery\nPercutaneous drainage\nPlastic double-pigtail stents\nAXIOS"
+            default_o = "Technical success\nClinical success\nDrainage efficacy\nResolution\nComplications"
+
     else:
-        default_inc = "1. 대상 환자군 조건 입력\n2. 임상 평가 목적 입력"
-        default_exc = "1. 동물 실험\n2. 상관없는 적응증"
+        default_p = "Obstructive Jaundice\nBiliary Stricture"
+        default_i = "Biliary Stent\nSEMS"
+        default_c = "Surgery\nPlastic stent"
+        default_o = "Technical success\nClinical success"
 
     include_criteria = default_inc
     exclude_criteria = default_exc
@@ -156,7 +297,7 @@ def parse_pico_input(text):
         return f"({' OR '.join(formatted)})"
 
 def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="", 
-                            start_year=2026, start_month=1, 
+                            start_year=2016, start_month=1, 
                             end_year=2026, end_month=12, 
                             fetch_all=False, max_results=20):
     query_parts = []
@@ -266,7 +407,7 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     return f"""
     너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
 
-    [선택된 카테고리/분류]: {due_category}
+    [선택된 카테고리/분류]: {due_category} ({sub_model})
 
     [판정 규칙]:
     1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
@@ -411,14 +552,13 @@ with tab2:
                 df['AI 판정'] = results
                 df['상세 사유'] = reasons
                 
-                # 💡 'No' 순번 컬럼 1번부터 생성 및 인덱스 1부터 시작 지정
                 df.insert(0, 'No', range(1, len(df) + 1))
                 df.index = df.index + 1
                 
                 st.session_state["tab2_result"] = df
 
     if st.session_state["tab2_result"] is not None:
-        st.success(f"[{due_category}] 일괄 스크리닝 결과")
+        st.success(f"[{due_category} - {sub_model}] 일괄 스크리닝 결과")
         st.dataframe(st.session_state["tab2_result"])
         
         csv_data = st.session_state["tab2_result"].to_csv(index=False).encode('utf-8-sig')
@@ -428,45 +568,16 @@ with tab2:
 # TAB 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
 # --------------------------------------------------
 with tab3:
-    st.subheader("🔍 PICO 다중 키워드 입력")
-    st.caption("💡 각 입력창 안에서 **줄바꿈(Enter)**이나 **쉼표(,)**로 동의어 키워드를 여러 개 적으시면 자동으로 **(A OR B OR C)** 형태의 쿼리가 생성됩니다.")
+    st.subheader(f"🔍 PICO 다중 키워드 입력 ({due_category} 👉 {sub_model})")
+    st.caption("💡 선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다. 필요 시 추가/수정이 가능합니다.")
     
-    if due_category == "1. Biliary Stent":
-        default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign biliary obstruction\nBenign biliary stricture\nBenign pancreatic duct stricture"
-        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
-        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
-        default_o = "Stent patency\nDecreased bilirubin\nRemoval"
-    elif due_category == "2. Esophageal Stent":
-        default_p = "Esophageal stricture\nEsophageal obstruction\nMalignant esophageal stricture\nMalignant esophageal obstruction\nBenign esophageal stricture\nRefractory benign esophageal stricture\nBenign esophgeal obstruction\nTracheoesophageal fistula"
-        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent"
-        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nUltraflex\nEvolution\nHanarostent\nAixstent\nEGIS\nBonastent\nMicro-tech"
-        default_o = "Stent patency\nDysphagia improvement\nFistula closure\nRemoval"
-    elif due_category == "3. Pyloric/Duodenal Stent":
-        default_p = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction\nBenign pyloric stricture\nBenign pyloric obstruction\nBenign duodenal stricture\nBenign duodenal obstruction"
-        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nCovered stent\nUncovered stent"
-        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent"
-        default_o = "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
-    elif due_category == "4. Colonic Stent":
-        default_p = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction\nBenign colonic stricture\nBenign colonic obstruction\nBenign colorectal stricture\nBenign colorectal obstruction"
-        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
-        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-tech\nBonastent"
-        default_o = "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
-    elif due_category == "5. Drainage Stent":
-        default_p = "Pancreatic pseudocyst\nWalled-off necrosis\nWON\nGallbladder drainage"
-        default_i = "Lumen-apposing metal stents\nLAMS\nNiti-S SPAXUS\nSPAXUS"
-        default_c = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
-        default_o = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
-    else:
-        default_p = "Obstructive Jaundice\nBiliary Stricture"
-        default_i = "Biliary Stent\nSEMS"
-
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
-        p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=130)
-        i_val = st.text_area("I (Intervention)", value=default_i, height=130)
+        p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=140)
+        i_val = st.text_area("I (Intervention / 시술·중재법)", value=default_i, height=140)
     with col_pico2:
-        c_val = st.text_area("C (Comparison)", value=default_c, height=130)
-        o_val = st.text_area("O (Outcome", value=default_o, height=130)
+        c_val = st.text_area("C (Comparison / 대조군)", value=default_c, height=140)
+        o_val = st.text_area("O (Outcome / 평가지표)", value=default_o, height=140)
         
     st.markdown("---")
     st.subheader("🗓️ 문헌 검색 기간(연/월) 및 추출 개수 설정")
@@ -516,7 +627,6 @@ with tab3:
                 with st.expander("📄 자동 생성된 PubMed 조합 쿼리식 확인 (CER 제출용)", expanded=True):
                     st.code(used_query, language="sql")
                 
-                # 💡 0번 인덱스 없이 깔끔하게 쉼표(,) 형태로 미리보기 출력
                 pmid_summary = ", ".join(found_pmids[:10])
                 st.write(f"📋 **추출된 PMID 목록 (상위 10개):** {pmid_summary}" + (" ... (이하 생략)" if len(found_pmids) > 10 else ""))
                 
@@ -566,14 +676,13 @@ with tab3:
                 auto_df['AI 판정'] = results
                 auto_df['상세 사유'] = reasons
                 
-                # 💡 'No' 순번 컬럼 1번부터 생성 및 인덱스 1부터 시작 지정
                 auto_df.insert(0, 'No', range(1, len(auto_df) + 1))
                 auto_df.index = auto_df.index + 1
                 
                 st.session_state["tab3_result"] = auto_df
 
     if st.session_state["tab3_result"] is not None:
-        st.success(f"✅ [{due_category}] PICO 기반 자동 스크리닝 완료 결과")
+        st.success(f"✅ [{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
         st.dataframe(st.session_state["tab3_result"])
         
         csv_data = st.session_state["tab3_result"].to_csv(index=False).encode('utf-8-sig')
