@@ -15,7 +15,7 @@ st.markdown("""
     /* 메인 타이틀 스타일 */
     .main-title {
         font-size: 28px;
-        font-weight: 1000;
+        font-weight: 1200;
         color: #0f172a;
         margin-bottom: 20px;
     }
@@ -30,7 +30,7 @@ st.markdown("""
     
     div[data-testid="stSegmentedControl"] button {
         border-radius: 8px !important;
-        font-weight: 800 !important;
+        font-weight: 1000 !important;
         font-size: 14px !important;
         border: none !important;
         padding: 8px 24px !important;
