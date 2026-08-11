@@ -282,7 +282,7 @@ if not due_category:
             "Esophageal",
             "Pyloric/Duodenal",
             "Colonic",
-            "Drainage (LAMS)",
+            "Drainage",
         ])
 
         with prod_tab1:
