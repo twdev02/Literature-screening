@@ -9,56 +9,58 @@ st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
 st.title("PubMed PMID 기반 AI 문헌 스크리닝 시스템")
 
 # --------------------------------------------------
-# 🎨 커스텀 CSS 적용 (고급스러운 인덱스 탭 스타일링)
+# 🎨 고급 커스텀 CSS (기존 빨간선 제거 & 깔끔한 알약형 탭 버튼)
 # --------------------------------------------------
 st.markdown("""
 <style>
-    /* 탭 전체 컨테이너 배경 및 테두리 */
+    /* 1. 탭 전체 바 디자인 (그레이톤 둥근 배경) */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
+        gap: 8px;
         background-color: #f1f3f5;
-        padding: 8px 10px;
-        border-radius: 12px;
+        padding: 6px;
+        border-radius: 30px;
         border: 1px solid #e9ecef;
+        display: inline-flex;
     }
 
-    /* 개별 탭 버튼 스타일 */
+    /* 2. 각 탭 버튼 디자인 (기본 상태) */
     .stTabs [data-baseweb="tab"] {
-        height: 46px;
+        height: 40px;
         white-space: pre;
-        background-color: #ffffff;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
+        background-color: transparent;
+        border-radius: 20px;
+        border: none !important;
         padding: 0px 20px;
         font-weight: 600;
         font-size: 14px;
         color: #495057;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-        transition: all 0.25s ease;
+        transition: all 0.2s ease-in-out;
     }
 
-    /* 마우스 호버(Hover) 효과 */
+    /* 3. 마우스 올렸을 때 (Hover) */
     .stTabs [data-baseweb="tab"]:hover {
-        background-color: #e9ecef;
-        color: #212529;
-        border-color: #ced4da;
-        transform: translateY(-1px);
+        color: #121212;
+        background-color: rgba(255, 255, 255, 0.6);
     }
 
-    /* 💡 선택된 활성 탭 (Dark Blue Gradient 적용) */
+    /* 4. 선택된 탭 (Active: 진한 네이비 알약 스타일) */
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%) !important;
+        background-color: #1e293b !important;
         color: #ffffff !important;
-        border: none !important;
-        box-shadow: 0 4px 10px rgba(32, 58, 67, 0.35) !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
     }
 
-    /* 기본 탭의 밋밋한 빨간 하단선 제거 */
+    /* 5. ⭐ 핵심: 기존 Streamlit의 유치한 빨간 밑줄 완전히 숨기기 */
     .stTabs [data-baseweb="tab-highlight"] {
-        background-color: transparent !important;
+        display: none !important;
+    }
+    
+    /* 6. 탭 구분선 제거 */
+    .stTabs [data-baseweb="tab-border"] {
+        display: none !important;
     }
 </style>
-""", unsafe_allow_html=True)
+""", unsafe_html=True)
 
 # --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화 (화면 초기화 방지)
