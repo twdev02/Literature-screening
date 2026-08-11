@@ -9,6 +9,58 @@ st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
 st.title("PubMed PMID 기반 AI 문헌 스크리닝 시스템")
 
 # --------------------------------------------------
+# 🎨 커스텀 CSS 적용 (고급스러운 인덱스 탭 스타일링)
+# --------------------------------------------------
+st.markdown("""
+<style>
+    /* 탭 전체 컨테이너 배경 및 테두리 */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: #f1f3f5;
+        padding: 8px 10px;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+    }
+
+    /* 개별 탭 버튼 스타일 */
+    .stTabs [data-baseweb="tab"] {
+        height: 46px;
+        white-space: pre;
+        background-color: #ffffff;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 0px 20px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #495057;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        transition: all 0.25s ease;
+    }
+
+    /* 마우스 호버(Hover) 효과 */
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #e9ecef;
+        color: #212529;
+        border-color: #ced4da;
+        transform: translateY(-1px);
+    }
+
+    /* 💡 선택된 활성 탭 (Dark Blue Gradient 적용) */
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 4px 10px rgba(32, 58, 67, 0.35) !important;
+    }
+
+    /* 기본 탭의 밋밋한 빨간 하단선 제거 */
+    .stTabs [data-baseweb="tab-highlight"] {
+        background-color: transparent !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화 (화면 초기화 방지)
 # --------------------------------------------------
 if "tab1_result" not in st.session_state:
@@ -40,7 +92,7 @@ with st.sidebar:
         st.error("🔴 API Key가 없습니다. Secrets 등록 또는 키를 입력하세요.")
         
     st.markdown("---")
-    st.subheader("📋 품목 선택")
+    st.subheader("품목 선택")
     
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
@@ -58,58 +110,54 @@ with st.sidebar:
         st.info("위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
         st.stop()
 
-    # 💡 [NEW] 2차 세부 모델/유형 선택 서브 메뉴 (카테고리별 분기)
     sub_model = "전체 (All Models)"
     
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
-                "전체 (All Models)",
-                "Niti-S Covered Stent",
-                "Niti-S Uncovered Stent",
-                "ComVi Covered Stent"
+                "Niti-S Biliary Covered Stent",
+                "Niti-S Biliary Uncovered Stent",
+                "ComVi Biliary Covered Stent"
             ]
         )
     elif due_category == "2. Esophageal Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
-                "전체 (All Models)",
-                "Niti-S Esophageal Full Covered",
-                "Niti-S Esophageal Both Bare / Cervical"
+                "Niti-S Esophageal Covered Stent"
             ]
         )
     elif due_category == "3. Pyloric/Duodenal Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
-                "전체 (All Models)",
-                "Niti-S Pyloric/Duodenal D-Type",
+                "Niti-S Pyloric/Duodenal Covered Stent",
+                "Niti-S Pyloric/Duodenal Uncovered Stent",
                 "ComVi Pyloric/Duodenal"
             ]
         )
     elif due_category == "4. Colonic Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
-                "전체 (All Models)",
-                "Niti-S Enteral Colonic",
-                "ComVi Enteral Colonic"
+                "Niti-S Enteral Colonic Covered Stent",
+                "Niti-S Enteral Colonic Uncovered Stent",
+                "ComVi Enteral Colonic Covered Stent"
             ]
         )
     elif due_category == "5. Drainage Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
-                "전체 (All Models)",
-                "Niti-S SPAXUS / Hot SPAXUS",
-                "Niti-S NAGI"
+                "Niti-S SPAXUS Stent",
+                "Niti-S Hot SPAXUS Stent",                
+                "Niti-S NAGI Stent"
             ]
         )
 
     # --------------------------------------------------
-    # 💡 선택된 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
+    # 선택된 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
     # --------------------------------------------------
     if due_category == "1. Biliary Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -124,7 +172,6 @@ with st.sidebar:
 3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management
 4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
-        # PICO 세부 기본값 매핑
         if sub_model == "Niti-S Covered Stent":
             default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nBenign biliary stricture"
             default_i = "Niti-S Covered\nNiti-S Full Covered\nCovered biliary SEMS\nCovered metal stent\nTaewoong Covered"
@@ -140,7 +187,7 @@ with st.sidebar:
             default_i = "ComVi\nComVi Biliary\nComVi Covered\nTaewoong ComVi"
             default_c = "Single layer Covered SEMS\nUncovered stent\nPlastic stent\nWallFlex"
             default_o = "Stent patency\nTumor ingrowth prevention\nTechnical success\nClinical success"
-        else: # 전체 (All Models)
+        else:
             default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign biliary obstruction\nBenign biliary stricture\nBenign pancreatic duct stricture"
             default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
             default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
@@ -568,8 +615,8 @@ with tab2:
 # TAB 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
 # --------------------------------------------------
 with tab3:
-    st.subheader(f"🔍 PICO 다중 키워드 입력 ({due_category} 👉 {sub_model})")
-    st.caption("💡 선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다. 필요 시 추가/수정이 가능합니다.")
+    st.subheader(f"PICO 다중 키워드 입력 ({due_category} 👉 {sub_model})")
+    st.caption("선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다. 필요 시 추가/수정이 가능합니다.")
     
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
@@ -584,7 +631,7 @@ with tab3:
     
     col_s1, col_s2, col_e1, col_e2 = st.columns(4)
     with col_s1:
-        start_year = st.number_input("시작 연도", min_value=1990, max_value=2026, value=2016)
+        start_year = st.number_input("시작 연도", min_value=1990, max_value=2026, value=2026)
     with col_s2:
         start_month = st.number_input("시작 월", min_value=1, max_value=12, value=1)
         
