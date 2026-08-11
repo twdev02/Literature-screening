@@ -8,18 +8,45 @@ import time
 st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (카드 & UI 모던 대시보드화)
+# 🎨 고급 커스텀 CSS (메인 대시보드 히어로 배너 & UI 개선)
 # --------------------------------------------------
 st.markdown("""
 <style>
-    /* 메인 타이틀 스타일 */
-    .main-title {
-        font-size: 28px;
-        font-weight: 1200;
-        color: #0f172a;
-        margin-bottom: 20px;
+    /* 💡 [수정] 상단 메인 히어로 배너 디자인 카드 */
+    .hero-container {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 24px 30px;
+        border-radius: 16px;
+        color: #ffffff;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
     }
-    
+    .hero-tag {
+        background-color: #3b82f6;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+    .hero-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0px 0px 6px 0px;
+        letter-spacing: -0.5px;
+    }
+    .hero-subtitle {
+        font-size: 14px;
+        color: #94a3b8;
+        margin: 0;
+        font-weight: 400;
+    }
+
     /* 세그먼티드 컨트롤(상단 메뉴 바) 커스텀 */
     div[data-testid="stSegmentedControl"] {
         background-color: #f1f5f9;
@@ -44,9 +71,14 @@ st.markdown("""
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 </style>
-""", unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>', unsafe_allow_html=True)
+<!-- 💡 [수정] 메인 첫 페이지 상단 대시보드 카드 영역 -->
+<div class="hero-container">
+    <div class="hero-tag">CER Clinical Evaluation Platform</div>
+    <div class="hero-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
+    <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
+</div>
+""", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화
@@ -444,7 +476,7 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     """
 
 # --------------------------------------------------
-# ✨ 💡 모던 세그먼티드 컨트롤 메뉴 (유치한 st.tabs 완전 대체!)
+# ✨ 모던 세그먼티드 컨트롤 메뉴
 # --------------------------------------------------
 selected_mode = st.segmented_control(
     "",
@@ -508,6 +540,10 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
             if 'PMID' not in df.columns:
                 st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
+                df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+                if 'No' in df.columns:
+                    df = df.drop(columns=['No'])
+
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash") 
                 
@@ -674,7 +710,6 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
                 auto_df['상세 사유'] = reasons
                 
                 auto_df.insert(0, 'No', range(1, len(auto_df) + 1))
-                auto_df.index = auto_df.index + 1
                 
                 st.session_state["tab3_result"] = auto_df
 
