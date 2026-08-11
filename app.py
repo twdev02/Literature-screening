@@ -115,19 +115,10 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
 # --------------------------------------------------
-# ⚙️ 사이드바: 슬림한 HOME 버튼, API Key 및 품목 선택
+# ⚙️ 사이드바 설정 및 품목 선택
 # --------------------------------------------------
 with st.sidebar:
-    # 💡 3. 사이드바 최상단에 아주 작고 깔끔한 HOME 버튼 배치
-    col_nav1, col_nav2 = st.columns([1, 1])
-    with col_nav1:
-        st.subheader("시스템 설정")
-    with col_nav2:
-        if st.button("HOME", type="secondary", help="홈 대시보드로 이동"):
-            st.session_state["due_category_choice"] = None
-            st.rerun()
-        
-    st.markdown("---")
+    st.header("시스템 설정")
     
     default_api_key = ""
     try:
@@ -164,6 +155,12 @@ with st.sidebar:
         key="due_category_choice"
     )
 
+    # 💡 사이드바 맨 아래쪽에 배치된 깔끔한 HOME 버튼
+    st.markdown("---")
+    if st.button("HOME", type="secondary", use_container_width=True, help="홈 대시보드로 이동"):
+        st.session_state["due_category_choice"] = None
+        st.rerun()
+
 # --------------------------------------------------
 # 🏠 품목 선택이 안 되었을 때 (홈 대시보드 화면)
 # --------------------------------------------------
@@ -180,7 +177,6 @@ if not due_category:
     col_ov1, col_ov2, col_ov3 = st.columns(3)
 
     with col_ov1:
-        # 💡 2. Target Products 박스 완전 일체화 (한 상자 안 배치)
         with st.container(border=True):
             st.markdown("""
             <div class="card-title">TARGET PRODUCTS</div>
@@ -232,7 +228,6 @@ if not due_category:
             <br>
             """, unsafe_allow_html=True)
 
-    # 💡 1. 하단 파란색 안내 문구 삭제됨 (st.stop()으로 깔끔 정지)
     st.stop()
 
 # --------------------------------------------------
