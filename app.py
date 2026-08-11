@@ -356,7 +356,7 @@ if not due_category:
           )
 
         with prod_tab5:
-          st.markdown("#### Niti-S SPAXUS / NAGI (LAMS)")
+          st.markdown("#### Niti-S Drainage Stent")
           if os.path.exists("drainage.png"):
             st.image(
                 "drainage.png",
