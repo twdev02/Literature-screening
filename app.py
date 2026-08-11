@@ -453,7 +453,7 @@ selected_mode = st.segmented_control(
         "PMID 리스트 CSV 업로드", 
         "PICO 다중 검색어 기반 자동 추출"
     ],
-    default="🔍 PICO 다중 검색어 기반 자동 추출"
+    default="PICO 다중 검색어 기반 자동 추출"
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
