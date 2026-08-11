@@ -8,7 +8,7 @@ import time
 st.set_page_config(page_title="Taewoong Medical - AI 문헌 스크리닝", layout="wide")
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (태웅메디컬 브랜딩 & 카탈로그 배너)
+# 🎨 고급 커스텀 CSS (태웅메디컬 브랜딩 & HTML 깨짐 방지)
 # --------------------------------------------------
 st.markdown("""
 <style>
@@ -72,7 +72,7 @@ st.markdown("""
         color: #e2e8f0;
         font-size: 11px;
         font-weight: 600;
-        padding: 3px 10px;
+        padding: 4px 12px;
         border-radius: 6px;
     }
 
@@ -126,27 +126,25 @@ st.markdown("""
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 </style>
-
-<!-- 메인 첫 페이지 상단 대시보드 카드 영역 (태웅메디컬 브랜딩 + 카탈로그) -->
-<div class="hero-container">
-    <div class="hero-header-flex">
-        <div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
-        <div class="dept-tag">🏢 Development Department | Development 2nd Team</div>
-    </div>
-    <div class="hero-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
-    <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
-    
-    <!-- 제품 카탈로그 라인업 뱃지 -->
-    <div class="catalog-lineup">
-        <span class="catalog-badge">📦 Niti-S Biliary Stent</span>
-        <span class="catalog-badge">📦 Niti-S Esophageal Stent</span>
-        <span class="catalog-badge">📦 Niti-S Pyloric/Duodenal Stent</span>
-        <span class="catalog-badge">📦 Niti-S Enteral Colonic Stent</span>
-        <span class="catalog-badge">📦 ComVi Stent Series</span>
-        <span class="catalog-badge">📦 Niti-S SPAXUS / NAGI LAMS</span>
-    </div>
-</div>
 """, unsafe_allow_html=True)
+
+# 💡 [핵심] HTML 들여쓰기 공백을 완벽 제거하여 코드 블록 현상 수정
+st.markdown("""<div class="hero-container">
+<div class="hero-header-flex">
+<div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
+<div class="dept-tag">🏢 Development Department | Development 2nd Team</div>
+</div>
+<div class="hero-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
+<div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
+<div class="catalog-lineup">
+<span class="catalog-badge">📦 Niti-S Biliary Stent</span>
+<span class="catalog-badge">📦 Niti-S Esophageal Stent</span>
+<span class="catalog-badge">📦 Niti-S Pyloric/Duodenal Stent</span>
+<span class="catalog-badge">📦 Niti-S Enteral Colonic Stent</span>
+<span class="catalog-badge">📦 ComVi Stent Series</span>
+<span class="catalog-badge">📦 Niti-S SPAXUS / NAGI LAMS</span>
+</div>
+</div>""", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # 📊 시스템 개요 & 핵심 지표 요약 카드 배치
@@ -154,31 +152,25 @@ st.markdown("""
 col_ov1, col_ov2, col_ov3 = st.columns(3)
 
 with col_ov1:
-    st.markdown("""
-    <div class="overview-card">
-        <div class="overview-title">🎯 Target Products</div>
-        <div class="overview-value">태웅메디컬 5개 주요 Stent 제품군</div>
-        <div class="overview-desc">Biliary, Esophageal, Pyloric, Colonic, Drainage</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="overview-card">
+<div class="overview-title">🎯 Target Products</div>
+<div class="overview-value">태웅메디컬 5개 주요 Stent 제품군</div>
+<div class="overview-desc">Biliary, Esophageal, Pyloric, Colonic, Drainage</div>
+</div>""", unsafe_allow_html=True)
 
 with col_ov2:
-    st.markdown("""
-    <div class="overview-card">
-        <div class="overview-title">🤖 AI Pipeline</div>
-        <div class="overview-value">Gemini 3.6 Flash + PubMed Engine</div>
-        <div class="overview-desc">초록 자동 추출 및 Include/Exclude 실시간 판정</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="overview-card">
+<div class="overview-title">🤖 AI Pipeline</div>
+<div class="overview-value">Gemini 3.6 Flash + PubMed Engine</div>
+<div class="overview-desc">초록 자동 추출 및 Include/Exclude 실시간 판정</div>
+</div>""", unsafe_allow_html=True)
 
 with col_ov3:
-    st.markdown("""
-    <div class="overview-card">
-        <div class="overview-title">📋 Regulatory Goal</div>
-        <div class="overview-value">MDR CER 대응 리포팅 자동화</div>
-        <div class="overview-desc">PICO 쿼리 검증 및 배제 사유(English) 자동 생성</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="overview-card">
+<div class="overview-title">📋 Regulatory Goal</div>
+<div class="overview-value">MDR CER 대응 리포팅 자동화</div>
+<div class="overview-desc">PICO 쿼리 검증 및 배제 사유(English) 자동 생성</div>
+</div>""", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
