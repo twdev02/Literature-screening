@@ -571,10 +571,10 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
         p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=140)
-        i_val = st.text_area("I (Intervention / 시술·중재법)", value=default_i, height=140)
+        i_val = st.text_area("I (Intervention)", value=default_i, height=140)
     with col_pico2:
-        c_val = st.text_area("C (Comparison / 대조군)", value=default_c, height=140)
-        o_val = st.text_area("O (Outcome / 평가지표)", value=default_o, height=140)
+        c_val = st.text_area("C (Comparison)", value=default_c, height=140)
+        o_val = st.text_area("O (Outcome)", value=default_o, height=140)
         
     st.markdown("---")
     st.subheader("🗓️ 문헌 검색 기간(연/월) 및 추출 개수 설정")
