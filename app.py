@@ -380,7 +380,7 @@ if not due_category:
           """
             <div class="card-title">AI PIPELINE</div>
             <div class="card-value">Gemini 3.6 Flash + PubMed Engine</div>
-            <div class="card-desc">AI-assisted Literature Inclusion/Exclusion Screening</div>
+            <div class="card-desc">AI 기반 문헌 스크리닝</div>
             <br>
             """,
           unsafe_allow_html=True,
@@ -391,8 +391,8 @@ if not due_category:
       st.markdown(
           """
             <div class="card-title">REGULATORY GOAL</div>
-            <div class="card-value">Standardization and Automation of MDR CER Literature Review</div>
-            <div class="card-desc">Consistent and Traceable Screening Records</div>
+            <div class="card-value">Standardization and Automation of Literature Review</div>
+            <div class="card-desc">일관성 및 추적성을 확보한 스크리닝 기록</div>
             <br>
             """,
           unsafe_allow_html=True,
