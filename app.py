@@ -475,8 +475,8 @@ if selected_mode == "단일 PMID 입력":
             if not abstract_text:
                 st.error(f"❌ 데이터 조회 실패: {status}")
             else:
-                st.success(f"📌 **논문 제목:** {title}")
-                st.info(f"📄 **초록 내용:**\n{abstract_text[:400]}...")
+                st.success(f"**논문 제목:** {title}")
+                st.info(f"**초록 내용:**\n{abstract_text[:400]}...")
                 
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash") 
@@ -556,10 +556,10 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
 
     if st.session_state["tab2_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] 일괄 스크리닝 결과")
-        st.dataframe(st.session_state["tab2_result"])
+        st.dataframe(st.session_state["tab2_result"], hide_index=True)
         
         csv_data = st.session_state["tab2_result"].to_csv(index=False).encode('utf-8-sig')
-        st.download_button("📥 결과 CSV 다운로드", data=csv_data, file_name="cer_screening_result.csv", mime="text/csv")
+        st.download_button("결과 CSV 다운로드", data=csv_data, file_name="cer_screening_result.csv", mime="text/csv")
 
 # --------------------------------------------------
 # MODE 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
@@ -592,7 +592,7 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
 
     col_opt1, col_opt2 = st.columns([1, 1])
     with col_opt1:
-        fetch_all_toggle = st.checkbox("🔥 검색된 전체 논문 수집 (개수 제한 없음)", value=False)
+        fetch_all_toggle = st.checkbox("검색된 전체 논문 수집 (개수 제한 없음)", value=False)
     with col_opt2:
         if not fetch_all_toggle:
             max_limit = st.number_input("가져올 최대 논문 수", min_value=1, max_value=2000, value=20)
@@ -600,7 +600,7 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
             max_limit = 0
             st.info("ℹ️ 조건에 맞는 PubMed의 **전체 PMID**를 가져옵니다.")
 
-    if st.button("🚀 PICO 다중 조합 검색 및 AI 스크리닝 실행"):
+    if st.button("PICO 다중 조합 검색 및 AI 스크리닝 실행"):
         if not api_key:
             st.error("❌ API Key가 설정되지 않았습니다!")
         elif not p_val.strip() or not i_val.strip():
@@ -619,16 +619,16 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
                 st.warning(f"⚠️ [{date_range_label}] 기간 및 입력하신 PICO 조건에 부합하는 PubMed 논문이 없습니다.")
                 st.info(f"🔍 **생성된 조합 쿼리:**\n`{used_query}`")
             else:
-                st.success(f"🎉 **[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의 PMID가 추출되었습니다!")
+                st.success(f"**[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의 PMID가 추출되었습니다!")
                 
-                with st.expander("📄 자동 생성된 PubMed 조합 쿼리식 확인 (CER 제출용)", expanded=True):
+                with st.expander("자동 생성된 PubMed 조합 쿼리식 확인 (CER 제출용)", expanded=True):
                     st.code(used_query, language="sql")
                 
                 pmid_summary = ", ".join(found_pmids[:10])
-                st.write(f"📋 **추출된 PMID 목록 (상위 10개):** {pmid_summary}" + (" ... (이하 생략)" if len(found_pmids) > 10 else ""))
+                st.write(f"**추출된 PMID 목록 (상위 10개):** {pmid_summary}" + (" ... (이하 생략)" if len(found_pmids) > 10 else ""))
                 
                 st.markdown("---")
-                st.subheader("🤖 추출된 PMID 기반 AI 스크리닝 진행 중...")
+                st.subheader("추출된 PMID 기반 AI 스크리닝 진행 중...")
                 
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash") 
@@ -683,4 +683,4 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
         st.dataframe(st.session_state["tab3_result"])
         
         csv_data = st.session_state["tab3_result"].to_csv(index=False).encode('utf-8-sig')
-        st.download_button("📥 PICO 스크리닝 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv", mime="text/csv")
+        st.download_button("PICO 스크리닝 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv", mime="text/csv")
