@@ -8,11 +8,10 @@ import time
 st.set_page_config(page_title="Taewoong Medical - AI 문헌 스크리닝", layout="wide")
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (태웅메디컬 브랜딩 & HTML 깨짐 방지)
+# 🎨 고급 커스텀 CSS
 # --------------------------------------------------
 st.markdown("""
 <style>
-    /* 상단 메인 히어로 배너 디자인 (태웅메디컬 브랜딩) */
     .hero-container {
         background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%);
         padding: 28px 32px;
@@ -58,43 +57,30 @@ st.markdown("""
         margin-bottom: 0px;
         font-weight: 400;
     }
-
-    /* 개요 요약 카드 (System Features) */
-    .overview-card {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 16px 20px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        height: 100%;
-    }
-    .overview-title {
+    .card-title {
         font-size: 12px;
         font-weight: 700;
         color: #0284c7;
         text-transform: uppercase;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
-    .overview-value {
+    .card-value {
         font-size: 15px;
         font-weight: 700;
         color: #0f172a;
+        margin-bottom: 4px;
     }
-    .overview-desc {
+    .card-desc {
         font-size: 12px;
         color: #64748b;
-        margin-top: 4px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
-
-    /* 세그먼티드 컨트롤(상단 메뉴 바) 커스텀 */
     div[data-testid="stSegmentedControl"] {
         background-color: #f1f5f9;
         padding: 6px;
         border-radius: 12px;
         border: 1px solid #e2e8f0;
     }
-    
     div[data-testid="stSegmentedControl"] button {
         border-radius: 8px !important;
         font-weight: 1000 !important;
@@ -103,8 +89,6 @@ st.markdown("""
         padding: 8px 24px !important;
         transition: all 0.2s ease !important;
     }
-    
-    /* 선택된 버튼 스타일 (태웅 딥 네이비) */
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
         background-color: #0b1a2d !important;
         color: #ffffff !important;
@@ -112,76 +96,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-# 상단 배너
-st.markdown("""<div class="hero-container">
-<div class="hero-header-flex">
-<div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
-<div class="dept-tag">Development Department | Development 2nd Team</div>
-</div>
-<div class="hero-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
-<div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
-</div>""", unsafe_allow_html=True)
-
-# --------------------------------------------------
-# 📊 시스템 개요 & 클릭 가능한 Target Products 요약 카드
-# --------------------------------------------------
-col_ov1, col_ov2, col_ov3 = st.columns(3)
-
-with col_ov1:
-    st.markdown("""<div class="overview-card">
-<div class="overview-title">Target Products</div>
-<div class="overview-value">태웅메디컬 5개 주요 Stent 제품군</div>
-<div class="overview-desc">클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
-</div>""", unsafe_allow_html=True)
-    
-    with st.popover("제품 라인업 카탈로그 상세보기"):
-        st.subheader("태웅메디컬 주요 제품 라인업")
-        
-        prod_tab1, prod_tab2, prod_tab3, prod_tab4, prod_tab5 = st.tabs([
-            "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage (LAMS)"
-        ])
-        
-        with prod_tab1:
-            st.markdown("#### **Niti-S & ComVi Biliary Stent**")
-            st.write("- **유형:** Covered / Uncovered / ComVi(Double Layer)")
-            st.write("- **주요 적응증:** Malignant/Benign Biliary Stricture")
-            
-        with prod_tab2:
-            st.markdown("#### **Niti-S Esophageal Stent**")
-            st.write("- **유형:** Full Covered / Cervical / Both Bare")
-            st.write("- **주요 적응증:** Esophageal Stricture, TE Fistula")
-            
-        with prod_tab3:
-            st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
-            st.write("- **유형:** D-Type / Flare-Type / Covered / Uncovered")
-            st.write("- **주요 적응증:** Gastric Outlet Obstruction (GOO)")
-            
-        with prod_tab4:
-            st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
-            st.write("- **유형:** S-Type / D-Type / Covered / Uncovered")
-            st.write("- **주요 적응증:** Colorectal Obstruction, Bridge to Surgery")
-            
-        with prod_tab5:
-            st.markdown("#### **Niti-S SPAXUS / NAGI (LAMS)**")
-            st.write("- **유형:** SPAXUS, Hot SPAXUS, NAGI Stent")
-            st.write("- **주요 적응증:** Pancreatic Pseudocyst, WON, Gallbladder Drainage")
-
-with col_ov2:
-    st.markdown("""<div class="overview-card">
-<div class="overview-title">AI Pipeline</div>
-<div class="overview-value">Gemini 3.6 Flash + PubMed Engine</div>
-<div class="overview-desc">초록 자동 추출 및 Include/Exclude 실시간 판정</div>
-</div>""", unsafe_allow_html=True)
-
-with col_ov3:
-    st.markdown("""<div class="overview-card">
-<div class="overview-title">Regulatory Goal</div>
-<div class="overview-value">MDR CER 대응 리포팅 자동화</div>
-<div class="overview-desc">PICO 쿼리 검증 및 배제 사유(English) 자동 생성</div>
-</div>""", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화
@@ -194,10 +108,17 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
 # --------------------------------------------------
-# ⚙️ 사이드바: API Key 및 품목 / 세부 모델 분류 설정
+# ⚙️ 사이드바: 홈 버튼, API Key 및 품목 선택
 # --------------------------------------------------
 with st.sidebar:
     st.header("시스템 설정")
+    
+    # 홈 화면으로 돌아가는 버튼
+    if st.button("Home", use_container_width=True):
+        st.session_state["due_category_choice"] = None
+        st.rerun()
+        
+    st.markdown("---")
     
     default_api_key = ""
     try:
@@ -217,22 +138,98 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("품목 선택")
     
+    category_options = [
+        "1. Biliary Stent",
+        "2. Esophageal Stent",
+        "3. Pyloric/Duodenal Stent",
+        "4. Colonic Stent",
+        "5. Drainage Stent"
+    ]
+    
+    # 라디오 선택 상태 관리
+    if "due_category_choice" not in st.session_state:
+        st.session_state["due_category_choice"] = None
+
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
-        options=[
-            "1. Biliary Stent",
-            "2. Esophageal Stent",
-            "3. Pyloric/Duodenal Stent",
-            "4. Colonic Stent",
-            "5. Drainage Stent"
-        ],
-        index=None
+        options=category_options,
+        key="due_category_choice"
     )
 
-    if not due_category:
-        st.info("위에서 스크리닝할 카테고리를 먼저 선택해 주세요.")
-        st.stop()
+# --------------------------------------------------
+# 🏠 품목 선택이 안 되었을 때 (홈 화면 전용 렌더링)
+# --------------------------------------------------
+if not due_category:
+    st.markdown("""<div class="hero-container">
+<div class="hero-header-flex">
+<div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
+<div class="dept-tag">Development Department | Development 2nd Team</div>
+</div>
+<div class="hero-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
+<div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
+</div>""", unsafe_allow_html=True)
 
+    col_ov1, col_ov2, col_ov3 = st.columns(3)
+
+    with col_ov1:
+        with st.container(border=True):
+            st.markdown("""
+            <div class="card-title">TARGET PRODUCTS</div>
+            <div class="card-value">태웅메디컬 5개 주요 Stent 제품군</div>
+            <div class="card-desc">클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
+            """, unsafe_allow_html=True)
+            
+            with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
+                st.subheader("태웅메디컬 주요 제품 라인업")
+                prod_tab1, prod_tab2, prod_tab3, prod_tab4, prod_tab5 = st.tabs([
+                    "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage (LAMS)"
+                ])
+                with prod_tab1:
+                    st.markdown("#### **Niti-S & ComVi Biliary Stent**")
+                    st.write("- **유형:** Covered / Uncovered / ComVi(Double Layer)")
+                    st.write("- **주요 적응증:** Malignant/Benign Biliary Stricture")
+                with prod_tab2:
+                    st.markdown("#### **Niti-S Esophageal Stent**")
+                    st.write("- **유형:** Full Covered / Cervical / Both Bare")
+                    st.write("- **주요 적응증:** Esophageal Stricture, TE Fistula")
+                with prod_tab3:
+                    st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
+                    st.write("- **유형:** D-Type / Flare-Type / Covered / Uncovered")
+                    st.write("- **주요 적응증:** Gastric Outlet Obstruction (GOO)")
+                with prod_tab4:
+                    st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
+                    st.write("- **유형:** S-Type / D-Type / Covered / Uncovered")
+                    st.write("- **주요 적응증:** Colorectal Obstruction, Bridge to Surgery")
+                with prod_tab5:
+                    st.markdown("#### **Niti-S SPAXUS / NAGI (LAMS)**")
+                    st.write("- **유형:** SPAXUS, Hot SPAXUS, NAGI Stent")
+                    st.write("- **주요 적응증:** Pancreatic Pseudocyst, WON, Gallbladder Drainage")
+
+    with col_ov2:
+        with st.container(border=True):
+            st.markdown("""
+            <div class="card-title">AI PIPELINE</div>
+            <div class="card-value">Gemini 3.6 Flash + PubMed Engine</div>
+            <div class="card-desc">초록 자동 추출 및 Include/Exclude 실시간 판정</div>
+            <br>
+            """, unsafe_allow_html=True)
+
+    with col_ov3:
+        with st.container(border=True):
+            st.markdown("""
+            <div class="card-title">REGULATORY GOAL</div>
+            <div class="card-value">MDR CER 대응 리포팅 자동화</div>
+            <div class="card-desc">PICO 쿼리 검증 및 배제 사유(English) 자동 생성</div>
+            <br>
+            """, unsafe_allow_html=True)
+
+    st.info("왼쪽 사이드바에서 스크리닝할 품목 카테고리를 선택해 주세요.")
+    st.stop()
+
+# --------------------------------------------------
+# 🔬 품목 선택 시 메인 스크리닝 화면 렌더링
+# --------------------------------------------------
+with st.sidebar:
     sub_model = "전체 (All Models)"
     
     if due_category == "1. Biliary Stent":
@@ -279,9 +276,7 @@ with st.sidebar:
             ]
         )
 
-    # --------------------------------------------------
-    # 선택된 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
-    # --------------------------------------------------
+    # 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
     if due_category == "1. Biliary Stent":
         default_inc = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
@@ -579,8 +574,10 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     """
 
 # --------------------------------------------------
-# ✨ 모던 세그먼티드 컨트롤 메뉴
+# ✨ 세그먼티드 컨트롤 메뉴 및 상단 제목 헤더
 # --------------------------------------------------
+st.subheader(f"📌 {due_category} - {sub_model}")
+
 selected_mode = st.segmented_control(
     "",
     options=[
@@ -737,7 +734,7 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
             max_limit = st.number_input("가져올 최대 논문 수", min_value=1, max_value=2000, value=20)
         else:
             max_limit = 0
-            st.info("ℹ️ 조건에 맞는 PubMed의 **전체 PMID**를 가져옵니다.")
+            st.info("ℹ️ 조건에 맞는 PubMed의 전체 PMID를 가져옵니다.")
 
     if st.button("PICO 다중 조합 검색 및 AI 스크리닝 실행"):
         if not api_key:
@@ -817,7 +814,7 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
                 st.session_state["tab3_result"] = auto_df
 
     if st.session_state["tab3_result"] is not None:
-        st.success(f"✅ [{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
+        st.success(f"[{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
         st.dataframe(st.session_state["tab3_result"], hide_index=True)
         
         csv_data = st.session_state["tab3_result"].to_csv(index=False).encode('utf-8-sig')
