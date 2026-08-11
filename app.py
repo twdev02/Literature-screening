@@ -449,9 +449,9 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
 selected_mode = st.segmented_control(
     "",
     options=[
-        "🔢 단일 PMID 입력", 
-        "📁 PMID 리스트 CSV 업로드", 
-        "🔍 PICO 다중 검색어 기반 자동 추출"
+        "단일 PMID 입력", 
+        "PMID 리스트 CSV 업로드", 
+        "PICO 다중 검색어 기반 자동 추출"
     ],
     default="🔍 PICO 다중 검색어 기반 자동 추출"
 )
