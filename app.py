@@ -132,10 +132,10 @@ st.markdown("""
 st.markdown("""<div class="hero-container">
 <div class="hero-header-flex">
 <div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
-<div class="dept-tag">🏢 Development Department | Development 2nd Team</div>
+<div class="dept-tag">Development Department | Development 2nd Team</div>
 </div>
-<div class="hero-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
-<div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
+<div class="hero-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
+<div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review</div>
 <div class="catalog-lineup">
 <span class="catalog-badge">📦 Niti-S Biliary Stent</span>
 <span class="catalog-badge">📦 Niti-S Esophageal Stent</span>
