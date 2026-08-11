@@ -15,7 +15,7 @@ st.markdown("""
     /* 상단 메인 히어로 배너 디자인 (태웅메디컬 브랜딩) */
     .hero-container {
         background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%);
-        padding: 28px 32px;
+        padding: 24px 32px;
         border-radius: 16px;
         color: #ffffff;
         box-shadow: 0 10px 20px -3px rgba(11, 26, 45, 0.3);
@@ -55,25 +55,8 @@ st.markdown("""
     .hero-subtitle {
         font-size: 14px;
         color: #cbd5e1;
-        margin-bottom: 12px;
+        margin-bottom: 0px;
         font-weight: 400;
-    }
-
-    /* 💡 대표 제품 카탈로그 라인업 태그 */
-    .catalog-lineup {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-        flex-wrap: wrap;
-    }
-    .catalog-badge {
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #e2e8f0;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 4px 12px;
-        border-radius: 6px;
     }
 
     /* 개요 요약 카드 (System Features) */
@@ -83,6 +66,7 @@ st.markdown("""
         border-radius: 12px;
         padding: 16px 20px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        height: 100%;
     }
     .overview-title {
         font-size: 12px;
@@ -100,6 +84,7 @@ st.markdown("""
         font-size: 12px;
         color: #64748b;
         margin-top: 4px;
+        margin-bottom: 10px;
     }
 
     /* 세그먼티드 컨트롤(상단 메뉴 바) 커스텀 */
@@ -128,26 +113,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 💡 [핵심] HTML 들여쓰기 공백을 완벽 제거하여 코드 블록 현상 수정
+# 💡 상단 배너 (뱃지 제거로 더욱 정돈된 배너)
 st.markdown("""<div class="hero-container">
 <div class="hero-header-flex">
 <div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
-<div class="dept-tag">Development Department | Development 2nd Team</div>
+<div class="dept-tag">🏢 Development Department | Development 2nd Team</div>
 </div>
-<div class="hero-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
-<div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review</div>
-<div class="catalog-lineup">
-<span class="catalog-badge">📦 Niti-S Biliary Stent</span>
-<span class="catalog-badge">📦 Niti-S Esophageal Stent</span>
-<span class="catalog-badge">📦 Niti-S Pyloric/Duodenal Stent</span>
-<span class="catalog-badge">📦 Niti-S Enteral Colonic Stent</span>
-<span class="catalog-badge">📦 ComVi Stent Series</span>
-<span class="catalog-badge">📦 Niti-S SPAXUS / NAGI LAMS</span>
-</div>
+<div class="hero-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
+<div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
 </div>""", unsafe_allow_html=True)
 
 # --------------------------------------------------
-# 📊 시스템 개요 & 핵심 지표 요약 카드 배치
+# 📊 시스템 개요 & 클릭 가능한 Target Products 요약 카드
 # --------------------------------------------------
 col_ov1, col_ov2, col_ov3 = st.columns(3)
 
@@ -155,8 +132,46 @@ with col_ov1:
     st.markdown("""<div class="overview-card">
 <div class="overview-title">🎯 Target Products</div>
 <div class="overview-value">태웅메디컬 5개 주요 Stent 제품군</div>
-<div class="overview-desc">Biliary, Esophageal, Pyloric, Colonic, Drainage</div>
+<div class="overview-desc">클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
 </div>""", unsafe_allow_html=True)
+    
+    # 💡 Target Products 박스 하단에 클릭 가능한 팝오버(Popover) 뱃지 버튼 배치
+    with st.popover("📦 제품 라인업 카탈로그 상세보기"):
+        st.subheader("태웅메디컬 주요 제품 라인업")
+        
+        prod_tab1, prod_tab2, prod_tab3, prod_tab4, prod_tab5 = st.tabs([
+            "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage (LAMS)"
+        ])
+        
+        with prod_tab1:
+            st.markdown("#### **Niti-S & ComVi Biliary Stent**")
+            st.write("- **유형:** Covered / Uncovered / ComVi(Double Layer)")
+            st.write("- **주요 적응증:** Malignant/Benign Biliary Stricture")
+            st.caption("💡 프로젝트 폴더 내 이미지 연결 준비 완료 (예: biliary_catalog.png)")
+            
+        with prod_tab2:
+            st.markdown("#### **Niti-S Esophageal Stent**")
+            st.write("- **유형:** Full Covered / Cervical / Both Bare")
+            st.write("- **주요 적응증:** Esophageal Stricture, TE Fistula")
+            st.caption("💡 프로젝트 폴더 내 이미지 연결 준비 완료 (예: esophageal_catalog.png)")
+            
+        with prod_tab3:
+            st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
+            st.write("- **유형:** D-Type / Flare-Type / Covered / Uncovered")
+            st.write("- **주요 적응증:** Gastric Outlet Obstruction (GOO)")
+            st.caption("💡 프로젝트 폴더 내 이미지 연결 준비 완료 (예: pyloric_catalog.png)")
+            
+        with prod_tab4:
+            st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
+            st.write("- **유형:** S-Type / D-Type / Covered / Uncovered")
+            st.write("- **주요 적응증:** Colorectal Obstruction, Bridge to Surgery")
+            st.caption("💡 프로젝트 폴더 내 이미지 연결 준비 완료 (예: colonic_catalog.png)")
+            
+        with prod_tab5:
+            st.markdown("#### **Niti-S SPAXUS / NAGI (LAMS)**")
+            st.write("- **유형:** SPAXUS, Hot SPAXUS, NAGI Stent")
+            st.write("- **주요 적응증:** Pancreatic Pseudocyst, WON, Gallbladder Drainage")
+            st.caption("💡 프로젝트 폴더 내 이미지 연결 준비 완료 (예: drainage_catalog.png)")
 
 with col_ov2:
     st.markdown("""<div class="overview-card">
