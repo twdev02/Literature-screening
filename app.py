@@ -298,7 +298,7 @@ if not due_category:
                 "biliary.png 이미지를 프로젝트 폴더에 추가하면 카탈로그 사진이"
                 " 표시됩니다."
             )
-          st.write("- **유형:** Covered / Uncovered / ComVi(Double Layer)")
+          st.write("- **유형:** Covered / Uncovered / ComVi")
           st.write("- **주요 적응증:** Malignant / Benign Biliary Stricture")
 
         with prod_tab2:
@@ -314,7 +314,7 @@ if not due_category:
                 "esophageal.png 이미지를 프로젝트 폴더에 추가하면 카탈로그"
                 " 사진이 표시됩니다."
             )
-          st.write("- **유형:** Full Covered / Cervical / Both Bare")
+          st.write("- **유형:** Covered")
           st.write("- **주요 적응증:** Esophageal Stricture, TE Fistula")
 
         with prod_tab3:
