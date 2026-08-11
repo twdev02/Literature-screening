@@ -986,7 +986,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
 # MODE 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
 # --------------------------------------------------
 elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
-  st.subheader(f"PICO 다중 키워드 입력 ({due_category} / {sub_model})")
+  st.subheader(f"PICO 다중 키워드 입력")
   st.caption(
       "선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로"
       " 세팅되었습니다. 필요 시 추가/수정이 가능합니다."
