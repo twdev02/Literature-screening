@@ -46,7 +46,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>', unsafe_allow_html=True)
 
 # --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화
