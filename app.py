@@ -5,46 +5,84 @@ import requests
 import xml.etree.ElementTree as ET
 import time
 
-st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
+st.set_page_config(page_title="Taewoong Medical - AI 문헌 스크리닝", layout="wide")
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (메인 대시보드 히어로 배너 & UI 개선)
+# 🎨 고급 커스텀 CSS (태웅메디컬 브랜딩 & UI 대시보드화)
 # --------------------------------------------------
 st.markdown("""
 <style>
-    /* 💡 [수정] 상단 메인 히어로 배너 디자인 카드 */
+    /* 상단 메인 히어로 배너 디자인 (태웅메디컬 브랜딩) */
     .hero-container {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        padding: 24px 30px;
+        background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%);
+        padding: 28px 32px;
         border-radius: 16px;
         color: #ffffff;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 25px;
+        box-shadow: 0 10px 20px -3px rgba(11, 26, 45, 0.3);
+        margin-bottom: 20px;
+        border-left: 6px solid #00a8ff;
+    }
+    .hero-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
     }
     .hero-tag {
-        background-color: #3b82f6;
+        background: linear-gradient(90deg, #84cc16 0%, #06b6d4 100%);
         color: #ffffff;
         font-size: 12px;
-        font-weight: 700;
-        padding: 4px 10px;
+        font-weight: 800;
+        padding: 4px 12px;
         border-radius: 20px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         display: inline-block;
-        margin-bottom: 8px;
+    }
+    .dept-tag {
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
     }
     .hero-title {
         font-size: 26px;
         font-weight: 800;
         color: #ffffff;
-        margin: 0px 0px 6px 0px;
+        margin: 4px 0px 6px 0px;
         letter-spacing: -0.5px;
     }
     .hero-subtitle {
         font-size: 14px;
-        color: #94a3b8;
+        color: #cbd5e1;
         margin: 0;
         font-weight: 400;
+    }
+
+    /* 개요 요약 카드 (System Features) */
+    .overview-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .overview-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0284c7;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .overview-value {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .overview-desc {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px;
     }
 
     /* 세그먼티드 컨트롤(상단 메뉴 바) 커스텀 */
@@ -64,21 +102,58 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
     
-    /* 선택된 버튼 스타일 (딥 네이비) */
+    /* 선택된 버튼 스타일 (태웅 딥 네이비) */
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
-        background-color: #0f172a !important;
+        background-color: #0b1a2d !important;
         color: #ffffff !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 </style>
 
-<!-- 💡 [수정] 메인 첫 페이지 상단 대시보드 카드 영역 -->
+<!-- 메인 첫 페이지 상단 대시보드 카드 영역 (태웅메디컬 브랜딩) -->
 <div class="hero-container">
-    <div class="hero-tag">CER Clinical Evaluation Platform</div>
+    <div class="hero-header-flex">
+        <div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
+        <div class="dept-tag">🏢 Development Department | Development 2nd Team</div>
+    </div>
     <div class="hero-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
     <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
 </div>
 """, unsafe_allow_html=True)
+
+# --------------------------------------------------
+# 📊 시스템 개요 & 핵심 지표 요약 카드 배치
+# --------------------------------------------------
+col_ov1, col_ov2, col_ov3 = st.columns(3)
+
+with col_ov1:
+    st.markdown("""
+    <div class="overview-card">
+        <div class="overview-title">🎯 Target Products</div>
+        <div class="overview-value">태웅메디컬 5개 주요 Stent 제품군</div>
+        <div class="overview-desc">Biliary, Esophageal, Pyloric, Colonic, Drainage</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_ov2:
+    st.markdown("""
+    <div class="overview-card">
+        <div class="overview-title">🤖 AI Pipeline</div>
+        <div class="overview-value">Gemini 3.6 Flash + PubMed Engine</div>
+        <div class="overview-desc">초록 자동 추출 및 Include/Exclude 실시간 판정</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_ov3:
+    st.markdown("""
+    <div class="overview-card">
+        <div class="overview-title">📋 Regulatory Goal</div>
+        <div class="overview-value">MDR CER 대응 리포팅 자동화</div>
+        <div class="overview-desc">PICO 쿼리 검증 및 배제 사유(English) 자동 생성</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화
