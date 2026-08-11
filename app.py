@@ -6,64 +6,50 @@ import xml.etree.ElementTree as ET
 import time
 
 st.set_page_config(page_title="AI 문헌 스크리닝", layout="wide")
-st.title("PubMed PMID 기반 AI 문헌 스크리닝 시스템")
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (빨간선 완벽 제거 & 세련된 알약형 탭 버튼)
+# 🎨 고급 커스텀 CSS (카드 & UI 모던 대시보드화)
 # --------------------------------------------------
 st.markdown("""
 <style>
-    /* 1. 탭 전체 바 디자인 (그레이톤 둥근 배경) */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #f1f3f5;
-        padding: 6px;
-        border-radius: 30px;
-        border: 1px solid #e9ecef;
-        display: inline-flex;
-    }
-
-    /* 2. 각 탭 버튼 디자인 (기본 상태) */
-    .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        white-space: pre;
-        background-color: transparent;
-        border-radius: 20px;
-        border: none !important;
-        padding: 0px 20px;
-        font-weight: 600;
-        font-size: 14px;
-        color: #495057;
-        transition: all 0.2s ease-in-out;
-    }
-
-    /* 3. 마우스 올렸을 때 (Hover) */
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #121212;
-        background-color: rgba(255, 255, 255, 0.6);
-    }
-
-    /* 4. 선택된 탭 (Active: 진한 네이비 알약 스타일) */
-    .stTabs [aria-selected="true"] {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
-    }
-
-    /* 5. ⭐ 기존 Streamlit의 유치한 빨간 밑줄 완전히 숨기기 */
-    .stTabs [data-baseweb="tab-highlight"] {
-        display: none !important;
+    /* 메인 타이틀 스타일 */
+    .main-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 20px;
     }
     
-    /* 6. 탭 구분선 제거 */
-    .stTabs [data-baseweb="tab-border"] {
-        display: none !important;
+    /* 세그먼티드 컨트롤(상단 메뉴 바) 커스텀 */
+    div[data-testid="stSegmentedControl"] {
+        background-color: #f1f5f9;
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    div[data-testid="stSegmentedControl"] button {
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        border: none !important;
+        padding: 8px 24px !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    /* 선택된 버튼 스타일 (딥 네이비) */
+    div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown('<div class="main-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>', unsafe_allow_html=True)
+
 # --------------------------------------------------
-# ⚙️ Session State 메모리 저장소 초기화 (화면 초기화 방지)
+# ⚙️ Session State 메모리 저장소 초기화
 # --------------------------------------------------
 if "tab1_result" not in st.session_state:
     st.session_state["tab1_result"] = None
@@ -94,7 +80,7 @@ with st.sidebar:
         st.error("🔴 API Key가 없습니다. Secrets 등록 또는 키를 입력하세요.")
         
     st.markdown("---")
-    st.subheader("📋 품목 선택")
+    st.subheader("품목 선택")
     
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
@@ -116,7 +102,7 @@ with st.sidebar:
     
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
                 "Niti-S Biliary Covered Stent",
                 "Niti-S Biliary Uncovered Stent",
@@ -125,14 +111,14 @@ with st.sidebar:
         )
     elif due_category == "2. Esophageal Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
                 "Niti-S Esophageal Covered Stent"
             ]
         )
     elif due_category == "3. Pyloric/Duodenal Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
                 "Niti-S Pyloric/Duodenal Covered Stent",
                 "Niti-S Pyloric/Duodenal Uncovered Stent",
@@ -141,7 +127,7 @@ with st.sidebar:
         )
     elif due_category == "4. Colonic Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
                 "Niti-S Enteral Colonic Covered Stent",
                 "Niti-S Enteral Colonic Uncovered Stent",
@@ -150,7 +136,7 @@ with st.sidebar:
         )
     elif due_category == "5. Drainage Stent":
         sub_model = st.selectbox(
-            "🔎 세부 모델/유형을 선택하세요",
+            "세부 모델/유형을 선택하세요",
             options=[
                 "Niti-S SPAXUS Stent",
                 "Niti-S Hot SPAXUS Stent",                
@@ -458,18 +444,24 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     """
 
 # --------------------------------------------------
-# 📌 탭 UI 구성
+# ✨ 💡 모던 세그먼티드 컨트롤 메뉴 (유치한 st.tabs 완전 대체!)
 # --------------------------------------------------
-tab1, tab2, tab3 = st.tabs([
-    "🔢 단일 PMID 입력", 
-    "📁 PMID 리스트 CSV 업로드", 
-    "🔍 PICO 다중 검색어 기반 자동 추출"
-])
+selected_mode = st.segmented_control(
+    "",
+    options=[
+        "🔢 단일 PMID 입력", 
+        "📁 PMID 리스트 CSV 업로드", 
+        "🔍 PICO 다중 검색어 기반 자동 추출"
+    ],
+    default="🔍 PICO 다중 검색어 기반 자동 추출"
+)
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # --------------------------------------------------
-# TAB 1: 단일 PMID 테스트
+# MODE 1: 단일 PMID 테스트
 # --------------------------------------------------
-with tab1:
+if selected_mode == "🔢 단일 PMID 입력":
     single_pmid = st.text_input("PubMed PMID 번호를 입력하세요 (예: 31234567)")
     if st.button("단일 PMID 스크리닝 실행"):
         if not api_key:
@@ -498,9 +490,9 @@ with tab1:
                     st.error(f"AI 통신 에러 발생: {err}")
 
 # --------------------------------------------------
-# TAB 2: CSV 파일 PMID 일괄 스크리닝
+# MODE 2: CSV 파일 PMID 일괄 스크리닝
 # --------------------------------------------------
-with tab2:
+elif selected_mode == "📁 PMID 리스트 CSV 업로드":
     uploaded_file = st.file_uploader("PMID가 적힌 CSV 업로드 ('PMID' 열 필수)", type=['csv'])
     if st.button("CSV PMID 일괄 스크리닝 실행"):
         if not api_key:
@@ -570,10 +562,10 @@ with tab2:
         st.download_button("📥 결과 CSV 다운로드", data=csv_data, file_name="cer_screening_result.csv", mime="text/csv")
 
 # --------------------------------------------------
-# TAB 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
+# MODE 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
 # --------------------------------------------------
-with tab3:
-    st.subheader(f"PICO 다중 키워드 입력 ({due_category} 👉 {sub_model})")
+elif selected_mode == "🔍 PICO 다중 검색어 기반 자동 추출":
+    st.subheader(f"PICO 다중 키워드 입력 ({due_category} / {sub_model})")
     st.caption("선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다. 필요 시 추가/수정이 가능합니다.")
     
     col_pico1, col_pico2 = st.columns(2)
