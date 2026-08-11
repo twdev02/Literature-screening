@@ -8,7 +8,7 @@ import time
 st.set_page_config(page_title="Taewoong Medical - AI 문헌 스크리닝", layout="wide")
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (태웅메디컬 브랜딩 & UI 대시보드화)
+# 🎨 고급 커스텀 CSS (태웅메디컬 브랜딩 & 카탈로그 배너)
 # --------------------------------------------------
 st.markdown("""
 <style>
@@ -55,8 +55,25 @@ st.markdown("""
     .hero-subtitle {
         font-size: 14px;
         color: #cbd5e1;
-        margin: 0;
+        margin-bottom: 12px;
         font-weight: 400;
+    }
+
+    /* 💡 대표 제품 카탈로그 라인업 태그 */
+    .catalog-lineup {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    .catalog-badge {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #e2e8f0;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 6px;
     }
 
     /* 개요 요약 카드 (System Features) */
@@ -110,7 +127,7 @@ st.markdown("""
     }
 </style>
 
-<!-- 메인 첫 페이지 상단 대시보드 카드 영역 (태웅메디컬 브랜딩) -->
+<!-- 메인 첫 페이지 상단 대시보드 카드 영역 (태웅메디컬 브랜딩 + 카탈로그) -->
 <div class="hero-container">
     <div class="hero-header-flex">
         <div class="hero-tag">TAEWOONG MEDICAL CER PLATFORM</div>
@@ -118,6 +135,16 @@ st.markdown("""
     </div>
     <div class="hero-title">🔬 PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
     <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
+    
+    <!-- 제품 카탈로그 라인업 뱃지 -->
+    <div class="catalog-lineup">
+        <span class="catalog-badge">📦 Niti-S Biliary Stent</span>
+        <span class="catalog-badge">📦 Niti-S Esophageal Stent</span>
+        <span class="catalog-badge">📦 Niti-S Pyloric/Duodenal Stent</span>
+        <span class="catalog-badge">📦 Niti-S Enteral Colonic Stent</span>
+        <span class="catalog-badge">📦 ComVi Stent Series</span>
+        <span class="catalog-badge">📦 Niti-S SPAXUS / NAGI LAMS</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
