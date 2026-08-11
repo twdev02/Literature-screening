@@ -269,7 +269,7 @@ if not due_category:
       st.markdown(
           """
             <div class="card-title">TARGET PRODUCTS</div>
-            <div class="card-value">태웅메디칼 주요 Stent 제품군</div>
+            <div class="card-value">Taewoong Medical’s Stent Product Lines</div>
             <div class="card-desc">클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
             """,
           unsafe_allow_html=True,
