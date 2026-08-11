@@ -79,6 +79,30 @@ st.markdown("""
         margin-bottom: 12px;
     }
 
+    /* 💡 선택된 품목 반투명 하이라이트 박스 커스텀 */
+    .selected-category-box {
+        background-color: rgba(11, 26, 45, 0.04);
+        border: 1px solid rgba(11, 26, 45, 0.12);
+        border-left: 5px solid #0284c7;
+        border-radius: 12px;
+        padding: 16px 22px;
+        margin-bottom: 18px;
+    }
+    .selected-category-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #0284c7;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 4px;
+    }
+    .selected-category-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+
     /* 세그먼티드 컨트롤 커스텀 */
     div[data-testid="stSegmentedControl"] {
         background-color: #f1f5f9;
@@ -155,7 +179,6 @@ with st.sidebar:
         key="due_category_choice"
     )
 
-    # 💡 사이드바 맨 아래쪽에 배치된 깔끔한 HOME 버튼
     st.markdown("---")
     if st.button("HOME", type="secondary", use_container_width=True, help="홈 대시보드로 이동"):
         st.session_state["due_category_choice"] = None
@@ -578,9 +601,15 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, abs
     """
 
 # --------------------------------------------------
-# ✨ 세그먼티드 컨트롤 메뉴 및 상단 제목 헤더
+# ✨ 세그먼티드 컨트롤 메뉴 및 선택된 품목 하이라이트 헤더
 # --------------------------------------------------
-st.subheader(f"📌 {due_category} - {sub_model}")
+# 💡 이모지를 제거하고 눈에 잘 띄는 반투명 하이라이트 박스 적용
+st.markdown(f"""
+<div class="selected-category-box">
+    <div class="selected-category-label">SELECTED CATEGORY & MODEL</div>
+    <div class="selected-category-title">{due_category} - {sub_model}</div>
+</div>
+""", unsafe_allow_html=True)
 
 selected_mode = st.segmented_control(
     "",
