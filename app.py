@@ -461,7 +461,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 # --------------------------------------------------
 # MODE 1: 단일 PMID 테스트
 # --------------------------------------------------
-if selected_mode == "🔢 단일 PMID 입력":
+if selected_mode == "단일 PMID 입력":
     single_pmid = st.text_input("PubMed PMID 번호를 입력하세요 (예: 31234567)")
     if st.button("단일 PMID 스크리닝 실행"):
         if not api_key:
@@ -492,7 +492,7 @@ if selected_mode == "🔢 단일 PMID 입력":
 # --------------------------------------------------
 # MODE 2: CSV 파일 PMID 일괄 스크리닝
 # --------------------------------------------------
-elif selected_mode == "📁 PMID 리스트 CSV 업로드":
+elif selected_mode == "PMID 리스트 CSV 업로드":
     uploaded_file = st.file_uploader("PMID가 적힌 CSV 업로드 ('PMID' 열 필수)", type=['csv'])
     if st.button("CSV PMID 일괄 스크리닝 실행"):
         if not api_key:
@@ -564,7 +564,7 @@ elif selected_mode == "📁 PMID 리스트 CSV 업로드":
 # --------------------------------------------------
 # MODE 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
 # --------------------------------------------------
-elif selected_mode == "🔍 PICO 다중 검색어 기반 자동 추출":
+elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
     st.subheader(f"PICO 다중 키워드 입력 ({due_category} / {sub_model})")
     st.caption("선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다. 필요 시 추가/수정이 가능합니다.")
     
