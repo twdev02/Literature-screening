@@ -577,7 +577,7 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
         
     st.markdown("---")
-    st.subheader("🗓️ 문헌 검색 기간(연/월) 및 추출 개수 설정")
+    st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
     
     col_s1, col_s2, col_e1, col_e2 = st.columns(4)
     with col_s1:
@@ -680,7 +680,7 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
 
     if st.session_state["tab3_result"] is not None:
         st.success(f"✅ [{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
-        st.dataframe(st.session_state["tab3_result"])
+        st.dataframe(st.session_state["tab3_result"], hide_index=True)
         
         csv_data = st.session_state["tab3_result"].to_csv(index=False).encode('utf-8-sig')
         st.download_button("PICO 스크리닝 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv", mime="text/csv")
