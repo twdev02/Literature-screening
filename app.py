@@ -200,7 +200,7 @@ with st.sidebar:
         options=[
             "Niti-S Biliary Covered Stent",
             "Niti-S Biliary Uncovered Stent",
-            "ComVi Biliary Covered Stent",
+            "ComVi Biliary Stent",
         ],
     )
   elif due_category == "2. Esophageal Stent":
@@ -214,7 +214,7 @@ with st.sidebar:
         options=[
             "Niti-S Pyloric/Duodenal Covered Stent",
             "Niti-S Pyloric/Duodenal Uncovered Stent",
-            "ComVi Pyloric/Duodenal",
+            "ComVi Pyloric/Duodenal Stent",
         ],
     )
   elif due_category == "4. Colonic Stent":
@@ -223,7 +223,7 @@ with st.sidebar:
         options=[
             "Niti-S Enteral Colonic Covered Stent",
             "Niti-S Enteral Colonic Uncovered Stent",
-            "ComVi Enteral Colonic Covered Stent",
+            "ComVi Enteral Colonic Stent",
         ],
     )
   elif due_category == "5. Drainage Stent":
