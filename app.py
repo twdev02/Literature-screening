@@ -136,9 +136,15 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* Expander(세부품목) 제목 아래 간격 띄우기 설정 */
-    div[data-testid="stExpander"] div[role="button"] {
-        margin-bottom: 12px !important;
+    /* Expander(세부품목) 펼쳤을 때 제목과 내부 컨텐츠 간격 넓히기 */
+    div[data-testid="stExpanderDetails"] {
+        padding-top: 18px !important;
+        margin-top: 8px !important;
+    }
+
+    /* Expander 상자 간 바깥 간격 추가 */
+    div[data-testid="stExpander"] {
+        margin-bottom: 16px !important;
     }
 
     /* 2. 팝업창(Popover) 하단 여백 추가 및 높이 조절 (바닥 맞닿음 방지) */
@@ -525,7 +531,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S SPAXUS Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Hot SPAXUS Stent"):
@@ -540,7 +546,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Hot SPAXUS Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Nagi Stent"):
@@ -555,7 +561,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Nagi Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
     with col_ov2:
