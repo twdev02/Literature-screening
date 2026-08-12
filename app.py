@@ -129,6 +129,13 @@ st.markdown(
         color: #ffffff !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
+
+    /* 팝업창(Popover) 높이 제한 / 자동 스크롤 / 너비 확장 (잘림 방지 적용) */
+    div[data-testid="stPopoverBody"] {
+        max-height: 75vh !important;
+        overflow-y: auto !important;
+        min-width: 700px !important;
+    }
 </style>
 """,
     unsafe_allow_html=True,
