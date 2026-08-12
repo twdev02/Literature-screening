@@ -289,24 +289,8 @@ if not due_category:
         # 📌 [수정 완료] Biliary 탭 모델별 개별 사진 및 Expander UI
         # --------------------------------------------------
         with prod_tab1:
-          st.markdown("#### **Niti-S & ComVi Biliary Stent Series**")
-          if os.path.exists("biliary.png"):
-            st.image(
-                "biliary.png",
-                caption="Niti-S Biliary Stent Series 전체 라인업",
-                use_container_width=True,
-            )
-          else:
-            st.info(
-                "biliary.png 이미지를 프로젝트 폴더에 추가하면 대표 카탈로그"
-                " 사진이 표시됩니다."
-            )
-
-          st.write(
-              "**주요 적응증:** Malignant / Benign Biliary Obstruction"
-          )
-          st.markdown("---")
-          st.markdown("##### **모델별 상세 이미지 및 설명 (Total 13 Types)**")
+          st.markdown("#### **Niti-S & ComVi Biliary Stent Series (Total 13 Types)**")
+          st.write("")  # 여백 추가
 
           # 1. Uncovered Stent (4종)
           with st.expander("🔹 Niti-S Biliary Uncovered Stent (4종)"):
