@@ -136,13 +136,13 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 2. 팝업창(Popover) 하단 여백 추가 및 높이 조절 (바닥 맞닿음 방지) */
+    /* 팝업창(Popover) 바닥 맞닿음 완전 해결 (하단에서 80px 강제 이격) */
     div[data-testid="stPopoverBody"] {
-        max-height: 55vh !important;       /* 모니터 높이 55%로 조절하여 바닥과 닿지 않도록 함 */
-        margin-bottom: 50px !important;    /* 화면 하단과의 여백 확보 */
+        max-height: 50vh !important;
+        bottom: 80px !important;
         overflow-y: auto !important;
         min-width: 700px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3) !important;
         border-radius: 12px !important;
     }
 </style>
@@ -520,7 +520,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S SPAXUS Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Hot SPAXUS Stent"):
@@ -535,7 +535,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Hot SPAXUS Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Nagi Stent"):
@@ -550,7 +550,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Nagi Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
     with col_ov2:
