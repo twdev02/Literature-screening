@@ -285,31 +285,18 @@ if not due_category:
                 ])
 
                 # --------------------------------------------------
-                # 📌 Biliary 탭 모델별 개별 사진 및 Expander UI
+                # 📌 1. Biliary 탭
                 # --------------------------------------------------
                 with prod_tab1:
-                    st.markdown("#### **Niti-S & ComVi Biliary Stent Series (Total 13 Types)**")
-                    st.write("")  # 여백 추가
+                    st.markdown("#### **Niti-S & ComVi Biliary Stent Series**")
+                    st.write("")
 
-                    # 1. Uncovered Stent (4종)
                     with st.expander("🔹 Niti-S Biliary Uncovered Stent (4종)"):
                         uncovered_models = [
                             ("S-Type", "biliary_uncovered_s.png", "기본형 Uncovered Stent"),
-                            (
-                                "D-Type",
-                                "biliary_uncovered_d.png",
-                                "Dual Structure 유연성 강화 모델",
-                            ),
-                            (
-                                "M-Type",
-                                "biliary_uncovered_m.png",
-                                "Mesh 구조 설계로 방사력 유지",
-                            ),
-                            (
-                                "LCD-Type",
-                                "biliary_uncovered_lcd.png",
-                                "Large Cell Design 적용",
-                            ),
+                            ("D-Type", "biliary_uncovered_d.png", "Dual Structure 유연성 강화 모델"),
+                            ("M-Type", "biliary_uncovered_m.png", "Mesh 구조 설계로 방사력 유지"),
+                            ("LCD-Type", "biliary_uncovered_lcd.png", "Large Cell Design 적용"),
                         ]
                         for m_name, m_img, m_desc in uncovered_models:
                             c1, c2 = st.columns([1, 2])
@@ -319,44 +306,17 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(
-                                    f"**Niti-S Biliary Uncovered [{m_name}]**\n\n- {m_desc}"
-                                )
+                                st.markdown(f"**Niti-S Biliary Uncovered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    # 2. Covered Stent (6종)
                     with st.expander("🔹 Niti-S Biliary Covered Stent (6종)"):
                         covered_models = [
-                            (
-                                "Full Covered-Type",
-                                "biliary_covered_full.png",
-                                "전체 피복 구조로 종양 내성장 방지",
-                            ),
-                            (
-                                "Both Bare-Type",
-                                "biliary_covered_bothbare.png",
-                                "양끝 단 Bare 구조로 이동 방지",
-                            ),
-                            (
-                                "Giobor",
-                                "biliary_covered_giobor.png",
-                                "특수 덮개 구조 및 위치 고정 강화",
-                            ),
-                            (
-                                "Flare-Type",
-                                "biliary_covered_flare.png",
-                                "Flared Ends 적용으로 Position 유지",
-                            ),
-                            (
-                                "Kaffes",
-                                "biliary_covered_kaffes.png",
-                                "제거 용이 디자인 (Removable Stent)",
-                            ),
-                            (
-                                "Bumpy",
-                                "biliary_covered_bumpy.png",
-                                "Bumpy 굴곡 구조 적용, 췌관 Stricture용",
-                            ),
+                            ("Full Covered-Type", "biliary_covered_full.png", "전체 피복 구조로 종양 내성장 방지"),
+                            ("Both Bare-Type", "biliary_covered_bothbare.png", "양끝 단 Bare 구조로 이동 방지"),
+                            ("Giobor", "biliary_covered_giobor.png", "특수 덮개 구조 및 위치 고정 강화"),
+                            ("Flare-Type", "biliary_covered_flare.png", "Flared Ends 적용으로 Position 유지"),
+                            ("Kaffes", "biliary_covered_kaffes.png", "제거 용이 디자인 (Removable Stent)"),
+                            ("Bumpy", "biliary_covered_bumpy.png", "Bumpy 굴곡 구조 적용, 췌관 Stricture용"),
                         ]
                         for m_name, m_img, m_desc in covered_models:
                             c1, c2 = st.columns([1, 2])
@@ -366,29 +326,14 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(
-                                    f"**Niti-S Biliary Covered [{m_name}]**\n\n- {m_desc}"
-                                )
+                                st.markdown(f"**Niti-S Biliary Covered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    # 3. ComVi Stent (3종)
                     with st.expander("🔹 ComVi Biliary Stent (3종)"):
                         comvi_models = [
-                            (
-                                "Full Covered-Type",
-                                "biliary_comvi_full.png",
-                                "이중막(PTFE+PTFE) 구조로 Tissue Ingrowth 완전 차단",
-                            ),
-                            (
-                                "Both Bare-Type",
-                                "biliary_comvi_bothbare.png",
-                                "ComVi 이중막 구조 + 양 끝단 Bare 앵커링",
-                            ),
-                            (
-                                "End Bare-Type",
-                                "biliary_comvi_endbare.png",
-                                "한쪽 끝단 Bare 적용 모델",
-                            ),
+                            ("Full Covered-Type", "biliary_comvi_full.png", "이중막(PTFE+PTFE) 구조로 Tissue Ingrowth 완전 차단"),
+                            ("Both Bare-Type", "biliary_comvi_bothbare.png", "ComVi 이중막 구조 + 양 끝단 Bare 앵커링"),
+                            ("End Bare-Type", "biliary_comvi_endbare.png", "한쪽 끝단 Bare 적용 모델"),
                         ]
                         for m_name, m_img, m_desc in comvi_models:
                             c1, c2 = st.columns([1, 2])
@@ -401,78 +346,93 @@ if not due_category:
                                 st.markdown(f"**ComVi Biliary [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
+                # --------------------------------------------------
+                # 📌 2. Esophageal 탭
+                # --------------------------------------------------
                 with prod_tab2:
-                    st.markdown("#### Niti-S Esophageal Stent")
-                    if os.path.exists("esophageal.png"):
-                        st.image(
-                            "esophageal.png",
-                            caption="Niti-S Esophageal Stent Series",
-                            use_container_width=True,
-                        )
-                    else:
-                        st.info(
-                            "esophageal.png 이미지를 프로젝트 폴더에 추가하면 카탈로그"
-                            " 사진이 표시됩니다."
-                        )
-                    st.write("- **유형:** Covered")
-                    st.write("- **주요 적응증:** Esophageal Stricture, TE Fistula")
+                    st.markdown("#### **Niti-S Esophageal Stent Series**")
+                    st.write("")
 
+                    with st.expander("🔹 Niti-S Esophageal Covered Stent"):
+                        c1, c2 = st.columns([1, 2])
+                        with c1:
+                            if os.path.exists("esophageal.png"):
+                                st.image("esophageal.png", use_container_width=True)
+                            else:
+                                st.caption("📷 esophageal.png 이미지 등록 필요")
+                        with c2:
+                            st.markdown(
+                                "**Niti-S Esophageal Covered Stent**\n\n"
+                                "- **유형:** Covered\n"
+                                "- **주요 적응증:** Esophageal Stricture, TE Fistula\n"
+                                "- **특징:** 식도 협착 완화 및 병변 전이 예방"
+                            )
+
+                # --------------------------------------------------
+                # 📌 3. Pyloric/Duodenal 탭
+                # --------------------------------------------------
                 with prod_tab3:
-                    st.markdown("#### Niti-S & ComVi Pyloric/Duodenal Stent")
-                    if os.path.exists("pyloric.png"):
-                        st.image(
-                            "pyloric.png",
-                            caption="Niti-S Pyloric/Duodenal Stent Series",
-                            use_container_width=True,
-                        )
-                    else:
-                        st.info(
-                            "pyloric.png 이미지를 프로젝트 폴더에 추가하면 카탈로그"
-                            " 사진이 표시됩니다."
-                        )
-                    st.write(
-                        "- **유형:** D-Type / Flare-Type / Covered / Uncovered"
-                    )
-                    st.write("- **주요 적응증:** Gastric Outlet Obstruction (GOO)")
+                    st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent Series**")
+                    st.write("")
 
+                    with st.expander("🔹 Niti-S / ComVi Pyloric & Duodenal Stent"):
+                        c1, c2 = st.columns([1, 2])
+                        with c1:
+                            if os.path.exists("pyloric.png"):
+                                st.image("pyloric.png", use_container_width=True)
+                            else:
+                                st.caption("📷 pyloric.png 이미지 등록 필요")
+                        with c2:
+                            st.markdown(
+                                "**Niti-S & ComVi Pyloric/Duodenal**\n\n"
+                                "- **유형:** D-Type / Flare-Type / Covered / Uncovered\n"
+                                "- **주요 적응증:** Gastric Outlet Obstruction (GOO)\n"
+                                "- **특징:** 위출구 폐색 환자의 연하 및 통증 완화"
+                            )
+
+                # --------------------------------------------------
+                # 📌 4. Colonic 탭
+                # --------------------------------------------------
                 with prod_tab4:
-                    st.markdown("#### Niti-S & ComVi Enteral Colonic Stent")
-                    if os.path.exists("colonic.png"):
-                        st.image(
-                            "colonic.png",
-                            caption="Niti-S Enteral Colonic Stent Series",
-                            use_container_width=True,
-                        )
-                    else:
-                        st.info(
-                            "colonic.png 이미지를 프로젝트 폴더에 추가하면 카탈로그"
-                            " 사진이 표시됩니다."
-                        )
-                    st.write(
-                        "- **유형:** S-Type / D-Type / Covered / Uncovered"
-                    )
-                    st.write(
-                        "- **주요 적응증:** Colorectal Obstruction, Bridge to Surgery"
-                    )
+                    st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent Series**")
+                    st.write("")
 
+                    with st.expander("🔹 Niti-S / ComVi Enteral Colonic Stent"):
+                        c1, c2 = st.columns([1, 2])
+                        with c1:
+                            if os.path.exists("colonic.png"):
+                                st.image("colonic.png", use_container_width=True)
+                            else:
+                                st.caption("📷 colonic.png 이미지 등록 필요")
+                        with c2:
+                            st.markdown(
+                                "**Niti-S & ComVi Enteral Colonic**\n\n"
+                                "- **유형:** S-Type / D-Type / Covered / Uncovered\n"
+                                "- **주요 적응증:** Colorectal Obstruction, Bridge to Surgery\n"
+                                "- **특징:** 대장 폐쇄 해소 및 수술 전 처치(BTS) 유용"
+                            )
+
+                # --------------------------------------------------
+                # 📌 5. Drainage 탭
+                # --------------------------------------------------
                 with prod_tab5:
-                    st.markdown("#### Niti-S Drainage Stent")
-                    if os.path.exists("drainage.png"):
-                        st.image(
-                            "drainage.png",
-                            caption="Niti-S SPAXUS & NAGI LAMS Series",
-                            use_container_width=True,
-                        )
-                    else:
-                        st.info(
-                            "drainage.png 이미지를 프로젝트 폴더에 추가하면 카탈로그"
-                            " 사진이 표시됩니다."
-                        )
-                    st.write("- **유형:** SPAXUS, Hot SPAXUS, NAGI Stent")
-                    st.write(
-                        "- **주요 적응증:** Pancreatic Pseudocyst, WON, Gallbladder"
-                        " Drainage"
-                    )
+                    st.markdown("#### **Niti-S Drainage Stent Series**")
+                    st.write("")
+
+                    with st.expander("🔹 Niti-S SPAXUS & NAGI LAMS Series"):
+                        c1, c2 = st.columns([1, 2])
+                        with c1:
+                            if os.path.exists("drainage.png"):
+                                st.image("drainage.png", use_container_width=True)
+                            else:
+                                st.caption("📷 drainage.png 이미지 등록 필요")
+                        with c2:
+                            st.markdown(
+                                "**Niti-S SPAXUS / NAGI / Hot SPAXUS**\n\n"
+                                "- **유형:** SPAXUS, Hot SPAXUS, NAGI Stent (LAMS)\n"
+                                "- **주요 적응증:** Pancreatic Pseudocyst, WON, Gallbladder Drainage\n"
+                                "- **특징:** 초음파 내시경(EUS) 기반 transluminal 배액용 스텐트"
+                            )
 
     with col_ov2:
         with st.container(border=True):
