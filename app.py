@@ -515,7 +515,7 @@ if not due_category:
                             st.divider()
 
                     with st.expander("🔹 Niti-S Hot SPAXUS Stent"):
-                        hot spaxus_models = [
+                        hot_spaxus_models = [
                             ("Full Covered-Type", "colonic_covered_full.png", "전체 피복 구조로 종양 내성장 방지"),
                         ]
                         for m_name, m_img, m_desc in covered_models:
