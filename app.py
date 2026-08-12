@@ -136,12 +136,14 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 2. 팝업창(Popover) 잘림 방지 스타일 */
+    /* 2. 팝업창(Popover) 하단 여백 추가 및 높이 조절 (바닥 맞닿음 방지) */
     div[data-testid="stPopoverBody"] {
-        max-height: 60vh !important;
+        max-height: 55vh !important;       /* 모니터 높이 55%로 조절하여 바닥과 닿지 않도록 함 */
+        margin-bottom: 50px !important;    /* 화면 하단과의 여백 확보 */
         overflow-y: auto !important;
         min-width: 700px !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+        border-radius: 12px !important;
     }
 </style>
 """,
@@ -206,7 +208,7 @@ with st.sidebar:
         key="radio_category",
     )
 
-    # 세부 모델 선택 (Uncovered -> Covered -> ComVi 순서)
+    # 세부 모델 선택 (수정 포인트: Uncovered -> Covered -> ComVi 순서 지정)
     sub_model = "전체 (All Models)"
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
