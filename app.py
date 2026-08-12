@@ -500,11 +500,8 @@ if not due_category:
                     st.write("")
 
                     with st.expander("🔹 Niti-S SPAXUS Stent"):
-                        uncovered_models = [
+                        spaxus_models = [
                             ("S-Type", "colonic_uncovered_s.png", "기본형 Uncovered Stent"),
-                            ("D-Type", "colonic_uncovered_d.png", "Dual Structure 유연성 강화 모델"),
-                            ("M-Type", "colonic_uncovered_m.png", "Mesh 구조 설계로 방사력 유지"),
-                            ("LCD-Type", "colonic_uncovered_lcd.png", "Large Cell Design 적용"),
                         ]
                         for m_name, m_img, m_desc in uncovered_models:
                             c1, c2 = st.columns([1, 2])
@@ -517,14 +514,9 @@ if not due_category:
                                 st.markdown(f"**Niti-S Enteral Colonic Uncovered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 Niti-S Enteral Colonic Covered Stent"):
-                        covered_models = [
+                    with st.expander("🔹 Niti-S Hot SPAXUS Stent"):
+                        hot spaxus_models = [
                             ("Full Covered-Type", "colonic_covered_full.png", "전체 피복 구조로 종양 내성장 방지"),
-                            ("Both Bare-Type", "colonic_covered_bothbare.png", "양끝 단 Bare 구조로 이동 방지"),
-                            ("Giobor", "colonic_covered_giobor.png", "특수 덮개 구조 및 위치 고정 강화"),
-                            ("Flare-Type", "colonic_covered_flare.png", "Flared Ends 적용으로 Position 유지"),
-                            ("Kaffes", "colonic_covered_kaffes.png", "제거 용이 디자인 (Removable Stent)"),
-                            ("Bumpy", "colonic_covered_bumpy.png", "Bumpy 굴곡 구조 적용, 췌관 Stricture용"),
                         ]
                         for m_name, m_img, m_desc in covered_models:
                             c1, c2 = st.columns([1, 2])
@@ -537,11 +529,9 @@ if not due_category:
                                 st.markdown(f"**Niti-S Enteral Colonic Covered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 ComVi Enteral Colonic Stent"):
-                        comvi_models = [
+                    with st.expander("🔹 Niti-S Nagi Stent"):
+                        nagi_models = [
                             ("Full Covered-Type", "colonic_comvi_full.png", "이중막(PTFE+PTFE) 구조로 Tissue Ingrowth 완전 차단"),
-                            ("Both Bare-Type", "colonic_comvi_bothbare.png", "ComVi 이중막 구조 + 양 끝단 Bare 앵커링"),
-                            ("End Bare-Type", "colonic_comvi_endbare.png", "한쪽 끝단 Bare 적용 모델"),
                         ]
                         for m_name, m_img, m_desc in comvi_models:
                             c1, c2 = st.columns([1, 2])
