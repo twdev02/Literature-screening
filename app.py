@@ -306,7 +306,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Biliary Uncovered [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Biliary Uncovered Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Biliary Covered Stent"):
@@ -326,7 +326,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Biliary Covered [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Biliary Covered Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 ComVi Biliary Stent"):
@@ -343,7 +343,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**ComVi Biliary [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**ComVi Biliary Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                 # --------------------------------------------------
@@ -372,7 +372,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Esophageal Covered [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Esophageal Covered Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                 # --------------------------------------------------
@@ -394,7 +394,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Pyloric/Duodenal Uncovered [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Pyloric/Duodenal Uncovered Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Pyloric/Duodenal Covered Stent"):
@@ -411,7 +411,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Pyloric/Duodenal Covered [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Pyloric/Duodenal Covered Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 ComVi Pyloric/Duodenal Stent"):
@@ -427,7 +427,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**ComVi Pyloric/Duodenal [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**ComVi Pyloric/Duodenal Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                 # --------------------------------------------------
@@ -450,7 +450,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Enteral Colonic Uncovered [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Enteral Colonic Uncovered Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Enteral Colonic Covered Stent"):
@@ -467,7 +467,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S Enteral Colonic Covered [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Enteral Colonic Covered Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 ComVi Enteral Colonic Stent"):
@@ -482,7 +482,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**ComVi Enteral Colonic [{m_name}]**\n\n- {m_desc}")
+                                st.markdown(f"**ComVi Enteral Colonic Stent [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
                 # --------------------------------------------------
@@ -504,7 +504,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S [{m_name}] Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Hot SPAXUS Stent"):
@@ -519,7 +519,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S [{m_name}] Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Nagi Stent"):
@@ -534,7 +534,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S [{m_name}] Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
                             st.divider()
 
     with col_ov2:
