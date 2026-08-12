@@ -192,14 +192,14 @@ with st.sidebar:
         key="radio_category",
     )
 
-    # 세부 모델 선택 (품목 선택 바로 아래 위치)
+    # 세부 모델 선택 (Uncovered -> Covered -> ComVi 순서)
     sub_model = "전체 (All Models)"
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
             options=[
-                "Niti-S Biliary Covered Stent",
                 "Niti-S Biliary Uncovered Stent",
+                "Niti-S Biliary Covered Stent",
                 "ComVi Biliary Stent",
             ],
         )
@@ -212,8 +212,8 @@ with st.sidebar:
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
             options=[
-                "Niti-S Pyloric/Duodenal Covered Stent",
                 "Niti-S Pyloric/Duodenal Uncovered Stent",
+                "Niti-S Pyloric/Duodenal Covered Stent",
                 "ComVi Pyloric/Duodenal Stent",
             ],
         )
@@ -221,8 +221,8 @@ with st.sidebar:
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
             options=[
-                "Niti-S Enteral Colonic Covered Stent",
                 "Niti-S Enteral Colonic Uncovered Stent",
+                "Niti-S Enteral Colonic Covered Stent",
                 "ComVi Enteral Colonic Stent",
             ],
         )
@@ -288,10 +288,10 @@ if not due_category:
                 # 📌 1. Biliary 탭 (Total 13 Types)
                 # --------------------------------------------------
                 with prod_tab1:
-                    st.markdown("#### **Niti-S & ComVi Biliary Stent**")
+                    st.markdown("#### **Niti-S & ComVi Biliary Stent Series**")
                     st.write("")
 
-                    with st.expander("🔹 Niti-S Biliary Uncovered Stent"):
+                    with st.expander("🔹 Niti-S Biliary Uncovered Stent (4종)"):
                         biliary_uncovered_models = [
                             ("S-Type", "biliary_uncovered_s.png", "기본형 Uncovered Stent"),
                             ("D-Type", "biliary_uncovered_d.png", "Dual Structure 유연성 강화 모델"),
@@ -309,7 +309,7 @@ if not due_category:
                                 st.markdown(f"**Niti-S Biliary Uncovered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 Niti-S Biliary Covered Stent"):
+                    with st.expander("🔹 Niti-S Biliary Covered Stent (6종)"):
                         biliary_covered_models = [
                             ("Full Covered-Type", "biliary_covered_full.png", "전체 피복 구조로 종양 내성장 방지"),
                             ("Both Bare-Type", "biliary_covered_bothbare.png", "양끝 단 Bare 구조로 이동 방지"),
@@ -329,7 +329,7 @@ if not due_category:
                                 st.markdown(f"**Niti-S Biliary Covered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 ComVi Biliary Stent"):
+                    with st.expander("🔹 ComVi Biliary Stent (3종)"):
                         biliary_comvi_models = [
                             ("Full Covered-Type", "biliary_comvi_full.png", "이중막(PTFE+PTFE) 구조로 Tissue Ingrowth 완전 차단"),
                             ("Both Bare-Type", "biliary_comvi_bothbare.png", "ComVi 이중막 구조 + 양 끝단 Bare 앵커링"),
@@ -350,10 +350,10 @@ if not due_category:
                 # 📌 2. Esophageal 탭 (Total 8 Types)
                 # --------------------------------------------------
                 with prod_tab2:
-                    st.markdown("#### **Niti-S Esophageal Stent**")
+                    st.markdown("#### **Niti-S Esophageal Stents (Covered 8 Types)**")
                     st.write("")
 
-                    with st.expander("🔹 Niti-S Esophageal Covered Stent"):
+                    with st.expander("🔹 Niti-S Esophageal Covered Stent Series (8종)"):
                         esophageal_covered_models = [
                             ("Full Covered-Type", "esophageal_covered_full.png", "식도 전체 피복 구조로 병변 침투 방지 및 협착 완화"),
                             ("Cervical", "esophageal_covered_cervical.png", "경부 식도(Cervical Esophagus) 협착 전용 특수 설계"),
@@ -379,10 +379,10 @@ if not due_category:
                 # 📌 3. Pyloric/Duodenal 탭 (Total 6 Types)
                 # --------------------------------------------------
                 with prod_tab3:
-                    st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
+                    st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stents (Total 6 Types)**")
                     st.write("")
 
-                    with st.expander("🔹 Niti-S Pyloric/Duodenal Uncovered Stent"):
+                    with st.expander("🔹 Niti-S Pyloric/Duodenal Uncovered Stent (1종)"):
                         pyloric_uncovered_models = [
                             ("D-Type", "pyloric_uncovered_d.png", "Dual Structure 유연 구조로 위출구/십이지장 협착부 유연성 및 통과성 강화"),
                         ]
@@ -397,7 +397,7 @@ if not due_category:
                                 st.markdown(f"**Niti-S Pyloric/Duodenal Uncovered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 Niti-S Pyloric/Duodenal Covered Stent"):
+                    with st.expander("🔹 Niti-S Pyloric/Duodenal Covered Stent (3종)"):
                         pyloric_covered_models = [
                             ("Full Covered-Type", "pyloric_covered_full.png", "전체 피복 구조 적용으로 위출구 및 십이지장 종양 내성장 방지"),
                             ("Both Bare-Type", "pyloric_covered_bothbare.png", "양 끝단 Bare 구조 적용으로 스텐트 위치 고정 및 이동(Migration) 방지"),
@@ -414,7 +414,7 @@ if not due_category:
                                 st.markdown(f"**Niti-S Pyloric/Duodenal Covered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 ComVi Pyloric/Duodenal Stent"):
+                    with st.expander("🔹 ComVi Pyloric/Duodenal Stent (2종)"):
                         pyloric_comvi_models = [
                             ("Flare-Type", "pyloric_comvi_flare.png", "ComVi 이중막 구조 + Flare 확장 구조로 위치 고정력 극대화"),
                             ("Both Bare-Type", "pyloric_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조 + 양 끝단 Bare 앵커링"),
@@ -434,10 +434,10 @@ if not due_category:
                 # 📌 4. Colonic 탭 (Total 6 Types)
                 # --------------------------------------------------
                 with prod_tab4:
-                    st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
+                    st.markdown("#### **Niti-S & ComVi Enteral Colonic Stents (Total 6 Types)**")
                     st.write("")
 
-                    with st.expander("🔹 Niti-S Enteral Colonic Uncovered Stent"):
+                    with st.expander("🔹 Niti-S Enteral Colonic Uncovered Stent (2종)"):
                         colonic_uncovered_models = [
                             ("S-Type", "colonic_uncovered_s.png", "기본형 대장 Uncovered Stent 구조"),
                             ("D-Type", "colonic_uncovered_d.png", "Dual Structure 적용으로 대장 굴곡부 우수한 통과성 확보"),
@@ -453,7 +453,7 @@ if not due_category:
                                 st.markdown(f"**Niti-S Enteral Colonic Uncovered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 Niti-S Enteral Colonic Covered Stent"):
+                    with st.expander("🔹 Niti-S Enteral Colonic Covered Stent (3종)"):
                         colonic_covered_models = [
                             ("Full Covered-Type", "colonic_covered_full.png", "전체 피복 구조로 대장/직장 종양 내성장 차단"),
                             ("Both Bare-Type", "colonic_covered_bothbare.png", "양 끝단 Bare 구조 적용으로 이동(Migration) 방지"),
@@ -470,7 +470,7 @@ if not due_category:
                                 st.markdown(f"**Niti-S Enteral Colonic Covered [{m_name}]**\n\n- {m_desc}")
                             st.divider()
 
-                    with st.expander("🔹 ComVi Enteral Colonic Stent"):
+                    with st.expander("🔹 ComVi Enteral Colonic Stent (1종)"):
                         colonic_comvi_models = [
                             ("Both Bare-Type", "colonic_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조로 조직 침투 차단 + 양 끝단 Bare 앵커링"),
                         ]
@@ -489,7 +489,7 @@ if not due_category:
                 # 📌 5. Drainage 탭 (Total 3 Types)
                 # --------------------------------------------------
                 with prod_tab5:
-                    st.markdown("#### **Niti-S Drainage Stent**")
+                    st.markdown("#### **Niti-S Drainage Stent Series (Total 3 Types)**")
                     st.write("")
 
                     with st.expander("🔹 Niti-S SPAXUS Stent"):
