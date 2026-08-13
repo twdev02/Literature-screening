@@ -413,39 +413,48 @@ if not due_category:
                             st.divider()
 
                 # --------------------------------------------------
-                # 📌 2. Esophageal 탭
+                # 📌 2. Esophageal 탭 (선택 클릭형 변경 적용)
                 # --------------------------------------------------
                 with prod_tab2:
                     st.markdown("#### **Niti-S Esophageal Stent**")
-                    st.write("")
+                    esophageal_sel = st.segmented_control(
+                        "",
+                        options=[
+                            "Covered Stent",
+                        ],
+                        default=None,
+                        key="pop_esophageal_seg",
+                    )
+                    st.markdown("<br>", unsafe_allow_html=True)
 
-                    esophageal_covered_models = [
-                        ("Full Covered-Type", "esophageal_covered_full.png", "식도 전체 피복 구조로 병변 침투 방지 및 협착 완화"),
-                        ("Cervical", "esophageal_covered_cervical.png", "경부 식도(Cervical Esophagus) 협착 전용 특수 설계"),
-                        ("Both Bare-Type", "esophageal_covered_bothbare.png", "양 끝단 Bare 메쉬 적용으로 위치 이동(Migration) 방지"),
-                        ("Conio", "esophageal_covered_conio.png", "Conio 형태 적용 특수 구조 모델"),
-                        ("Anti Reflux-Type", "esophageal_covered_antireflux.png", "역류 방지 밸브 구조 적용으로 위산 역류 예방"),
-                        ("Double Anti Reflux-Type", "esophageal_covered_doubleantireflux.png", "이중 역류 방지 구조로 강력한 역류 차단 기능 제공"),
-                        ("Double-Type", "esophageal_covered_double.png", "이중 레이어 메쉬 구조로 인체공학적 유연성 확보"),
-                        ("Beta-2", "esophageal_covered_beta2.png", "Beta-2 차세대 유연성 메쉬 설계 모델"),
-                    ]
-                    for m_name, m_img, m_desc in esophageal_covered_models:
-                        c1, c2 = st.columns([1, 2.2])
-                        with c1:
-                            if os.path.exists(m_img):
-                                st.image(m_img, use_container_width=True)
-                            else:
-                                st.caption(f"📷 {m_img} 이미지 등록 필요")
-                        with c2:
-                            st.markdown(
-                                f'<div class="prod-item-title">Niti-S Esophageal Covered Stent [{m_name}]</div>'
-                                f'<div class="prod-item-desc">• {m_desc}</div>',
-                                unsafe_allow_html=True,
-                            )
-                        st.divider()
+                    if esophageal_sel == "Covered Stent":
+                        esophageal_covered_models = [
+                            ("Full Covered-Type", "esophageal_covered_full.png", "식도 전체 피복 구조로 병변 침투 방지 및 협착 완화"),
+                            ("Cervical", "esophageal_covered_cervical.png", "경부 식도(Cervical Esophagus) 협착 전용 특수 설계"),
+                            ("Both Bare-Type", "esophageal_covered_bothbare.png", "양 끝단 Bare 메쉬 적용으로 위치 이동(Migration) 방지"),
+                            ("Conio", "esophageal_covered_conio.png", "Conio 형태 적용 특수 구조 모델"),
+                            ("Anti Reflux-Type", "esophageal_covered_antireflux.png", "역류 방지 밸브 구조 적용으로 위산 역류 예방"),
+                            ("Double Anti Reflux-Type", "esophageal_covered_doubleantireflux.png", "이중 역류 방지 구조로 강력한 역류 차단 기능 제공"),
+                            ("Double-Type", "esophageal_covered_double.png", "이중 레이어 메쉬 구조로 인체공학적 유연성 확보"),
+                            ("Beta-2", "esophageal_covered_beta2.png", "Beta-2 차세대 유연성 메쉬 설계 모델"),
+                        ]
+                        for m_name, m_img, m_desc in esophageal_covered_models:
+                            c1, c2 = st.columns([1, 2.2])
+                            with c1:
+                                if os.path.exists(m_img):
+                                    st.image(m_img, use_container_width=True)
+                                else:
+                                    st.caption(f"📷 {m_img} 이미지 등록 필요")
+                            with c2:
+                                st.markdown(
+                                    f'<div class="prod-item-title">Niti-S Esophageal Covered Stent [{m_name}]</div>'
+                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    unsafe_allow_html=True,
+                                )
+                            st.divider()
 
                 # --------------------------------------------------
-                # 📌 3. Pyloric/Duodenal 탭
+                # 📌 3. Pyloric/Duodenal 탭 (기본 선택 없음 / 진입 시 초기화)
                 # --------------------------------------------------
                 with prod_tab3:
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
@@ -522,7 +531,7 @@ if not due_category:
                             st.divider()
 
                 # --------------------------------------------------
-                # 📌 4. Colonic 탭
+                # 📌 4. Colonic 탭 (기본 선택 없음 / 진입 시 초기화)
                 # --------------------------------------------------
                 with prod_tab4:
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
@@ -599,7 +608,7 @@ if not due_category:
                             st.divider()
 
                 # --------------------------------------------------
-                # 📌 5. Drainage 탭
+                # 📌 5. Drainage 탭 (기본 선택 없음 / 진입 시 초기화)
                 # --------------------------------------------------
                 with prod_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
