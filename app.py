@@ -320,6 +320,8 @@ if not due_category:
                 unsafe_allow_html=True,
             )
 
+            reset_cnt = st.session_state.get("exp_reset_cnt", 0)
+            
             with st.expander(
                 "태웅메디컬 제품 라인업 카탈로그 상세보기",
                 key=f"cat_expander_{reset_cnt}",
