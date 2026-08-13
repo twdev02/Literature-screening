@@ -147,11 +147,16 @@ st.markdown(
         margin-bottom: 16px !important;
     }
 
-    /* 팝업창(Popover) 상단 겹침 방지 및 위치/높이 개선 */
+    /* 팝업창 외곽 레이어 바닥에서 강제 이격 */
+    div[data-testid="stPopoverContent"] {
+        bottom: auto !important;
+        margin-top: 10px !important;
+    }
+
+    /* 팝업창(Popover) 높이 슬림화 및 100% 배율 바닥 닿음 완벽 해결 */
     div[data-testid="stPopoverBody"] {
-        max-height: 55vh !important;
-        margin-top: 15px !important;       /* 버튼과 겹치지 않게 위쪽 여백 확보 */
-        margin-bottom: 40px !important;    /* 바닥 맞닿음 방지 */
+        max-height: 40vh !important;       /* 세로 높이를 화면의 40%로 작게 만들어 바닥에 늘어남 방지 */
+        bottom: auto !important;
         overflow-y: auto !important;
         min-width: 720px !important;
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25) !important;
@@ -220,7 +225,7 @@ with st.sidebar:
         key="radio_category",
     )
 
-    # 세부 모델 선택 (Uncovered -> Covered -> ComVi 순서)
+    # 세부 모델 선택 (수정 포인트: Uncovered -> Covered -> ComVi 순서 지정)
     sub_model = "전체 (All Models)"
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -514,7 +519,7 @@ if not due_category:
                             st.divider()
 
                 # --------------------------------------------------
-                # 📌 5. Drainage 탭 (괄호 제거 및 정식 제품명으로 수정)
+                # 📌 5. Drainage 탭 (괄호 제거 및 정식 제품명 표기)
                 # --------------------------------------------------
                 with prod_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
