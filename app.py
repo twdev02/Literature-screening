@@ -136,28 +136,6 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 🔥 팝업창 너비 및 높이 고정 (문장 길이에 따라 안 늘어남) */
-    div[data-testid="stPopoverContent"] {
-        position: fixed !important;
-        top: 38% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        width: 760px !important;
-        min-width: 760px !important;
-        max-width: 760px !important;
-        z-index: 999999 !important;
-    }
-
-    div[data-testid="stPopoverBody"] {
-        max-height: 460px !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        padding: 24px !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
-        border-radius: 16px !important;
-        background-color: #ffffff !important;
-    }
-
     /* 제품명 한 줄 유지 & 긴 설명 문장 아래 줄 자동 넘김 스타일 */
     .prod-item-title {
         font-weight: 700;
@@ -188,15 +166,11 @@ if "tab2_result" not in st.session_state:
 if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
-# 🔥 팝업 닫힘 후 재오픈 시 메모리를 새로 부여하기 위한 세션 카운터
-if "popover_session_id" not in st.session_state:
-    st.session_state["popover_session_id"] = 0
 
-
+# HOME 버튼 클릭 시 리셋을 위한 콜백 함수
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
-    st.session_state["popover_session_id"] += 1
 
 
 # --------------------------------------------------
@@ -318,20 +292,18 @@ if not due_category:
                 """
                 <div class="card-title">TARGET PRODUCTS</div>
                 <div class="card-value">Taewoong Medical’s Stent Product Lines</div>
-                <div class="card-desc">클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
+                <div class="card-desc">아래 상자를 클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
                 """,
                 unsafe_allow_html=True,
             )
 
-            # 🔥 세션 ID를 통해 팝업창을 열 때마다 이전 흔적을 완벽 소멸시킴
-            sid = st.session_state["popover_session_id"]
-
-            with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
+            # 🔥 [방법 2 적용] 팝업 대신 안정적인 접이식 상자로 배치 (버그 완전 차단)
+            with st.expander("📂 태웅메디컬 제품 라인업 카탈로그 상세보기"):
                 prod_view_tab = st.segmented_control(
                     "",
                     options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
                     default=None,
-                    key=f"pop_main_tab_seg_{sid}",
+                    key="exp_main_tab_seg",
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -348,7 +320,7 @@ if not due_category:
                             "ComVi Stent",
                         ],
                         default=None,
-                        key=f"pop_biliary_seg_{sid}",
+                        key="exp_biliary_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -430,7 +402,7 @@ if not due_category:
                             "Covered Stent",
                         ],
                         default=None,
-                        key=f"pop_esophageal_seg_{sid}",
+                        key="exp_esophageal_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -473,7 +445,7 @@ if not due_category:
                             "ComVi Stent",
                         ],
                         default=None,
-                        key=f"pop_pyloric_seg_{sid}",
+                        key="exp_pyloric_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -550,7 +522,7 @@ if not due_category:
                             "ComVi Stent",
                         ],
                         default=None,
-                        key=f"pop_colonic_seg_{sid}",
+                        key="exp_colonic_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -627,7 +599,7 @@ if not due_category:
                             "Nagi Stent",
                         ],
                         default=None,
-                        key=f"pop_drainage_seg_{sid}",
+                        key="exp_drainage_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
