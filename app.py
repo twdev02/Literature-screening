@@ -193,9 +193,8 @@ def reset_to_home():
     for key in exp_keys:
         if key in st.session_state:
             st.session_state[key] = None
-    st.session_state["expander_open"] = False
-    st.rerun()
-
+    st.session_state["exp_reset_cnt"] = st.session_state.get("exp_reset_cnt", 0) + 1
+    
 
 # --------------------------------------------------
 # ⚙️ 사이드바 UI 구성 (순서: 설정 -> 품목 -> 세부모델 -> HOME)
@@ -323,7 +322,7 @@ if not due_category:
 
             with st.expander(
                 "태웅메디컬 제품 라인업 카탈로그 상세보기",
-                expanded=st.session_state.get("expander_open", False),
+                key=f"cat_expander_{reset_cnt}",
             ):
                 prod_view_tab = st.segmented_control(
                     "",
