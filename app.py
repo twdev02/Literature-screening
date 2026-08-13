@@ -16,12 +16,6 @@ st.set_page_config(
 st.markdown(
     """
 <style>
-    /* 1. 홈 화면 전체 세로 스크롤 허용 (창 짤림 방지) */
-    html, body, [data-testid="stAppViewContainer"] {
-        overflow-y: auto !important;
-        height: auto !important;
-    }
-
     /* 상단 메인 히어로 배너 디자인 */
     .hero-container {
         background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%);
@@ -136,35 +130,18 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* Expander(세부품목) 펼쳤을 때 제목과 내부 컨텐츠 간격 넓히기 */
+    /* Expander(세부품목) 펼쳤을 때 내부 여백 조정 */
     div[data-testid="stExpanderDetails"] {
-        padding-top: 18px !important;
-        margin-top: 8px !important;
+        padding-top: 16px !important;
     }
 
-    /* Expander 상자 간 바깥 간격 추가 */
-    div[data-testid="stExpander"] {
-        margin-bottom: 16px !important;
-    }
-
-    /* 🔥 팝업창(Popover) 위치를 화면 중앙으로 고정하고 높이 제한 (맞물림/짤림 완벽 해결) */
-    div[data-testid="stPopoverContent"] {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        width: 800px !important;
-        max-width: 90vw !important;
-        z-index: 999999 !important;
-    }
-
+    /* 팝업창 내부 높이 및 스크롤 설정 */
     div[data-testid="stPopoverBody"] {
-        max-height: 65vh !important;
+        max-height: 480px !important;
         overflow-y: auto !important;
-        padding: 24px !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
-        border-radius: 16px !important;
-        background-color: #ffffff !important;
+        min-width: 700px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+        border-radius: 12px !important;
     }
 </style>
 """,
@@ -598,6 +575,8 @@ if not due_category:
                 unsafe_allow_html=True,
             )
 
+    # 🔥 [핵심 추가] 홈 화면 전체 하단 높이를 충분히 확장하여 팝업창 바닥 이격 공간 확보
+    st.markdown("<div style='height: 400px;'></div>", unsafe_allow_html=True)
     st.stop()
 
 # --------------------------------------------------
