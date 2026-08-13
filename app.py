@@ -173,9 +173,11 @@ if "tab2_result" not in st.session_state:
 if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
-# 접이식 카탈로그 개폐 제어를 위한 세션 초기화
+# 접이식 카탈로그 개폐 제어 및 이전 탭 기억용 세션
 if "expander_open" not in st.session_state:
     st.session_state["expander_open"] = False
+if "prev_main_tab" not in st.session_state:
+    st.session_state["prev_main_tab"] = None
 
 
 # HOME 버튼 클릭 시 카탈로그를 닫고 내부 세그먼트 상태도 리셋
@@ -193,6 +195,7 @@ def reset_to_home():
     for key in exp_keys:
         if key in st.session_state:
             st.session_state[key] = None
+    st.session_state["prev_main_tab"] = None
     st.session_state["exp_reset_cnt"] = st.session_state.get("exp_reset_cnt", 0) + 1
 
 
@@ -344,6 +347,15 @@ if not due_category:
                     key="exp_main_tab_seg",
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
+
+                # 💡 핵심: 상위 카탈로그 탭이 변경되면 하위 세부 선택을 완전 리셋하여 잔상 제거
+                if prod_view_tab != st.session_state["prev_main_tab"]:
+                    st.session_state["prev_main_tab"] = prod_view_tab
+                    st.session_state["exp_biliary_seg"] = None
+                    st.session_state["exp_esophageal_seg"] = None
+                    st.session_state["exp_pyloric_seg"] = None
+                    st.session_state["exp_colonic_seg"] = None
+                    st.session_state["exp_drainage_seg"] = None
 
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
@@ -1055,7 +1067,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 📌 key="main_mode_seg" 세션 키 고정으로 카탈로그 조작 시 PICO로 튕기는 현상 완벽 방지
 selected_mode = st.segmented_control(
     "",
     options=[
