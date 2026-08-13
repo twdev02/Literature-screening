@@ -114,21 +114,26 @@ st.markdown(
         margin: 0;
     }
 
-    /* 세그먼티드 컨트롤 커스텀 */
+    /* 🔥 세그먼티드 컨트롤 커스텀 (상단 탭 줄바꿈 꺾임 완벽 방지) */
     div[data-testid="stSegmentedControl"] {
         background-color: #f1f5f9;
         padding: 6px;
         border-radius: 12px;
         border: 1px solid #e2e8f0;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
     }
     
     div[data-testid="stSegmentedControl"] button {
         border-radius: 8px !important;
         font-weight: 1000 !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         border: none !important;
-        padding: 8px 24px !important;
+        padding: 8px 14px !important;
+        white-space: nowrap !important;
         transition: all 0.2s ease !important;
+        flex: 1 1 auto !important;
     }
     
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
@@ -334,7 +339,7 @@ if not due_category:
                 st.markdown("<br>", unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭 (순정 st.container 적용 - 밀림 정돈)
+                # 📌 1. Biliary 탭 (가변 높이 적용)
                 # --------------------------------------------------
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
@@ -357,7 +362,7 @@ if not due_category:
                             ("M-Type", "biliary_uncovered_m.png", "Mesh 구조 설계로 방사력 유지"),
                             ("LCD-Type", "biliary_uncovered_lcd.png", "Large Cell Design 적용"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in biliary_uncovered_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -382,7 +387,7 @@ if not due_category:
                             ("Kaffes", "biliary_covered_kaffes.png", "제거 용이 디자인 (Removable Stent)"),
                             ("Bumpy", "biliary_covered_bumpy.png", "Bumpy 굴곡 구조 적용, 췌관 Stricture용"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in biliary_covered_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -404,7 +409,7 @@ if not due_category:
                             ("Both Bare-Type", "biliary_comvi_bothbare.png", "ComVi 이중막 구조 + 양 끝단 Bare 앵커링"),
                             ("End Bare-Type", "biliary_comvi_endbare.png", "한쪽 끝단 Bare 적용 모델"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in biliary_comvi_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -421,7 +426,7 @@ if not due_category:
                                 st.divider()
 
                 # --------------------------------------------------
-                # 📌 2. Esophageal 탭 (순정 st.container 적용 - 밀림 정돈)
+                # 📌 2. Esophageal 탭 (가변 높이 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Esophageal":
                     st.markdown("#### **Niti-S Esophageal Stent**")
@@ -446,7 +451,7 @@ if not due_category:
                             ("Double-Type", "esophageal_covered_double.png", "이중 레이어 메쉬 구조로 인체공학적 유연성 확보"),
                             ("Beta-2", "esophageal_covered_beta2.png", "Beta-2 차세대 유연성 메쉬 설계 모델"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in esophageal_covered_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -463,7 +468,7 @@ if not due_category:
                                 st.divider()
 
                 # --------------------------------------------------
-                # 📌 3. Pyloric/Duodenal 탭 (순정 st.container 적용 - 밀림 정돈)
+                # 📌 3. Pyloric/Duodenal 탭 (가변 높이 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Pyloric/Duodenal":
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
@@ -483,7 +488,7 @@ if not due_category:
                         pyloric_uncovered_models = [
                             ("D-Type", "pyloric_uncovered_d.png", "Dual Structure 유연 구조로 위출구/십이지장 협착부 유연성 및 통과성 강화"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in pyloric_uncovered_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -505,7 +510,7 @@ if not due_category:
                             ("Both Bare-Type", "pyloric_covered_bothbare.png", "양 끝단 Bare 구조 적용으로 스텐트 위치 고정 및 이동(Migration) 방지"),
                             ("End Bare-Type", "pyloric_covered_endbare.png", "한쪽 끝단 Bare 적용으로 조직 고정력 향상"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in pyloric_covered_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -526,7 +531,7 @@ if not due_category:
                             ("Flare-Type", "pyloric_comvi_flare.png", "ComVi 이중막 구조 + Flare 확장 구조로 위치 고정력 극대화"),
                             ("Both Bare-Type", "pyloric_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조 + 양 끝단 Bare 앵커링"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in pyloric_comvi_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -543,7 +548,7 @@ if not due_category:
                                 st.divider()
 
                 # --------------------------------------------------
-                # 📌 4. Colonic 탭 (순정 st.container 적용 - 밀림 정돈)
+                # 📌 4. Colonic 탭 (가변 높이 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Colonic":
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
@@ -564,7 +569,7 @@ if not due_category:
                             ("S-Type", "colonic_uncovered_s.png", "기본형 대장 Uncovered Stent 구조"),
                             ("D-Type", "colonic_uncovered_d.png", "Dual Structure 적용으로 대장 굴곡부 우수한 통과성 확보"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in colonic_uncovered_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -586,7 +591,7 @@ if not due_category:
                             ("Both Bare-Type", "colonic_covered_bothbare.png", "양 끝단 Bare 구조 적용으로 이동(Migration) 방지"),
                             ("End Bare-Type", "colonic_covered_endbare.png", "한쪽 끝단 Bare 적용으로 대장 내 고정력 향상"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in colonic_covered_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -606,7 +611,7 @@ if not due_category:
                         colonic_comvi_models = [
                             ("Both Bare-Type", "colonic_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조로 조직 침투 차단 + 양 끝단 Bare 앵커링"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in colonic_comvi_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -623,7 +628,7 @@ if not due_category:
                                 st.divider()
 
                 # --------------------------------------------------
-                # 📌 5. Drainage 탭 (순정 st.container 적용 - 밀림 정돈)
+                # 📌 5. Drainage 탭 (가변 높이 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Drainage":
                     st.markdown("#### **Niti-S Drainage Stent**")
@@ -643,7 +648,7 @@ if not due_category:
                         spaxus_models = [
                             ("SPAXUS", "drainage_spaxus.png", "EUS-guided Transluminal Drainage 전용 Lumen-Apposing Stent"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in spaxus_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -663,7 +668,7 @@ if not due_category:
                         hot_spaxus_models = [
                             ("Hot SPAXUS", "drainage_hot_spaxus.png", "Electrocautery Delivery System 일체형 스텐트"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in hot_spaxus_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
@@ -683,7 +688,7 @@ if not due_category:
                         nagi_models = [
                             ("Nagi", "drainage_nagi.png", "Pancreatic Pseudocyst & WON 배액 전용 대구경 Flare 스텐트"),
                         ]
-                        with st.container(height=380):
+                        with st.container(border=True):
                             for m_name, m_img, m_desc in nagi_models:
                                 c1, c2 = st.columns([1, 2.2])
                                 with c1:
