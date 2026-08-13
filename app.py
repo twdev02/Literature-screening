@@ -189,25 +189,10 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
 
-# 🔥 [핵심 기능 1 & 2] HOME 및 팝업 카탈로그 초기화 콜백 함수
-def reset_popover_selections():
-    popover_keys = [
-        "pop_main_tab_seg",
-        "pop_biliary_seg",
-        "pop_esophageal_seg",
-        "pop_pyloric_seg",
-        "pop_colonic_seg",
-        "pop_drainage_seg",
-    ]
-    for key in popover_keys:
-        if key in st.session_state:
-            st.session_state[key] = None
-
-
+# HOME 버튼 클릭 시 리셋을 위한 콜백 함수
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
-    reset_popover_selections()
 
 
 # --------------------------------------------------
@@ -335,18 +320,16 @@ if not due_category:
             )
 
             with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
-                # 팝업을 열거나 다른 탭으로 바꿀 때 세부 선택 초기화 실행
                 prod_view_tab = st.segmented_control(
                     "",
                     options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
                     default=None,
                     key="pop_main_tab_seg",
-                    on_change=reset_popover_selections,
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭 (기본 선택 없음 / 탭 이동 시 리셋)
+                # 📌 1. Biliary 탭
                 # --------------------------------------------------
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
