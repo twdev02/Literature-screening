@@ -283,7 +283,7 @@ with st.sidebar:
             options=[
                 "Niti-S SPAXUS Stent",
                 "Niti-S Hot SPAXUS Stent",
-                "Niti-S NAGI Stent",
+                "Niti-S Nagi Stent",
             ],
         )
 
