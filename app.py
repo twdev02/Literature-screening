@@ -684,7 +684,7 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S NAGI Stent</div>'
+                                    f'<div class="prod-item-title">Niti-S Nagi Stent</div>'
                                     f'<div class="prod-item-desc">• {m_desc}</div>',
                                     unsafe_allow_html=True,
                                 )
