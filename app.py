@@ -303,7 +303,7 @@ if not due_category:
     )
 
     # 🔥 컬럼 비율을 [1.6, 1, 1.6]으로 조정하여 세 번째 카드의 제목이 한 줄로 예쁘게 정렬됨
-    col_ov1, col_ov2, col_ov3 = st.columns([1.6, 1, 1.6])
+    col_ov1, col_ov2, col_ov3 = st.columns([2.0, 1, 1.5])
 
     with col_ov1:
         with st.container(border=True):
