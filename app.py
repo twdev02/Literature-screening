@@ -78,10 +78,11 @@ st.markdown(
         margin-bottom: 4px;
     }
     .card-value {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 700;
         color: #0f172a;
         margin-bottom: 4px;
+        letter-spacing: -0.3px;
     }
     .card-desc {
         font-size: 12px;
@@ -167,15 +168,27 @@ if "tab2_result" not in st.session_state:
 if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
+# 🔥 접이식 카탈로그 개폐 제어를 위한 세션 초기화
+if "expander_open" not in st.session_state:
+    st.session_state["expander_open"] = False
 
-# 🔥 [수정] HOME 버튼 클릭 시 모든 탭과 펼침 상자를 초기화하고 즉시 새로고침
+
+# 🔥 HOME 버튼 클릭 시 카탈로그를 닫고 내부 세그먼트 상태도 리셋
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
-    exp_keys = ["exp_main_tab_seg", "exp_biliary_seg", "exp_esophageal_seg", "exp_pyloric_seg", "exp_colonic_seg", "exp_drainage_seg"]
+    exp_keys = [
+        "exp_main_tab_seg",
+        "exp_biliary_seg",
+        "exp_esophageal_seg",
+        "exp_pyloric_seg",
+        "exp_colonic_seg",
+        "exp_drainage_seg",
+    ]
     for key in exp_keys:
         if key in st.session_state:
             st.session_state[key] = None
+    st.session_state["expander_open"] = False
 
 
 # --------------------------------------------------
@@ -289,8 +302,8 @@ if not due_category:
         unsafe_allow_html=True,
     )
 
-    # 🔥 [수정] 3개 카드의 컬럼 비율을 [2, 1.2, 1.2]로 조절하여 3번째 카드 제목의 두 줄 줄바꿈 현상을 완벽 해결
-    col_ov1, col_ov2, col_ov3 = st.columns([2, 1.2, 1.2])
+    # 🔥 컬럼 비율을 [1.6, 1, 1.6]으로 조정하여 세 번째 카드의 제목이 한 줄로 예쁘게 정렬됨
+    col_ov1, col_ov2, col_ov3 = st.columns([1.6, 1, 1.6])
 
     with col_ov1:
         with st.container(border=True):
@@ -303,10 +316,20 @@ if not due_category:
                 unsafe_allow_html=True,
             )
 
-            with st.expander("📂 태웅메디컬 제품 라인업 카탈로그 상세보기"):
+            # 🔥 expanded=st.session_state["expander_open"] 적용으로 HOME 버튼 클릭 시 즉시 닫힘
+            with st.expander(
+                "📂 태웅메디컬 제품 라인업 카탈로그 상세보기",
+                expanded=st.session_state.get("expander_open", False),
+            ):
                 prod_view_tab = st.segmented_control(
                     "",
-                    options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
+                    options=[
+                        "Biliary",
+                        "Esophageal",
+                        "Pyloric/Duodenal",
+                        "Colonic",
+                        "Drainage",
+                    ],
                     default=None,
                     key="exp_main_tab_seg",
                 )
@@ -331,10 +354,26 @@ if not due_category:
 
                     if biliary_sel == "Uncovered Stent":
                         biliary_uncovered_models = [
-                            ("S-Type", "biliary_uncovered_s.png", "기본형 Uncovered Stent"),
-                            ("D-Type", "biliary_uncovered_d.png", "Dual Structure 유연성 강화 모델"),
-                            ("M-Type", "biliary_uncovered_m.png", "Mesh 구조 설계로 방사력 유지"),
-                            ("LCD-Type", "biliary_uncovered_lcd.png", "Large Cell Design 적용"),
+                            (
+                                "S-Type",
+                                "biliary_uncovered_s.png",
+                                "기본형 Uncovered Stent",
+                            ),
+                            (
+                                "D-Type",
+                                "biliary_uncovered_d.png",
+                                "Dual Structure 유연성 강화 모델",
+                            ),
+                            (
+                                "M-Type",
+                                "biliary_uncovered_m.png",
+                                "Mesh 구조 설계로 방사력 유지",
+                            ),
+                            (
+                                "LCD-Type",
+                                "biliary_uncovered_lcd.png",
+                                "Large Cell Design 적용",
+                            ),
                         ]
                         for m_name, m_img, m_desc in biliary_uncovered_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -345,20 +384,46 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Biliary Uncovered Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">Niti-S'
+                                    f" Biliary Uncovered Stent [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif biliary_sel == "Covered Stent":
                         biliary_covered_models = [
-                            ("Full Covered-Type", "biliary_covered_full.png", "전체 피복 구조로 종양 내성장 방지"),
-                            ("Both Bare-Type", "biliary_covered_bothbare.png", "양끝 단 Bare 구조로 이동 방지"),
-                            ("Giobor", "biliary_covered_giobor.png", "특수 덮개 구조 및 위치 고정 강화"),
-                            ("Flare-Type", "biliary_covered_flare.png", "Flared Ends 적용으로 Position 유지"),
-                            ("Kaffes", "biliary_covered_kaffes.png", "제거 용이 디자인 (Removable Stent)"),
-                            ("Bumpy", "biliary_covered_bumpy.png", "Bumpy 굴곡 구조 적용, 췌관 Stricture용"),
+                            (
+                                "Full Covered-Type",
+                                "biliary_covered_full.png",
+                                "전체 피복 구조로 종양 내성장 방지",
+                            ),
+                            (
+                                "Both Bare-Type",
+                                "biliary_covered_bothbare.png",
+                                "양끝 단 Bare 구조로 이동 방지",
+                            ),
+                            (
+                                "Giobor",
+                                "biliary_covered_giobor.png",
+                                "특수 덮개 구조 및 위치 고정 강화",
+                            ),
+                            (
+                                "Flare-Type",
+                                "biliary_covered_flare.png",
+                                "Flared Ends 적용으로 Position 유지",
+                            ),
+                            (
+                                "Kaffes",
+                                "biliary_covered_kaffes.png",
+                                "제거 용이 디자인 (Removable Stent)",
+                            ),
+                            (
+                                "Bumpy",
+                                "biliary_covered_bumpy.png",
+                                "Bumpy 굴곡 구조 적용, 췌관 Stricture용",
+                            ),
                         ]
                         for m_name, m_img, m_desc in biliary_covered_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -369,17 +434,32 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Biliary Covered Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">Niti-S'
+                                    f" Biliary Covered Stent [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif biliary_sel == "ComVi Stent":
                         biliary_comvi_models = [
-                            ("Full Covered-Type", "biliary_comvi_full.png", "이중막(PTFE+PTFE) 구조로 Tissue Ingrowth 완전 차단"),
-                            ("Both Bare-Type", "biliary_comvi_bothbare.png", "ComVi 이중막 구조 + 양 끝단 Bare 앵커링"),
-                            ("End Bare-Type", "biliary_comvi_endbare.png", "한쪽 끝단 Bare 적용 모델"),
+                            (
+                                "Full Covered-Type",
+                                "biliary_comvi_full.png",
+                                "이중막(PTFE+PTFE) 구조로 Tissue Ingrowth 완전"
+                                " 차단",
+                            ),
+                            (
+                                "Both Bare-Type",
+                                "biliary_comvi_bothbare.png",
+                                "ComVi 이중막 구조 + 양 끝단 Bare 앵커링",
+                            ),
+                            (
+                                "End Bare-Type",
+                                "biliary_comvi_endbare.png",
+                                "한쪽 끝단 Bare 적용 모델",
+                            ),
                         ]
                         for m_name, m_img, m_desc in biliary_comvi_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -390,8 +470,10 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">ComVi Biliary Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">ComVi'
+                                    f" Biliary Stent [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
@@ -413,14 +495,51 @@ if not due_category:
 
                     if esophageal_sel == "Covered Stent":
                         esophageal_covered_models = [
-                            ("Full Covered-Type", "esophageal_covered_full.png", "식도 전체 피복 구조로 병변 침투 방지 및 협착 완화"),
-                            ("Cervical", "esophageal_covered_cervical.png", "경부 식도(Cervical Esophagus) 협착 전용 특수 설계"),
-                            ("Both Bare-Type", "esophageal_covered_bothbare.png", "양 끝단 Bare 메쉬 적용으로 위치 이동(Migration) 방지"),
-                            ("Conio", "esophageal_covered_conio.png", "Conio 형태 적용 특수 구조 모델"),
-                            ("Anti Reflux-Type", "esophageal_covered_antireflux.png", "역류 방지 밸브 구조 적용으로 위산 역류 예방"),
-                            ("Double Anti Reflux-Type", "esophageal_covered_doubleantireflux.png", "이중 역류 방지 구조로 강력한 역류 차단 기능 제공"),
-                            ("Double-Type", "esophageal_covered_double.png", "이중 레이어 메쉬 구조로 인체공학적 유연성 확보"),
-                            ("Beta-2", "esophageal_covered_beta2.png", "Beta-2 차세대 유연성 메쉬 설계 모델"),
+                            (
+                                "Full Covered-Type",
+                                "esophageal_covered_full.png",
+                                "식도 전체 피복 구조로 병변 침투 방지 및 협착"
+                                " 완화",
+                            ),
+                            (
+                                "Cervical",
+                                "esophageal_covered_cervical.png",
+                                "경부 식도(Cervical Esophagus) 협착 전용 특수"
+                                " 설계",
+                            ),
+                            (
+                                "Both Bare-Type",
+                                "esophageal_covered_bothbare.png",
+                                "양 끝단 Bare 메쉬 적용으로 위치 이동(Migration)"
+                                " 방지",
+                            ),
+                            (
+                                "Conio",
+                                "esophageal_covered_conio.png",
+                                "Conio 형태 적용 특수 구조 모델",
+                            ),
+                            (
+                                "Anti Reflux-Type",
+                                "esophageal_covered_antireflux.png",
+                                "역류 방지 밸브 구조 적용으로 위산 역류 예방",
+                            ),
+                            (
+                                "Double Anti Reflux-Type",
+                                "esophageal_covered_doubleantireflux.png",
+                                "이중 역류 방지 구조로 강력한 역류 차단 기능"
+                                " 제공",
+                            ),
+                            (
+                                "Double-Type",
+                                "esophageal_covered_double.png",
+                                "이중 레이어 메쉬 구조로 인체공학적 유연성"
+                                " 확보",
+                            ),
+                            (
+                                "Beta-2",
+                                "esophageal_covered_beta2.png",
+                                "Beta-2 차세대 유연성 메쉬 설계 모델",
+                            ),
                         ]
                         for m_name, m_img, m_desc in esophageal_covered_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -431,8 +550,10 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Esophageal Covered Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">Niti-S'
+                                    f" Esophageal Covered Stent [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
@@ -456,7 +577,12 @@ if not due_category:
 
                     if pyloric_sel == "Uncovered Stent":
                         pyloric_uncovered_models = [
-                            ("D-Type", "pyloric_uncovered_d.png", "Dual Structure 유연 구조로 위출구/십이지장 협착부 유연성 및 통과성 강화"),
+                            (
+                                "D-Type",
+                                "pyloric_uncovered_d.png",
+                                "Dual Structure 유연 구조로 위출구/십이지장 협착부"
+                                " 유연성 및 통과성 강화",
+                            ),
                         ]
                         for m_name, m_img, m_desc in pyloric_uncovered_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -467,17 +593,34 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Pyloric/Duodenal Uncovered Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">Niti-S'
+                                    " Pyloric/Duodenal Uncovered Stent"
+                                    f" [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif pyloric_sel == "Covered Stent":
                         pyloric_covered_models = [
-                            ("Full Covered-Type", "pyloric_covered_full.png", "전체 피복 구조 적용으로 위출구 및 십이지장 종양 내성장 방지"),
-                            ("Both Bare-Type", "pyloric_covered_bothbare.png", "양 끝단 Bare 구조 적용으로 스텐트 위치 고정 및 이동(Migration) 방지"),
-                            ("End Bare-Type", "pyloric_covered_endbare.png", "한쪽 끝단 Bare 적용으로 조직 고정력 향상"),
+                            (
+                                "Full Covered-Type",
+                                "pyloric_covered_full.png",
+                                "전체 피복 구조 적용으로 위출구 및 십이지장 종양"
+                                " 내성장 방지",
+                            ),
+                            (
+                                "Both Bare-Type",
+                                "pyloric_covered_bothbare.png",
+                                "양 끝단 Bare 구조 적용으로 스텐트 위치 고정 및"
+                                " 이동(Migration) 방지",
+                            ),
+                            (
+                                "End Bare-Type",
+                                "pyloric_covered_endbare.png",
+                                "한쪽 끝단 Bare 적용으로 조직 고정력 향상",
+                            ),
                         ]
                         for m_name, m_img, m_desc in pyloric_covered_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -488,16 +631,28 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Pyloric/Duodenal Covered Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">Niti-S'
+                                    f" Pyloric/Duodenal Covered Stent [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif pyloric_sel == "ComVi Stent":
                         pyloric_comvi_models = [
-                            ("Flare-Type", "pyloric_comvi_flare.png", "ComVi 이중막 구조 + Flare 확장 구조로 위치 고정력 극대화"),
-                            ("Both Bare-Type", "pyloric_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조 + 양 끝단 Bare 앵커링"),
+                            (
+                                "Flare-Type",
+                                "pyloric_comvi_flare.png",
+                                "ComVi 이중막 구조 + Flare 확장 구조로 위치"
+                                " 고정력 극대화",
+                            ),
+                            (
+                                "Both Bare-Type",
+                                "pyloric_comvi_bothbare.png",
+                                "ComVi 이중막(PTFE+PTFE) 구조 + 양 끝단 Bare"
+                                " 앵커링",
+                            ),
                         ]
                         for m_name, m_img, m_desc in pyloric_comvi_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -508,8 +663,10 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">ComVi Pyloric/Duodenal Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">ComVi'
+                                    f" Pyloric/Duodenal Stent [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
@@ -533,8 +690,17 @@ if not due_category:
 
                     if colonic_sel == "Uncovered Stent":
                         colonic_uncovered_models = [
-                            ("S-Type", "colonic_uncovered_s.png", "기본형 대장 Uncovered Stent 구조"),
-                            ("D-Type", "colonic_uncovered_d.png", "Dual Structure 적용으로 대장 굴곡부 우수한 통과성 확보"),
+                            (
+                                "S-Type",
+                                "colonic_uncovered_s.png",
+                                "기본형 대장 Uncovered Stent 구조",
+                            ),
+                            (
+                                "D-Type",
+                                "colonic_uncovered_d.png",
+                                "Dual Structure 적용으로 대장 굴곡부 우수한"
+                                " 통과성 확보",
+                            ),
                         ]
                         for m_name, m_img, m_desc in colonic_uncovered_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -545,17 +711,33 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Enteral Colonic Uncovered Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">Niti-S'
+                                    " Enteral Colonic Uncovered Stent"
+                                    f" [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif colonic_sel == "Covered Stent":
                         colonic_covered_models = [
-                            ("Full Covered-Type", "colonic_covered_full.png", "전체 피복 구조로 대장/직장 종양 내성장 차단"),
-                            ("Both Bare-Type", "colonic_covered_bothbare.png", "양 끝단 Bare 구조 적용으로 이동(Migration) 방지"),
-                            ("End Bare-Type", "colonic_covered_endbare.png", "한쪽 끝단 Bare 적용으로 대장 내 고정력 향상"),
+                            (
+                                "Full Covered-Type",
+                                "colonic_covered_full.png",
+                                "전체 피복 구조로 대장/직장 종양 내성장 차단",
+                            ),
+                            (
+                                "Both Bare-Type",
+                                "colonic_covered_bothbare.png",
+                                "양 끝단 Bare 구조 적용으로 이동(Migration)"
+                                " 방지",
+                            ),
+                            (
+                                "End Bare-Type",
+                                "colonic_covered_endbare.png",
+                                "한쪽 끝단 Bare 적용으로 대장 내 고정력 향상",
+                            ),
                         ]
                         for m_name, m_img, m_desc in colonic_covered_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -566,15 +748,23 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Enteral Colonic Covered Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">Niti-S'
+                                    " Enteral Colonic Covered Stent"
+                                    f" [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif colonic_sel == "ComVi Stent":
                         colonic_comvi_models = [
-                            ("Both Bare-Type", "colonic_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조로 조직 침투 차단 + 양 끝단 Bare 앵커링"),
+                            (
+                                "Both Bare-Type",
+                                "colonic_comvi_bothbare.png",
+                                "ComVi 이중막(PTFE+PTFE) 구조로 조직 침투 차단"
+                                " + 양 끝단 Bare 앵커링",
+                            ),
                         ]
                         for m_name, m_img, m_desc in colonic_comvi_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -585,8 +775,10 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">ComVi Enteral Colonic Stent [{m_name}]</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    f'<div class="prod-item-title">ComVi'
+                                    f" Enteral Colonic Stent [{m_name}]</div>"
+                                    f'<div class="prod-item-desc">•'
+                                    f" {m_desc}</div>",
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
@@ -610,7 +802,12 @@ if not due_category:
 
                     if drainage_sel == "SPAXUS Stent":
                         spaxus_models = [
-                            ("SPAXUS", "drainage_spaxus.png", "EUS-guided Transluminal Drainage 전용 Lumen-Apposing Stent"),
+                            (
+                                "SPAXUS",
+                                "drainage_spaxus.png",
+                                "EUS-guided Transluminal Drainage 전용"
+                                " Lumen-Apposing Stent",
+                            ),
                         ]
                         for m_name, m_img, m_desc in spaxus_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -621,15 +818,20 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S SPAXUS Stent</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    '<div class="prod-item-title">Niti-S SPAXUS'
+                                    ' Stent</div><div'
+                                    f' class="prod-item-desc">• {m_desc}</div>',
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif drainage_sel == "Hot SPAXUS Stent":
                         hot_spaxus_models = [
-                            ("Hot SPAXUS", "drainage_hot_spaxus.png", "Electrocautery Delivery System 일체형 스텐트"),
+                            (
+                                "Hot SPAXUS",
+                                "drainage_hot_spaxus.png",
+                                "Electrocautery Delivery System 일체형 스텐트",
+                            ),
                         ]
                         for m_name, m_img, m_desc in hot_spaxus_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -640,15 +842,21 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Hot SPAXUS Stent</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    '<div class="prod-item-title">Niti-S Hot'
+                                    ' SPAXUS Stent</div><div'
+                                    f' class="prod-item-desc">• {m_desc}</div>',
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
 
                     elif drainage_sel == "Nagi Stent":
                         nagi_models = [
-                            ("Nagi", "drainage_nagi.png", "Pancreatic Pseudocyst & WON 배액 전용 대구경 Flare 스텐트"),
+                            (
+                                "Nagi",
+                                "drainage_nagi.png",
+                                "Pancreatic Pseudocyst & WON 배액 전용 대구경"
+                                " Flare 스텐트",
+                            ),
                         ]
                         for m_name, m_img, m_desc in nagi_models:
                             c1, c2 = st.columns([1, 2.2])
@@ -659,8 +867,9 @@ if not due_category:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
                                 st.markdown(
-                                    f'<div class="prod-item-title">Niti-S Nagi Stent</div>'
-                                    f'<div class="prod-item-desc">• {m_desc}</div>',
+                                    '<div class="prod-item-title">Niti-S Nagi'
+                                    ' Stent</div><div'
+                                    f' class="prod-item-desc">• {m_desc}</div>',
                                     unsafe_allow_html=True,
                                 )
                             st.divider()
@@ -682,7 +891,7 @@ if not due_category:
             st.markdown(
                 """
                 <div class="card-title">REGULATORY GOAL</div>
-                <div class="card-value">Standardization and Automation of Literature Review</div>
+                <div class="card-value" style="white-space: nowrap; font-size: 14px;">Standardization and Automation of Literature Review</div>
                 <div class="card-desc">일관성 및 추적성을 확보한 스크리닝 기록</div>
                 <br>
                 """,
