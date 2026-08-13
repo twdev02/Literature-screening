@@ -136,7 +136,7 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 팝업창 너비 및 높이 고정 (문장 길이에 따라 안 늘어남) */
+    /* 🔥 팝업창 너비 및 높이 고정 (문장 길이에 따라 안 늘어남) */
     div[data-testid="stPopoverContent"] {
         position: fixed !important;
         top: 38% !important;
@@ -188,26 +188,15 @@ if "tab2_result" not in st.session_state:
 if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
-
-# HOME 및 팝업 안전 리셋 함수 (버그 발생 방지 안전 처리)
-def reset_popover_selections():
-    popover_keys = [
-        "pop_biliary_seg",
-        "pop_esophageal_seg",
-        "pop_pyloric_seg",
-        "pop_colonic_seg",
-        "pop_drainage_seg",
-    ]
-    for key in popover_keys:
-        st.session_state[key] = None
+# 🔥 팝업 닫힘 후 재오픈 시 메모리를 새로 부여하기 위한 세션 카운터
+if "popover_session_id" not in st.session_state:
+    st.session_state["popover_session_id"] = 0
 
 
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
-    if "pop_main_tab_seg" in st.session_state:
-        st.session_state["pop_main_tab_seg"] = None
-    reset_popover_selections()
+    st.session_state["popover_session_id"] += 1
 
 
 # --------------------------------------------------
@@ -334,13 +323,15 @@ if not due_category:
                 unsafe_allow_html=True,
             )
 
+            # 🔥 세션 ID를 통해 팝업창을 열 때마다 이전 흔적을 완벽 소멸시킴
+            sid = st.session_state["popover_session_id"]
+
             with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
                 prod_view_tab = st.segmented_control(
                     "",
                     options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
                     default=None,
-                    key="pop_main_tab_seg",
-                    on_change=reset_popover_selections,
+                    key=f"pop_main_tab_seg_{sid}",
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -357,7 +348,7 @@ if not due_category:
                             "ComVi Stent",
                         ],
                         default=None,
-                        key="pop_biliary_seg",
+                        key=f"pop_biliary_seg_{sid}",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -439,7 +430,7 @@ if not due_category:
                             "Covered Stent",
                         ],
                         default=None,
-                        key="pop_esophageal_seg",
+                        key=f"pop_esophageal_seg_{sid}",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -482,7 +473,7 @@ if not due_category:
                             "ComVi Stent",
                         ],
                         default=None,
-                        key="pop_pyloric_seg",
+                        key=f"pop_pyloric_seg_{sid}",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -559,7 +550,7 @@ if not due_category:
                             "ComVi Stent",
                         ],
                         default=None,
-                        key="pop_colonic_seg",
+                        key=f"pop_colonic_seg_{sid}",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -636,7 +627,7 @@ if not due_category:
                             "Nagi Stent",
                         ],
                         default=None,
-                        key="pop_drainage_seg",
+                        key=f"pop_drainage_seg_{sid}",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
