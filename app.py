@@ -331,7 +331,7 @@ if not due_category:
             reset_cnt = st.session_state.get("exp_reset_cnt", 0)
 
             with st.expander(
-                "태웅메디칼 제품 라인업 카탈로그 상세보기",
+                "View Detailed Product Catalog",
                 key=f"cat_expander_{reset_cnt}",
             ):
                 prod_view_tab = st.segmented_control(
