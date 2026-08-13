@@ -189,10 +189,9 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
 
-# 🔥 [수정] 세션 메모리에서 세그먼티드 컨트롤 선택 기록을 '완전 삭제'하는 강제 리셋 함수
+# HOME 및 팝업 안전 리셋 함수 (버그 발생 방지 안전 처리)
 def reset_popover_selections():
     popover_keys = [
-        "pop_main_tab_seg",
         "pop_biliary_seg",
         "pop_esophageal_seg",
         "pop_pyloric_seg",
@@ -200,13 +199,14 @@ def reset_popover_selections():
         "pop_drainage_seg",
     ]
     for key in popover_keys:
-        if key in st.session_state:
-            del st.session_state[key]
+        st.session_state[key] = None
 
 
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
+    if "pop_main_tab_seg" in st.session_state:
+        st.session_state["pop_main_tab_seg"] = None
     reset_popover_selections()
 
 
@@ -335,7 +335,6 @@ if not due_category:
             )
 
             with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
-                # 🔥 메인 탭 선택 - 기본값 None
                 prod_view_tab = st.segmented_control(
                     "",
                     options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
@@ -346,7 +345,7 @@ if not due_category:
                 st.markdown("<br>", unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭 (기본 선택 없음 / 세션 키 삭제 리셋 적용)
+                # 📌 1. Biliary 탭
                 # --------------------------------------------------
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
