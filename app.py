@@ -154,15 +154,15 @@ st.markdown(
         line-height: 1.5;
     }
 
-    /* 🔥 가변 높이 세로 스크롤 상자 (최대 400px까지만 늘어나고 내용이 적으면 딱 맞춰서 줄어듦) */
+    /* 🔥 가변 높이 세로 스크롤 상자 (안쪽 여백 padding 20px 추가하여 답답함 해결) */
     .catalog-scroll-box {
         max-height: 400px !important;
         overflow-y: auto !important;
-        padding-right: 12px !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 12px !important;
-        padding: 16px !important;
+        padding: 20px !important;            /* 상하좌우 안쪽 여백 시원하게 지정 */
         background-color: #ffffff !important;
+        box-sizing: border-box !important;
     }
 
     /* 스크롤바 디자인 예쁘게 다듬기 */
@@ -325,7 +325,7 @@ if not due_category:
         unsafe_allow_html=True,
     )
 
-    col_ov1, col_ov2, col_ov3 = st.columns([2.4, 1, 1.2])
+    col_ov1, col_ov2, col_ov3 = st.columns([1.6, 1, 1.6])
 
     with col_ov1:
         with st.container(border=True):
@@ -357,7 +357,7 @@ if not due_category:
                 st.markdown("<br>", unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭 (가변 높이 스크롤 적용)
+                # 📌 1. Biliary 탭 (가변 높이 및 20px 안쪽 여백 적용)
                 # --------------------------------------------------
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
@@ -417,7 +417,7 @@ if not due_category:
                         st.markdown(html_content, unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 2. Esophageal 탭 (가변 높이 스크롤 적용)
+                # 📌 2. Esophageal 탭 (가변 높이 및 20px 안쪽 여백 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Esophageal":
                     st.markdown("#### **Niti-S Esophageal Stent**")
@@ -450,7 +450,7 @@ if not due_category:
                         st.markdown(html_content, unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 3. Pyloric/Duodenal 탭 (가변 높이 스크롤 적용)
+                # 📌 3. Pyloric/Duodenal 탭 (가변 높이 및 20px 안쪽 여백 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Pyloric/Duodenal":
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
@@ -503,7 +503,7 @@ if not due_category:
                         st.markdown(html_content, unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 4. Colonic 탭 (가변 높이 스크롤 적용)
+                # 📌 4. Colonic 탭 (가변 높이 및 20px 안쪽 여백 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Colonic":
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
@@ -556,7 +556,7 @@ if not due_category:
                         st.markdown(html_content, unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 5. Drainage 탭 (가변 높이 스크롤 적용)
+                # 📌 5. Drainage 탭 (가변 높이 및 20px 안쪽 여백 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Drainage":
                     st.markdown("#### **Niti-S Drainage Stent**")
