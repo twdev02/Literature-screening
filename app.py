@@ -321,7 +321,7 @@ if not due_category:
             )
 
             with st.expander(
-                "📂 태웅메디컬 제품 라인업 카탈로그 상세보기",
+                "태웅메디컬 제품 라인업 카탈로그 상세보기",
                 expanded=st.session_state.get("expander_open", False),
             ):
                 prod_view_tab = st.segmented_control(
