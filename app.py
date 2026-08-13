@@ -189,17 +189,25 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
 
-# HOME 버튼 클릭 시 리셋을 위한 콜백 함수
+# 🔥 [핵심 기능 1 & 2] HOME 및 팝업 카탈로그 초기화 콜백 함수
+def reset_popover_selections():
+    popover_keys = [
+        "pop_main_tab_seg",
+        "pop_biliary_seg",
+        "pop_esophageal_seg",
+        "pop_pyloric_seg",
+        "pop_colonic_seg",
+        "pop_drainage_seg",
+    ]
+    for key in popover_keys:
+        if key in st.session_state:
+            st.session_state[key] = None
+
+
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
-
-
-# 🔥 [핵심 추가] 탭을 이동할 때 이전 탭의 세부 선택 상태를 모두 제거(초기화)하는 콜백
-def reset_popover_selections():
-    for key in ["pop_biliary_seg", "pop_esophageal_seg", "pop_pyloric_seg", "pop_colonic_seg", "pop_drainage_seg"]:
-        if key in st.session_state:
-            st.session_state[key] = None
+    reset_popover_selections()
 
 
 # --------------------------------------------------
@@ -327,7 +335,7 @@ if not due_category:
             )
 
             with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
-                # 🔥 [수정] 팝업창을 열었을 때 기본 선택이 없도록 default=None 처리
+                # 팝업을 열거나 다른 탭으로 바꿀 때 세부 선택 초기화 실행
                 prod_view_tab = st.segmented_control(
                     "",
                     options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
