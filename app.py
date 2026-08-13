@@ -152,14 +152,15 @@ st.markdown(
         margin-top: 10px !important;
     }
 
-    /* 팝업창(Popover) 적절한 중간 높이 + 내부 여백 확보 */
+    /* 팝업창(Popover) 펼쳤을 때 바닥 닿음 방지 고정 높이 지정 */
     div[data-testid="stPopoverBody"] {
-        max-height: 68vh !important;       /* 박스 크기를 답답하지 않게 넉넉하게 확보 */
+        max-height: 520px !important;       /* 100% 배율에서 펼쳤을 때도 바닥에 안 붙도록 520px 고정 */
+        margin-bottom: 60px !important;    /* 바닥과의 여백 강제 확보 */
         overflow-y: auto !important;
         min-width: 720px !important;
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25) !important;
         border-radius: 12px !important;
-        padding-bottom: 40px !important;    /* 내부 밑부분 여백을 두어 스크롤 바닥이 답답하지 않게 조절 */
+        padding-bottom: 30px !important;
     }
 </style>
 """,
