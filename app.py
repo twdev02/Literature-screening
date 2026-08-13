@@ -147,13 +147,14 @@ st.markdown(
         margin-bottom: 16px !important;
     }
 
-    /* 2. 팝업창(Popover) 하단 여백 추가 및 높이 조절 (바닥 맞닿음 방지) */
+    /* 팝업창(Popover) 상단 겹침 방지 및 위치/높이 개선 */
     div[data-testid="stPopoverBody"] {
-        max-height: 55vh !important;       /* 모니터 높이 55%로 조절하여 바닥과 닿지 않도록 함 */
-        margin-bottom: 50px !important;    /* 화면 하단과의 여백 확보 */
+        max-height: 55vh !important;
+        margin-top: 15px !important;       /* 버튼과 겹치지 않게 위쪽 여백 확보 */
+        margin-bottom: 40px !important;    /* 바닥 맞닿음 방지 */
         overflow-y: auto !important;
-        min-width: 700px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+        min-width: 720px !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25) !important;
         border-radius: 12px !important;
     }
 </style>
@@ -219,7 +220,7 @@ with st.sidebar:
         key="radio_category",
     )
 
-    # 세부 모델 선택 (수정 포인트: Uncovered -> Covered -> ComVi 순서 지정)
+    # 세부 모델 선택 (Uncovered -> Covered -> ComVi 순서)
     sub_model = "전체 (All Models)"
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -513,7 +514,7 @@ if not due_category:
                             st.divider()
 
                 # --------------------------------------------------
-                # 📌 5. Drainage 탭 (Total 3 Types)
+                # 📌 5. Drainage 탭 (괄호 제거 및 정식 제품명으로 수정)
                 # --------------------------------------------------
                 with prod_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
@@ -531,7 +532,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S SPAXUS Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Hot SPAXUS Stent"):
@@ -546,7 +547,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S Hot SPAXUS Stent**\n\n- {m_desc}")
                             st.divider()
 
                     with st.expander("🔹 Niti-S Nagi Stent"):
@@ -561,7 +562,7 @@ if not due_category:
                                 else:
                                     st.caption(f"📷 {m_img} 이미지 등록 필요")
                             with c2:
-                                st.markdown(f"**Niti-S ({m_name}) Stent**\n\n- {m_desc}")
+                                st.markdown(f"**Niti-S NAGI Stent**\n\n- {m_desc}")
                             st.divider()
 
     with col_ov2:
