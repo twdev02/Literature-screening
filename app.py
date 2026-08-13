@@ -136,7 +136,7 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 🔥 팝업창 위치를 중앙 상단으로 확실하게 당겨올려 바닥 맞닿음 해결 */
+    /* 팝업창 위치 중앙 고정 */
     div[data-testid="stPopoverContent"] {
         position: fixed !important;
         top: 38% !important;
@@ -311,7 +311,7 @@ if not due_category:
                 ])
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭 (가로 세그먼트 버튼 UI 적용)
+                # 📌 1. Biliary 탭 (기본 선택 없음 / 진입 시 초기화)
                 # --------------------------------------------------
                 with prod_tab1:
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
@@ -322,7 +322,7 @@ if not due_category:
                             "Covered Stent",
                             "ComVi Stent",
                         ],
-                        default="Uncovered Stent",
+                        default=None,  # 아무것도 선택 안 된 상태로 시작
                         key="pop_biliary_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -411,7 +411,7 @@ if not due_category:
                         st.divider()
 
                 # --------------------------------------------------
-                # 📌 3. Pyloric/Duodenal 탭 (가로 세그먼트 버튼 UI 적용)
+                # 📌 3. Pyloric/Duodenal 탭 (기본 선택 없음 / 진입 시 초기화)
                 # --------------------------------------------------
                 with prod_tab3:
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
@@ -422,7 +422,7 @@ if not due_category:
                             "Covered Stent",
                             "ComVi Stent",
                         ],
-                        default="Uncovered Stent",
+                        default=None,  # 아무것도 선택 안 된 상태로 시작
                         key="pop_pyloric_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -476,7 +476,7 @@ if not due_category:
                             st.divider()
 
                 # --------------------------------------------------
-                # 📌 4. Colonic 탭 (가로 세그먼트 버튼 UI 적용)
+                # 📌 4. Colonic 탭 (기본 선택 없음 / 진입 시 초기화)
                 # --------------------------------------------------
                 with prod_tab4:
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
@@ -487,7 +487,7 @@ if not due_category:
                             "Covered Stent",
                             "ComVi Stent",
                         ],
-                        default="Uncovered Stent",
+                        default=None,  # 아무것도 선택 안 된 상태로 시작
                         key="pop_colonic_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -541,7 +541,7 @@ if not due_category:
                             st.divider()
 
                 # --------------------------------------------------
-                # 📌 5. Drainage 탭 (가로 세그먼트 버튼 UI 적용)
+                # 📌 5. Drainage 탭 (기본 선택 없음 / 진입 시 초기화)
                 # --------------------------------------------------
                 with prod_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
@@ -552,7 +552,7 @@ if not due_category:
                             "Hot SPAXUS Stent",
                             "NAGI Stent",
                         ],
-                        default="SPAXUS Stent",
+                        default=None,  # 아무것도 선택 안 된 상태로 시작
                         key="pop_drainage_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
