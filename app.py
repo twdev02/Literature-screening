@@ -147,20 +147,19 @@ st.markdown(
         margin-bottom: 16px !important;
     }
 
-    /* 팝업창 외곽 레이어 바닥에서 강제 이격 */
+    /* 팝업창 위치 정돈 및 상단 버튼 겹침 방지 */
     div[data-testid="stPopoverContent"] {
-        bottom: auto !important;
         margin-top: 10px !important;
     }
 
-    /* 팝업창(Popover) 높이 슬림화 및 100% 배율 바닥 닿음 완벽 해결 */
+    /* 팝업창(Popover) 적절한 중간 높이 + 내부 여백 확보 */
     div[data-testid="stPopoverBody"] {
-        max-height: 40vh !important;       /* 세로 높이를 화면의 40%로 작게 만들어 바닥에 늘어남 방지 */
-        bottom: auto !important;
+        max-height: 68vh !important;       /* 박스 크기를 답답하지 않게 넉넉하게 확보 */
         overflow-y: auto !important;
         min-width: 720px !important;
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25) !important;
         border-radius: 12px !important;
+        padding-bottom: 40px !important;    /* 내부 밑부분 여백을 두어 스크롤 바닥이 답답하지 않게 조절 */
     }
 </style>
 """,
