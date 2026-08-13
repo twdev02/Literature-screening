@@ -136,13 +136,13 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 🔥 제품명 상자 이탈 방지 & 자동 줄바꿈 스타일 수정 */
+    /* 제품명 상자 이탈 방지 & 자동 줄바꿈 스타일 */
     .prod-item-title {
         font-weight: 700;
         font-size: 15px;
         color: #0f172a;
-        white-space: normal !important;      /* 상자 안에서 가로 길이에 맞게 자연스럽게 줄바꿈 */
-        word-break: keep-all !important;     /* 단어 단위로 깔끔하게 잘림 방지 */
+        white-space: normal !important;
+        word-break: keep-all !important;
         margin-bottom: 6px;
     }
 
@@ -167,14 +167,15 @@ if "tab2_result" not in st.session_state:
 if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
-if "popover_session_id" not in st.session_state:
-    st.session_state["popover_session_id"] = 0
 
-
+# 🔥 [수정] HOME 버튼 클릭 시 모든 탭과 펼침 상자를 초기화하고 즉시 새로고침
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
-    st.session_state["popover_session_id"] += 1
+    exp_keys = ["exp_main_tab_seg", "exp_biliary_seg", "exp_esophageal_seg", "exp_pyloric_seg", "exp_colonic_seg", "exp_drainage_seg"]
+    for key in exp_keys:
+        if key in st.session_state:
+            st.session_state[key] = None
 
 
 # --------------------------------------------------
@@ -288,8 +289,8 @@ if not due_category:
         unsafe_allow_html=True,
     )
 
-    # 🔥 [핵심 수정] TARGET PRODUCTS 영역 너비를 2.5 비율로 확장하여 글자 넘침 및 흔들림 고정
-    col_ov1, col_ov2, col_ov3 = st.columns([2.5, 1, 1])
+    # 🔥 [수정] 3개 카드의 컬럼 비율을 [2, 1.2, 1.2]로 조절하여 3번째 카드 제목의 두 줄 줄바꿈 현상을 완벽 해결
+    col_ov1, col_ov2, col_ov3 = st.columns([2, 1.2, 1.2])
 
     with col_ov1:
         with st.container(border=True):
@@ -336,7 +337,7 @@ if not due_category:
                             ("LCD-Type", "biliary_uncovered_lcd.png", "Large Cell Design 적용"),
                         ]
                         for m_name, m_img, m_desc in biliary_uncovered_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -360,7 +361,7 @@ if not due_category:
                             ("Bumpy", "biliary_covered_bumpy.png", "Bumpy 굴곡 구조 적용, 췌관 Stricture용"),
                         ]
                         for m_name, m_img, m_desc in biliary_covered_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -381,7 +382,7 @@ if not due_category:
                             ("End Bare-Type", "biliary_comvi_endbare.png", "한쪽 끝단 Bare 적용 모델"),
                         ]
                         for m_name, m_img, m_desc in biliary_comvi_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -422,7 +423,7 @@ if not due_category:
                             ("Beta-2", "esophageal_covered_beta2.png", "Beta-2 차세대 유연성 메쉬 설계 모델"),
                         ]
                         for m_name, m_img, m_desc in esophageal_covered_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -458,7 +459,7 @@ if not due_category:
                             ("D-Type", "pyloric_uncovered_d.png", "Dual Structure 유연 구조로 위출구/십이지장 협착부 유연성 및 통과성 강화"),
                         ]
                         for m_name, m_img, m_desc in pyloric_uncovered_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -479,7 +480,7 @@ if not due_category:
                             ("End Bare-Type", "pyloric_covered_endbare.png", "한쪽 끝단 Bare 적용으로 조직 고정력 향상"),
                         ]
                         for m_name, m_img, m_desc in pyloric_covered_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -499,7 +500,7 @@ if not due_category:
                             ("Both Bare-Type", "pyloric_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조 + 양 끝단 Bare 앵커링"),
                         ]
                         for m_name, m_img, m_desc in pyloric_comvi_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -536,7 +537,7 @@ if not due_category:
                             ("D-Type", "colonic_uncovered_d.png", "Dual Structure 적용으로 대장 굴곡부 우수한 통과성 확보"),
                         ]
                         for m_name, m_img, m_desc in colonic_uncovered_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -557,7 +558,7 @@ if not due_category:
                             ("End Bare-Type", "colonic_covered_endbare.png", "한쪽 끝단 Bare 적용으로 대장 내 고정력 향상"),
                         ]
                         for m_name, m_img, m_desc in colonic_covered_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -576,7 +577,7 @@ if not due_category:
                             ("Both Bare-Type", "colonic_comvi_bothbare.png", "ComVi 이중막(PTFE+PTFE) 구조로 조직 침투 차단 + 양 끝단 Bare 앵커링"),
                         ]
                         for m_name, m_img, m_desc in colonic_comvi_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -612,7 +613,7 @@ if not due_category:
                             ("SPAXUS", "drainage_spaxus.png", "EUS-guided Transluminal Drainage 전용 Lumen-Apposing Stent"),
                         ]
                         for m_name, m_img, m_desc in spaxus_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -631,7 +632,7 @@ if not due_category:
                             ("Hot SPAXUS", "drainage_hot_spaxus.png", "Electrocautery Delivery System 일체형 스텐트"),
                         ]
                         for m_name, m_img, m_desc in hot_spaxus_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
@@ -650,7 +651,7 @@ if not due_category:
                             ("Nagi", "drainage_nagi.png", "Pancreatic Pseudocyst & WON 배액 전용 대구경 Flare 스텐트"),
                         ]
                         for m_name, m_img, m_desc in nagi_models:
-                            c1, c2 = st.columns([1, 2.5])
+                            c1, c2 = st.columns([1, 2.2])
                             with c1:
                                 if os.path.exists(m_img):
                                     st.image(m_img, use_container_width=True)
