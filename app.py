@@ -194,6 +194,7 @@ def reset_to_home():
         if key in st.session_state:
             st.session_state[key] = None
     st.session_state["expander_open"] = False
+    st.rerun()
 
 
 # --------------------------------------------------
