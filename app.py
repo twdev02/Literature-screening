@@ -172,18 +172,16 @@ if "tab2_result" not in st.session_state:
     st.session_state["tab2_result"] = None
 if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
-if "radio_category" not in st.session_state:
-    st.session_state["radio_category"] = None
+
+# 접이식 카탈로그 개폐 제어를 위한 세션 초기화
+if "expander_open" not in st.session_state:
+    st.session_state["expander_open"] = False
 
 
-# 품목 이동 콜백 함수
-def goto_category(category_name):
-    st.session_state["radio_category"] = category_name
-
-
-# HOME 버튼 클릭 시 카탈로그 및 선택 상태 리셋
+# HOME 버튼 클릭 시 카탈로그를 닫고 내부 세그먼트 상태도 리셋
 def reset_to_home():
-    st.session_state["radio_category"] = None
+    if "radio_category" in st.session_state:
+        del st.session_state["radio_category"]
     exp_keys = [
         "exp_main_tab_seg",
         "exp_biliary_seg",
@@ -322,7 +320,7 @@ if not due_category:
                 """
                 <div class="card-title">TARGET PRODUCTS</div>
                 <div class="card-value">Taewoong Medical’s Stent Product Lines</div>
-                <div class="card-desc">아래 상자를 클릭하여 세부 라인업 카탈로그를 확인하거나 바로 스크리닝으로 이동하세요.</div>
+                <div class="card-desc">아래 상자를 클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -348,14 +346,6 @@ if not due_category:
                 st.markdown("<br>", unsafe_allow_html=True)
 
                 if prod_view_tab == "Biliary":
-                    st.button(
-                        "🚀 '1. Biliary Stent' AI 스크리닝 시작하기",
-                        type="primary",
-                        use_container_width=True,
-                        on_click=goto_category,
-                        args=("1. Biliary Stent",),
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
                     biliary_sel = st.segmented_control(
                         "",
@@ -440,14 +430,6 @@ if not due_category:
                                 st.divider()
 
                 elif prod_view_tab == "Esophageal":
-                    st.button(
-                        "🚀 '2. Esophageal Stent' AI 스크리닝 시작하기",
-                        type="primary",
-                        use_container_width=True,
-                        on_click=goto_category,
-                        args=("2. Esophageal Stent",),
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
                     st.markdown("#### **Niti-S Esophageal Stent**")
                     esophageal_sel = st.segmented_control(
                         "",
@@ -485,14 +467,6 @@ if not due_category:
                                 st.divider()
 
                 elif prod_view_tab == "Pyloric/Duodenal":
-                    st.button(
-                        "🚀 '3. Pyloric/Duodenal Stent' AI 스크리닝 시작하기",
-                        type="primary",
-                        use_container_width=True,
-                        on_click=goto_category,
-                        args=("3. Pyloric/Duodenal Stent",),
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
                     pyloric_sel = st.segmented_control(
                         "",
@@ -570,14 +544,6 @@ if not due_category:
                                 st.divider()
 
                 elif prod_view_tab == "Colonic":
-                    st.button(
-                        "🚀 '4. Colonic Stent' AI 스크리닝 시작하기",
-                        type="primary",
-                        use_container_width=True,
-                        on_click=goto_category,
-                        args=("4. Colonic Stent",),
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
                     colonic_sel = st.segmented_control(
                         "",
@@ -655,14 +621,6 @@ if not due_category:
                                 st.divider()
 
                 elif prod_view_tab == "Drainage":
-                    st.button(
-                        "🚀 '5. Drainage Stent' AI 스크리닝 시작하기",
-                        type="primary",
-                        use_container_width=True,
-                        on_click=goto_category,
-                        args=("5. Drainage Stent",),
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
                     st.markdown("#### **Niti-S Drainage Stent**")
                     drainage_sel = st.segmented_control(
                         "",
@@ -1097,7 +1055,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 📌 핵심: key="main_mode_seg" 적용하여 탭 변경 시 PICO로 튕기는 문제 방지
+# 📌 key="main_mode_seg" 세션 키 고정으로 카탈로그 조작 시 PICO로 튕기는 현상 완벽 방지
 selected_mode = st.segmented_control(
     "",
     options=[
