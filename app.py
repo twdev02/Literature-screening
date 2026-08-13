@@ -136,7 +136,7 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 팝업창 너비 및 높이 고정 (문장 길이에 따라 안 늘어남) */
+    /* 🔥 팝업창 너비 및 높이 고정 (문장 길이에 따라 안 늘어남) */
     div[data-testid="stPopoverContent"] {
         position: fixed !important;
         top: 38% !important;
@@ -193,6 +193,13 @@ if "tab3_result" not in st.session_state:
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
+
+
+# 🔥 [핵심 추가] 탭을 이동할 때 이전 탭의 세부 선택 상태를 모두 제거(초기화)하는 콜백
+def reset_popover_selections():
+    for key in ["pop_biliary_seg", "pop_esophageal_seg", "pop_pyloric_seg", "pop_colonic_seg", "pop_drainage_seg"]:
+        if key in st.session_state:
+            st.session_state[key] = None
 
 
 # --------------------------------------------------
@@ -320,18 +327,20 @@ if not due_category:
             )
 
             with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
-                prod_tab1, prod_tab2, prod_tab3, prod_tab4, prod_tab5 = st.tabs([
-                    "Biliary",
-                    "Esophageal",
-                    "Pyloric/Duodenal",
-                    "Colonic",
-                    "Drainage",
-                ])
+                # 🔥 [수정] 탭 변경 시마다 내부 선택값을 깨끗이 비워주는 reset_popover_selections 적용
+                prod_view_tab = st.segmented_control(
+                    "",
+                    options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
+                    default="Biliary",
+                    key="pop_main_tab_seg",
+                    on_change=reset_popover_selections,
+                )
+                st.markdown("<br>", unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭 (선택 시 다른 항목은 완전 은폐)
+                # 📌 1. Biliary 탭 (기본 선택 없음 / 탭 이동 시 리셋)
                 # --------------------------------------------------
-                with prod_tab1:
+                if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
                     biliary_sel = st.segmented_control(
                         "",
@@ -415,7 +424,7 @@ if not due_category:
                 # --------------------------------------------------
                 # 📌 2. Esophageal 탭
                 # --------------------------------------------------
-                with prod_tab2:
+                elif prod_view_tab == "Esophageal":
                     st.markdown("#### **Niti-S Esophageal Stent**")
                     esophageal_sel = st.segmented_control(
                         "",
@@ -456,7 +465,7 @@ if not due_category:
                 # --------------------------------------------------
                 # 📌 3. Pyloric/Duodenal 탭
                 # --------------------------------------------------
-                with prod_tab3:
+                elif prod_view_tab == "Pyloric/Duodenal":
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
                     pyloric_sel = st.segmented_control(
                         "",
@@ -533,7 +542,7 @@ if not due_category:
                 # --------------------------------------------------
                 # 📌 4. Colonic 탭
                 # --------------------------------------------------
-                with prod_tab4:
+                elif prod_view_tab == "Colonic":
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
                     colonic_sel = st.segmented_control(
                         "",
@@ -610,7 +619,7 @@ if not due_category:
                 # --------------------------------------------------
                 # 📌 5. Drainage 탭
                 # --------------------------------------------------
-                with prod_tab5:
+                elif prod_view_tab == "Drainage":
                     st.markdown("#### **Niti-S Drainage Stent**")
                     drainage_sel = st.segmented_control(
                         "",
