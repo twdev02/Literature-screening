@@ -327,11 +327,11 @@ if not due_category:
             )
 
             with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
-                # 🔥 [수정] 탭 변경 시마다 내부 선택값을 깨끗이 비워주는 reset_popover_selections 적용
+                # 🔥 [수정] 팝업창을 열었을 때 기본 선택이 없도록 default=None 처리
                 prod_view_tab = st.segmented_control(
                     "",
                     options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
-                    default="Biliary",
+                    default=None,
                     key="pop_main_tab_seg",
                     on_change=reset_popover_selections,
                 )
