@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (태웅메디컬 브랜딩 & UI 개선)
+# 🎨 고급 커스텀 CSS (태웅메디칼 브랜딩 & UI 개선)
 # --------------------------------------------------
 st.markdown(
     """
@@ -331,7 +331,7 @@ if not due_category:
             reset_cnt = st.session_state.get("exp_reset_cnt", 0)
 
             with st.expander(
-                "태웅메디컬 제품 라인업 카탈로그 상세보기",
+                "태웅메디칼 제품 라인업 카탈로그 상세보기",
                 key=f"cat_expander_{reset_cnt}",
             ):
                 prod_view_tab = st.segmented_control(
