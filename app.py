@@ -154,9 +154,9 @@ st.markdown(
         line-height: 1.5;
     }
 
-    /* 🔥 카탈로그 내부 스크롤 상자 스타일 (높이 450px 고정 + 자체 스크롤) */
+    /* 🔥 카탈로그 내부 스크롤 상자 스타일 (높이 400px 고정 + 자체 스크롤) */
     .catalog-scroll-container {
-        max-height: 450px !important;
+        max-height: 400px !important;
         overflow-y: auto !important;
         padding-right: 12px !important;
         margin-top: 10px !important;
@@ -322,7 +322,7 @@ if not due_category:
         unsafe_allow_html=True,
     )
 
-    col_ov1, col_ov2, col_ov3 = st.columns([2.0, 1, 1.5])
+    col_ov1, col_ov2, col_ov3 = st.columns([1.6, 1, 1.6])
 
     with col_ov1:
         with st.container(border=True):
@@ -354,7 +354,7 @@ if not due_category:
                 st.markdown("<br>", unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭 (내부 세로 스크롤 상자 적용)
+                # 📌 1. Biliary 탭
                 # --------------------------------------------------
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
@@ -443,7 +443,7 @@ if not due_category:
                         st.markdown('</div>', unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 2. Esophageal 탭 (내부 세로 스크롤 상자 적용)
+                # 📌 2. Esophageal 탭 (수정: 스크롤 상자 적용)
                 # --------------------------------------------------
                 elif prod_view_tab == "Esophageal":
                     st.markdown("#### **Niti-S Esophageal Stent**")
@@ -486,7 +486,7 @@ if not due_category:
                         st.markdown('</div>', unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 3. Pyloric/Duodenal 탭 (내부 세로 스크롤 상자 적용)
+                # 📌 3. Pyloric/Duodenal 탭
                 # --------------------------------------------------
                 elif prod_view_tab == "Pyloric/Duodenal":
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
@@ -568,7 +568,7 @@ if not due_category:
                         st.markdown('</div>', unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 4. Colonic 탭 (내부 세로 스크롤 상자 적용)
+                # 📌 4. Colonic 탭
                 # --------------------------------------------------
                 elif prod_view_tab == "Colonic":
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
@@ -650,7 +650,7 @@ if not due_category:
                         st.markdown('</div>', unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 5. Drainage 탭 (내부 세로 스크롤 상자 적용)
+                # 📌 5. Drainage 탭
                 # --------------------------------------------------
                 elif prod_view_tab == "Drainage":
                     st.markdown("#### **Niti-S Drainage Stent**")
