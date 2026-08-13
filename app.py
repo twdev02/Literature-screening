@@ -307,7 +307,7 @@ if not due_category:
         unsafe_allow_html=True,
     )
 
-    col_ov1, col_ov2, col_ov3 = st.columns([1.6, 1, 1.6])
+    col_ov1, col_ov2, col_ov3 = st.columns([2.5, 1, 1.5])
 
     with col_ov1:
         with st.container(border=True):
