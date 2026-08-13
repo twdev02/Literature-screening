@@ -283,7 +283,7 @@ with st.sidebar:
             options=[
                 "Niti-S SPAXUS Stent",
                 "Niti-S Hot SPAXUS Stent",
-                "Niti-S Nagi Stent",
+                "Niti-S  Stent",
             ],
         )
 
@@ -626,7 +626,7 @@ if not due_category:
                         options=[
                             "SPAXUS Stent",
                             "Hot SPAXUS Stent",
-                            "NAGI Stent",
+                            "Nagi Stent",
                         ],
                         default=None,
                         key="pop_drainage_seg",
@@ -671,9 +671,9 @@ if not due_category:
                                 )
                             st.divider()
 
-                    elif drainage_sel == "NAGI Stent":
+                    elif drainage_sel == "Nagi Stent":
                         nagi_models = [
-                            ("NAGI", "drainage_nagi.png", "Pancreatic Pseudocyst & WON 배액 전용 대구경 Flare 스텐트"),
+                            ("Nagi", "drainage_nagi.png", "Pancreatic Pseudocyst & WON 배액 전용 대구경 Flare 스텐트"),
                         ]
                         for m_name, m_img, m_desc in nagi_models:
                             c1, c2 = st.columns([1, 2.2])
