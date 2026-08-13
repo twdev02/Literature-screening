@@ -421,9 +421,9 @@ if not due_category:
 
                     elif biliary_sel == "ComVi Stent":
                         biliary_comvi_models = [
-                            ("Full Covered-Type", "biliary_comvi_full.png", "이중막(PTFE+PTFE) 구조로 Tissue Ingrowth 완전 차단"),
-                            ("Both Bare-Type", "biliary_comvi_bothbare.png", "ComVi 이중막 구조 + 양 끝단 Bare 앵커링"),
-                            ("End Bare-Type", "biliary_comvi_endbare.png", "한쪽 끝단 Bare 적용 모델"),
+                            ("Full Covered-Type", "biliary_comvi_full.png", "ComVi Biliary Stent [Full Covered-Type] is indicated for use in malignant strictures."),
+                            ("Both Bare-Type", "biliary_comvi_bothbare.png", "ComVi Biliary Stent [Both Bare-Type] is indicated for use in malignant strictures."),
+                            ("End Bare-Type", "biliary_comvi_endbare.png", "ComVi Biliary Stent [End Bare-Type] is indicated for use in malignant strictures."),
                         ]
                         with st.container(border=True):
                             for m_name, m_img, m_desc in biliary_comvi_models:
