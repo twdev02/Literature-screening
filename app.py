@@ -136,7 +136,7 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 🔥 팝업창 너비 및 높이 고정 (문장 길이에 따라 안 늘어남) */
+    /* 팝업창 너비 및 높이 고정 (문장 길이에 따라 안 늘어남) */
     div[data-testid="stPopoverContent"] {
         position: fixed !important;
         top: 38% !important;
@@ -189,10 +189,25 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 
 
-# HOME 버튼 클릭 시 리셋을 위한 콜백 함수
+# 🔥 [수정] 세션 메모리에서 세그먼티드 컨트롤 선택 기록을 '완전 삭제'하는 강제 리셋 함수
+def reset_popover_selections():
+    popover_keys = [
+        "pop_main_tab_seg",
+        "pop_biliary_seg",
+        "pop_esophageal_seg",
+        "pop_pyloric_seg",
+        "pop_colonic_seg",
+        "pop_drainage_seg",
+    ]
+    for key in popover_keys:
+        if key in st.session_state:
+            del st.session_state[key]
+
+
 def reset_to_home():
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
+    reset_popover_selections()
 
 
 # --------------------------------------------------
@@ -320,16 +335,18 @@ if not due_category:
             )
 
             with st.popover("제품 라인업 카탈로그 상세보기", use_container_width=True):
+                # 🔥 메인 탭 선택 - 기본값 None
                 prod_view_tab = st.segmented_control(
                     "",
                     options=["Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"],
                     default=None,
                     key="pop_main_tab_seg",
+                    on_change=reset_popover_selections,
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
 
                 # --------------------------------------------------
-                # 📌 1. Biliary 탭
+                # 📌 1. Biliary 탭 (기본 선택 없음 / 세션 키 삭제 리셋 적용)
                 # --------------------------------------------------
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
