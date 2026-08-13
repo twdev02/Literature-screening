@@ -304,7 +304,7 @@ if not due_category:
     st.markdown(
         """<div class="hero-container">
 <div class="hero-header-flex">
-<div class="hero-tag">TAEWOONG MEDICAL CLINIVAL EVALUATION PLATFORM</div>
+<div class="hero-tag">TAEWOONG MEDICAL CLINICAL EVALUATION PLATFORM</div>
 <div class="dept-tag">Development Department | Development 2nd Team</div>
 </div>
 <div class="hero-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
