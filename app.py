@@ -739,7 +739,7 @@ if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
 2. Species: Human (not animal, artificial simulation)
 3. Patient population: Adult patients, irrespective of gender
-4. Clinical Conditions: Malignant biliary obstruction/stricture, Benign biliary obstruction/stricture (Covered types only), Benign pancreatic duct stricture (Niti-S Bumpy type only)
+4. Clinical Conditions: Malignant biliary obstruction/stricture, Benign biliary obstruction/stricture, Benign pancreatic duct stricture
 5. Intervention: Biliary SEMS (Uncovered or Covered). Specific Taewoong Medical models: Niti-S (S, D, M, LCD, Full Covered, Both Bare, Giobor, Flare, Kaffes, Bumpy), ComVi (Full Covered, Both Bare, End Bare)
 6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (e.g., WallFlex, Evolution, EGIS, Bonastent, Hanarostent)
 7. Outcomes: Stent patency, Decreased bilirubin, Technical/Clinical success, Complications, Stent removal (for benign cases)"""
@@ -748,21 +748,21 @@ if due_category == "1. Biliary Stent":
 3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management
 4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
-    if sub_model == "Niti-S Biliary Covered Stent":
-        default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nBenign biliary stricture"
-        default_i = "Niti-S Covered\nNiti-S Full Covered\nCovered biliary SEMS\nCovered metal stent\nTaewoong Covered"
-        default_c = "Uncovered stent\nPlastic stent\nSurgery\nWallFlex Covered"
-        default_o = "Stent patency\nDecreased bilirubin\nStent removal\nComplications"
-    elif sub_model == "Niti-S Biliary Uncovered Stent":
+    if sub_model == "Niti-S Biliary Uncovered Stent":
         default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
-        default_i = "Niti-S Uncovered\nNiti-S Bare\nUncovered biliary SEMS\nUncovered metal stent\nBoth Bare"
-        default_c = "Covered stent\nPlastic stent\nSurgery\nWallFlex Uncovered"
-        default_o = "Stent patency\nDecreased bilirubin\nTumor ingrowth\nComplications"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent"
+        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
+        default_o = "Stent patency\nDecreased bilirubin"
+    elif sub_model == "Niti-S Biliary Uncovered Stent":
+        default_p = "Biliary obstruction\nBiliary stricture\nBenign biliary stricture\nBenign biliary obstruction\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign pancreatic duct stricture"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent"
+        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
+        default_o = "Stent patency\nDecreased bilirubin\nRemoval"
     elif sub_model == "ComVi Biliary Stent":
         default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
-        default_i = "ComVi\nComVi Biliary\nComVi Covered\nTaewoong ComVi"
-        default_c = "Single layer Covered SEMS\nUncovered stent\nPlastic stent\nWallFlex"
-        default_o = "Stent patency\nTumor ingrowth prevention\nTechnical success\nClinical success"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nComVi\nCovered stent"
+        default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
+        default_o = "Stent patency\nDecreased bilirubin"
     else:
         default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign biliary obstruction\nBenign biliary stricture\nBenign pancreatic duct stricture"
         default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
