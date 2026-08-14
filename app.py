@@ -867,10 +867,26 @@ elif due_category == "5. Drainage Stent":
 2. Different indication/Irrelevant: Non-drainage target indications or vascular/intraluminal stenting without transluminal/EUS drainage purpose
 3. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
 
-    default_p = "Pancreatic pseudocyst\nWalled-off necrosis\nWON\nGallbladder drainage"
-    default_i = "Lumen-apposing metal stents\nLAMS\nNiti-S SPAXUS\nSPAXUS"
-    default_c = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
-    default_o = "Technical success\nClinical success\nDrainage efficacy\nResolution\nComplications"
+    if sub_model == "Niti-S SPAXUS Stent":
+        default_p = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nLumen apposing metal stent\nLAMS\nEUS gallbladder drainage\nEUS choledochoduodenostomy\nTaewoong\nNiti-S\nSPAXUS"
+        default_c = "Surgery\nPercutaneous drainage\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nLumen apposing metal stent\nLAMS\nAXIOS\nHot AXIOS"
+        default_o = "Pancreatic pseudocyst drainage\nWalled off necrosis drainage\nGallbladder drainage\nBiliary tract drainage"
+    elif sub_model == "Niti-S Hot SPAXUS Stent":
+        default_p = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nLumen apposing metal stent\nLAMS\nEUS gallbladder\nEUS choledochoduodenostomy\nElectrocautery delivery system\nHot delivery\nTaewoong\nNiti-S\nHot SPAXUS"
+        default_c = "Surgery\nPercutaneous drainage\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nLumen apposing metal stent\nLAMS\nAXIOS\nHot AXIOS "
+        default_o = "Pancreatic pseudocyst drainage\nWalled off necrosis drainage\nGallbladder drainage\nBiliary tract drainage"
+    elif sub_model == "Niti-S Nagi Stent":
+        default_p = "Pancreatic pseudocyst"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nLumen apposing metal stent\nLAMS\nBiflanged metal stent\nBFMS\nTaewoong\nNiti-S\nNagi"
+        default_c = "Surgery\nPercutaneous drainage\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nLumen apposing metal stent\nLAMS\nBiflanged metal stent\nBFMS\nAXIOS\nHot AXIOS"
+        default_o = "Pancreatic pseudocyst drainage"
+    else:
+        default_p = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract"
+        default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent"
+        default_c = "Surgery\nPercutaneous drainage\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nLumen apposing metal stent\nLAMS\nBiflanged metal stent\nBFMS\nAXIOS\nHot AXIOS"
+        default_o = "Pancreatic pseudocyst drainage\nWalled off necrosis drainage\nGallbladder drainage\nBiliary tract drainage"
 
 else:
     include_criteria = "Include All Relevant Clinical Papers"
