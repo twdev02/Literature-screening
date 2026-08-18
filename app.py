@@ -1107,33 +1107,31 @@ def generate_prompt(
     [논문 제목]: {title}
     [논문 초록]: {abstract_text}
 
-    답변형식 (마크다운 환경에서 텍스트가 뭉치지 않도록 반드시 항목과 항목 사이에 **빈 줄(Enter 2번)**을 넣어 작성할 것):
+    답변형식 (표 한 칸에 깔끔하게 들어가야 하므로 불필요한 줄바꿈을 만들지 말고 아래 형식대로만 작성할 것):
 
     판정: (Include 또는 Exclude)
 
     사유:
-    **(항목명):** (내용)
-
-    **(항목명):** (내용)
-
+    (한글 사유 1문장)
     ---
-    **(영어 요약 항목명):** (내용)
+    (말머리 레이블): (영문 사유 1문장)
 
-    [사유 및 결론 작성 가이드 - 매우 중요!]
-    1. 사유 (한국어 설명 부분):
-       - "기준 4", "제외기준 2", "- 1" 같은 **번호나 숫자는 절대 표기하지 마라.**
-       - 각 사유의 항목명은 반드시 **볼드 처리(**)**하여 작성할 것. (예시: "**적응증 (Clinical Conditions):** ...", "**중재시술 (Intervention):** ...")
-       - 화면에 한 줄씩 예쁘게 보이도록, 각 사유 항목이 끝날 때마다 **반드시 한 줄을 띄우고(빈 줄 삽입)** 다음 사유를 작성하라.
-    
-    2. 결론 요약 (영어 부분):
-       - 한국어 사유 작성이 모두 끝난 후 **반드시 빈 줄을 띄우고 마크다운 구분선(`---`)**을 넣어라. ('Conclusion' 이라는 단어는 절대 쓰지 마라)
-       - 구분선 바로 다음 줄에 영어(English)로 한 문장 작성한다.
-       - 판정이 'Include'인 경우: 논문이 포함된 핵심 이유를 자연스러운 영어 문장으로 작성.
-       - 판정이 'Exclude'인 경우: 제외된 핵심 이유를 반드시 아래 4가지 [배제 해당사항] 중 가장 적절한 하나를 골라 "**배제해당사항:** 영어 문장" 형식으로 작성할 것. (배제해당사항 이름은 볼드 처리)
+    [사유 작성 가이드 - 매우 중요!]
+    1. 한국어 사유:
+       - '문헌 유형:', '적응증:' 같은 항목명이나 번호를 절대 붙이지 마라.
+       - 핵심 이유만 1~2문장의 단문으로 깔끔하게 작성해라.
+
+    2. 영어 사유 (가장 중요!):
+       - 구분선(`---`) 바로 밑에 말머리 레이블을 붙인 후, 영문 사유 문장을 바로 적어라.
+       - Include인 경우 말머리: **Conclusion:**
+       - Exclude인 경우 말머리 아래 4가지 중 택 1:
          * **Different indication:**
          * **Irrelevant article:**
          * **Insufficient information:**
          * **Literature without human clinical data:**
+       - **말머리 뒤에 'Included because', 'It is because' 같은 접속어/수식어를 절대 붙이지 말고, 바로 'The study...' 또는 완결된 영문 문장을 바로 시작할 것.**
+       - 예시 (Include): **Conclusion:** The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
+       - 예시 (Exclude): **Different indication:** The study is focused exclusively on esophageal stenting rather than colonic stenting.
     """
 
 
