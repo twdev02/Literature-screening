@@ -1,9 +1,11 @@
+import io
 import os
 import time
 import xml.etree.ElementTree as ET
 import google.generativeai as genai
 import pandas as pd
 import requests
+import rispy  # 👈 GIE RIS 파일 파싱을 위해 추가
 import streamlit as st
 
 st.set_page_config(
@@ -172,6 +174,8 @@ if "tab2_result" not in st.session_state:
     st.session_state["tab2_result"] = None
 if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
+if "tab_gie_result" not in st.session_state:
+    st.session_state["tab_gie_result"] = None
 
 # 접이식 카탈로그 개폐 제어 및 이전 탭 기억용 세션
 if "expander_open" not in st.session_state:
@@ -309,7 +313,7 @@ if not due_category:
 <div class="hero-tag">TAEWOONG MEDICAL CLINICAL EVALUATION PLATFORM</div>
 <div class="dept-tag">Development Department | Development 2nd Team</div>
 </div>
-<div class="hero-title">PubMed PMID 기반 AI 문헌 스크리닝 시스템</div>
+<div class="hero-title">PubMed & GIE Journal AI 문헌 스크리닝 시스템</div>
 <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
 </div>""",
         unsafe_allow_html=True,
@@ -348,7 +352,6 @@ if not due_category:
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
 
-                # 💡 핵심: 상위 카탈로그 탭이 변경되면 하위 세부 선택을 완전 리셋하여 잔상 제거
                 if prod_view_tab != st.session_state["prev_main_tab"]:
                     st.session_state["prev_main_tab"] = prod_view_tab
                     st.session_state["exp_biliary_seg"] = None
@@ -711,7 +714,7 @@ if not due_category:
             st.markdown(
                 """
                 <div class="card-title">AI PIPELINE</div>
-                <div class="card-value">Gemini 3.6 Flash + PubMed Engine</div>
+                <div class="card-value">Gemini 3.6 Flash + PubMed & GIE Engine</div>
                 <div class="card-desc">AI 기반 문헌 스크리닝</div>
                 <br>
                 """,
@@ -753,7 +756,7 @@ if due_category == "1. Biliary Stent":
         default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent"
         default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
         default_o = "Stent patency\nDecreased bilirubin"
-    elif sub_model == "Niti-S Biliary Uncovered Stent":
+    elif sub_model == "Niti-S Biliary Covered Stent":
         default_p = "Biliary obstruction\nBiliary stricture\nBenign biliary stricture\nBenign biliary obstruction\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign pancreatic duct stricture"
         default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent"
         default_c = "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent"
@@ -1115,14 +1118,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# 👈 PubMed 모드와 GIE RIS 업로드 모드로 명확하게 이원화
 selected_mode = st.segmented_control(
     "",
     options=[
         "단일 PMID 입력",
         "PMID 리스트 CSV 업로드",
-        "PICO 다중 검색어 기반 자동 추출",
+        "PubMed PICO 자동 검색",
+        "GIE RIS 파일 일괄 스크리닝",  # 👈 GIE 전용 버튼 추가!
     ],
-    default="PICO 다중 검색어 기반 자동 추출",
+    default="PubMed PICO 자동 검색",
     key="main_mode_seg",
 )
 
@@ -1271,10 +1276,10 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
         )
 
 # --------------------------------------------------
-# MODE 3: PICO 키워드 조합 기반 자동 검색 & 스크리닝
+# MODE 3: PubMed PICO 키워드 자동 검색 & 스크리닝
 # --------------------------------------------------
-elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
-    st.subheader(f"PICO 다중 키워드 입력")
+elif selected_mode == "PubMed PICO 자동 검색":
+    st.subheader(f"PubMed PICO 다중 키워드 입력")
     st.caption(
         "선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로"
         " 세팅되었습니다. 필요 시 추가/수정이 가능합니다."
@@ -1457,5 +1462,117 @@ elif selected_mode == "PICO 다중 검색어 기반 자동 추출":
             file_name=(
                 f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv"
             ),
+            mime="text/csv",
+        )
+
+# --------------------------------------------------
+# 🔥 MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝 (신규 추가)
+# --------------------------------------------------
+elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
+    st.subheader("GIE Journal RIS 파일 업로드 스크리닝")
+    st.caption(
+        "giejournal.org 접속 ➔ Advanced Search 실행 ➔ [Export Citation] ➔ RIS 파일 다운로드 ➔ 아래 업로드 창에 드래그 & 드롭"
+    )
+
+    gie_file = st.file_uploader(
+        "GIE에서 Export한 RIS 파일(.ris)을 업로드하세요", type=["ris", "txt"]
+    )
+
+    if st.button("GIE RIS 파일 AI 스크리닝 실행"):
+        if not api_key:
+            st.error("API Key가 설정되지 않았습니다!")
+        elif not gie_file:
+            st.error("GIE RIS 파일을 업로드해 주세요!")
+        else:
+            # 1. RIS 파일 텍스트 디코딩 및 파싱
+            try:
+                content = gie_file.getvalue().decode("utf-8")
+            except UnicodeDecodeError:
+                content = gie_file.getvalue().decode("cp949", errors="ignore")
+
+            try:
+                entries = rispy.loads(content)
+            except Exception as e:
+                st.error(f"RIS 파일 구조 파싱 실패: {str(e)}")
+                entries = []
+
+            if not entries:
+                st.error("업로드하신 RIS 파일에서 추출된 논문 정보가 없습니다.")
+            else:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel("gemini-3.6-flash")
+
+                titles, abstracts, results, reasons, doi_list = [], [], [], [], []
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                total = len(entries)
+
+                # 2. RIS 내부 Abstract 데이터를 직접 읽어 Gemini AI로 스크리닝
+                for idx, entry in enumerate(entries):
+                    title = entry.get("title", entry.get("primary_title", "제목 없음"))
+                    abstract_text = entry.get("abstract", "").strip()
+                    doi = entry.get("doi", entry.get("url", "-"))
+
+                    status_text.text(f"[{idx+1}/{total}] GIE 초록 AI 분석 중... ({title[:30]}...)")
+
+                    doi_list.append(doi)
+                    titles.append(title)
+
+                    if not abstract_text:
+                        abstracts.append("GIE RIS 파일 내 초록(Abstract) 미포함")
+                        results.append("Exclude (초록없음)")
+                        reasons.append("GIE RIS 파일 내에 Abstract 텍스트가 제공되지 않았습니다.")
+                    else:
+                        abstracts.append(abstract_text[:150] + "...")
+
+                        prompt = generate_prompt(
+                            due_category,
+                            include_criteria,
+                            exclude_criteria,
+                            title,
+                            abstract_text,
+                        )
+                        ans, err = call_gemini_with_retry(model, prompt)
+
+                        if ans:
+                            results.append(
+                                "Include (포함)"
+                                if "Include" in ans and "Exclude" not in ans.split("판정:")[1]
+                                else "Exclude (제외)"
+                            )
+                            reasons.append(
+                                ans.split("사유:")[-1].strip() if "사유:" in ans else ans
+                            )
+                        else:
+                            results.append("Error")
+                            reasons.append(f"AI 에러: {err}")
+
+                    progress_bar.progress((idx + 1) / total)
+                    time.sleep(0.5)
+
+                res_df = pd.DataFrame({
+                    "No": range(1, len(entries) + 1),
+                    "DOI / URL": doi_list,
+                    "논문 제목": titles,
+                    "초록 요약": abstracts,
+                    "AI 판정": results,
+                    "상세 사유": reasons
+                })
+
+                st.session_state["tab_gie_result"] = res_df
+
+    if st.session_state["tab_gie_result"] is not None and selected_mode == "GIE RIS 파일 일괄 스크리닝":
+        st.success(f"[{due_category} - {sub_model}] GIE RIS 스크리닝 완료 결과")
+        st.dataframe(st.session_state["tab_gie_result"], hide_index=True)
+
+        csv_data = (
+            st.session_state["tab_gie_result"]
+            .to_csv(index=False)
+            .encode("utf-8-sig")
+        )
+        st.download_button(
+            "GIE 스크리닝 결과 CSV 다운로드",
+            data=csv_data,
+            file_name="gie_ris_screening_result.csv",
             mime="text/csv",
         )
