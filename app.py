@@ -933,7 +933,7 @@ else:
 
 
 # --------------------------------------------------
-# 🌐 PubMed API 기능 및 XML 파싱 함수
+# PubMed API 기능 및 XML 파싱 함수
 # --------------------------------------------------
 
 def parse_pico_input(text):
@@ -1157,14 +1157,14 @@ target_engine = st.segmented_control(
         "PubMed Engine",
         "GIE Journal Engine",
     ],
-    default="🌐 PubMed Engine",
+    default="PubMed Engine",
     key="engine_mode_seg",
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # 2단계: 선택된 엔진에 따른 세부 입력 모드 노출
-if target_engine == "🌐 PubMed Engine":
+if target_engine == "PubMed Engine":
     selected_mode = st.segmented_control(
         "",
         options=[
