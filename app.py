@@ -177,7 +177,7 @@ if "tab3_result" not in st.session_state:
 if "tab_gie_result" not in st.session_state:
     st.session_state["tab_gie_result"] = None
 
-# 👈 [추가] 누적 스크리닝 이력 저장용 메모리 (Uncovered ➔ Covered 등 모델 간 중복 필터링)
+# 누적 스크리닝 이력 저장용 메모리 (Uncovered ➔ Covered 등 모델 간 중복 필터링)
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 
@@ -188,8 +188,17 @@ if "prev_main_tab" not in st.session_state:
     st.session_state["prev_main_tab"] = None
 
 
+# 👈 [추가] 품목/세부모델 변경 시 이전 화면 결과를 자동으로 리셋하는 콜백 함수
+def clear_screening_results():
+    st.session_state["tab1_result"] = None
+    st.session_state["tab2_result"] = None
+    st.session_state["tab3_result"] = None
+    st.session_state["tab_gie_result"] = None
+
+
 # HOME 버튼 클릭 시 카탈로그를 닫고 내부 세그먼트 상태도 리셋
 def reset_to_home():
+    clear_screening_results()  # 👈 홈 이동 시도 결과 리셋
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
     exp_keys = [
@@ -207,7 +216,7 @@ def reset_to_home():
     st.session_state["exp_reset_cnt"] = st.session_state.get("exp_reset_cnt", 0) + 1
 
 
-# 👈 [추가] 이전 스크리닝 히스토리 삭제 함수
+# 이전 스크리닝 히스토리 삭제 함수
 def clear_history():
     st.session_state["screened_history"] = {}
     st.toast("이전 스크리닝 누적 기록이 초기화되었습니다.")
@@ -252,6 +261,7 @@ with st.sidebar:
         options=category_options,
         index=None,
         key="radio_category",
+        on_change=clear_screening_results,  # 👈 품목 변경 시 결과 자동 리셋
     )
 
     # 세부 모델 선택
@@ -265,12 +275,14 @@ with st.sidebar:
                 "ComVi Biliary Stent",
             ],
             key="sb_biliary",
+            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
         )
     elif due_category == "2. Esophageal Stent":
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
             options=["Niti-S Esophageal Covered Stent"],
             key="sb_esophageal",
+            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
         )
     elif due_category == "3. Pyloric/Duodenal Stent":
         sub_model = st.selectbox(
@@ -281,6 +293,7 @@ with st.sidebar:
                 "ComVi Pyloric/Duodenal Stent",
             ],
             key="sb_pyloric",
+            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
         )
     elif due_category == "4. Colonic Stent":
         sub_model = st.selectbox(
@@ -291,6 +304,7 @@ with st.sidebar:
                 "ComVi Enteral Colonic Stent",
             ],
             key="sb_colonic",
+            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
         )
     elif due_category == "5. Drainage Stent":
         sub_model = st.selectbox(
@@ -301,9 +315,10 @@ with st.sidebar:
                 "Niti-S Nagi Stent",
             ],
             key="sb_drainage",
+            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
         )
 
-    # 👈 [추가] 누적 스크리닝 현황 표기 및 리셋 버튼
+    # 누적 스크리닝 현황 표기 및 리셋 버튼
     st.markdown("---")
     history_cnt = len(st.session_state["screened_history"])
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
@@ -1238,7 +1253,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                         )
                         reasons.append(status)
                     else:
-                        # 👈 [추가] 이전 품목/모델 스크리닝 이력과 중복되는지 검사
+                        # 👈 이전 품목/모델 스크리닝 이력과 중복되는지 검사
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
@@ -1271,7 +1286,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
                                 reasons.append(reason_text)
 
-                                # 👈 [추가] 스크리닝 이력 기록
+                                # 👈 스크리닝 이력 기록
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
                                     "sub_model": sub_model,
@@ -1445,7 +1460,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                         )
                         reasons.append(status)
                     else:
-                        # 👈 [추가] 이전 품목/모델 스크리닝 이력과 중복되는지 검사
+                        # 👈 이전 품목/모델 스크리닝 이력과 중복되는지 검사
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
@@ -1478,7 +1493,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
                                 reasons.append(reason_text)
 
-                                # 👈 [추가] 스크리닝 이력 기록
+                                # 👈 스크리닝 이력 기록
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
                                     "sub_model": sub_model,
@@ -1568,7 +1583,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 
                     status_text.text(f"[{idx+1}/{total}] GIE 초록 AI 분석 중... ({title[:30]}...)")
 
-                    # 👈 [추가] DOI 또는 제목 기반 고유 식별자 생성
+                    # DOI 또는 제목 기반 고유 식별자 생성
                     identifier = doi.lower() if doi and doi != "-" else title.lower()
 
                     doi_list.append(doi)
@@ -1579,7 +1594,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         results.append("Exclude (초록없음)")
                         reasons.append("GIE RIS 파일 내에 Abstract 텍스트가 제공되지 않았습니다.")
 
-                    # 👈 [추가] 이전 스크리닝 이력과 중복 검사
+                    # 👈 이전 스크리닝 이력과 중복 검사
                     elif identifier in st.session_state["screened_history"]:
                         prev_info = st.session_state["screened_history"][identifier]
                         prev_mod = prev_info["sub_model"]
@@ -1610,7 +1625,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
                             reasons.append(reason_text)
 
-                            # 👈 [추가] 스크리닝 이력 기록
+                            # 👈 스크리닝 이력 기록
                             st.session_state["screened_history"][identifier] = {
                                 "category": due_category,
                                 "sub_model": sub_model,
