@@ -211,7 +211,7 @@ def reset_to_home():
     ]
     for key in exp_keys:
         if key in st.session_state:
-            st.session_state[key] = None
+            del st.session_state[key]
     st.session_state["prev_main_tab"] = None
     st.session_state["exp_reset_cnt"] = st.session_state.get("exp_reset_cnt", 0) + 1
 
@@ -384,13 +384,18 @@ if not due_category:
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
 
+                # 👈 [버그 수정] 탭 이동 시 이전 탭 세부 모델 선택 상태 완전 삭제하여 튕김 방지
                 if prod_view_tab != st.session_state["prev_main_tab"]:
                     st.session_state["prev_main_tab"] = prod_view_tab
-                    st.session_state["exp_biliary_seg"] = None
-                    st.session_state["exp_esophageal_seg"] = None
-                    st.session_state["exp_pyloric_seg"] = None
-                    st.session_state["exp_colonic_seg"] = None
-                    st.session_state["exp_drainage_seg"] = None
+                    for sub_key in [
+                        "exp_biliary_seg",
+                        "exp_esophageal_seg",
+                        "exp_pyloric_seg",
+                        "exp_colonic_seg",
+                        "exp_drainage_seg",
+                    ]:
+                        if sub_key in st.session_state:
+                            del st.session_state[sub_key]
 
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
@@ -1107,14 +1112,14 @@ def generate_prompt(
     [논문 제목]: {title}
     [논문 초록]: {abstract_text}
 
-    답변형식 (마크다운 환경에서 텍스트가 뭉치지 않도록 반드시 아래 정해진 형식대로만 작성할 것):
+    답변형식 (표 한 칸에 깔끔하게 들어가야 하므로 불필요한 줄바꿈을 만들지 말고 아래 형식대로만 작성할 것):
 
     판정: (Include 또는 Exclude)
 
     사유:
     (한글 사유 1문장)
     ---
-    (말머리 레이블): (영문 사유 1문장)
+    (영문 사유 1문장)
 
     [사유 작성 가이드 - 매우 중요!]
     1. 한국어 사유:
@@ -1122,14 +1127,14 @@ def generate_prompt(
        - 핵심 이유만 1~2문장의 단문으로 깔끔하게 작성해라.
 
     2. 영어 사유 (가장 중요!):
-       - 구분선(`---`) 바로 밑에 말머리 레이블을 붙인 후, 영문 사유 문장을 바로 적어라.
-       - Include인 경우 말머리를 절대로 붙이지 말고 그냥 완결된 영문 문장만 적어라. (예시: The study evaluates clinical efficacy and safety...)
-       - Exclude인 경우 아래 4가지 말머리 중 가장 적절한 하나를 골라 적어라:
+       - 구분선(`---`) 바로 밑에 영문 사유 문장을 적어라.
+       - Include인 경우: **Conclusion:** 이라는 말머리를 절대로 붙이지 말고, 그냥 완결된 영문 문장만 바로 작성해라. (예시: The study evaluates clinical efficacy and safety...)
+       - Exclude인 경우: 아래 4가지 말머리 중 가장 적절한 하나를 반드시 골라 붙이고 문장을 적어라:
          * **Different indication:**
          * **Irrelevant article:**
          * **Insufficient information:**
          * **Literature without human clinical data:**
-       - **말머리 뒤에 'Included because', 'It is because' 같은 접속어/수식어를 절대 붙이지 말고 바로 'The study...' 형태로 문장을 시작할 것.**
+       - **영문 문장 시작 부분에 'Included because', 'It is because' 같은 수식어를 절대 붙이지 말고 바로 'The study...' 형태로 문장을 시작할 것.**
        - 예시 (Include): The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
        - 예시 (Exclude): **Different indication:** The study is focused exclusively on esophageal stenting rather than colonic stenting.
     """
