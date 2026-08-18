@@ -181,12 +181,6 @@ if "tab_gie_result" not in st.session_state:
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 
-# 접이식 카탈로그 개폐 제어 세션
-if "expander_open" not in st.session_state:
-    st.session_state["expander_open"] = False
-if "prev_main_tab" not in st.session_state:
-    st.session_state["prev_main_tab"] = None
-
 
 # 품목/세부모델 변경 시 이전 화면 결과를 리셋하는 콜백
 def clear_screening_results():
@@ -201,19 +195,6 @@ def reset_to_home():
     clear_screening_results()
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
-    exp_keys = [
-        "exp_main_tab_seg",
-        "exp_biliary_seg",
-        "exp_esophageal_seg",
-        "exp_pyloric_seg",
-        "exp_colonic_seg",
-        "exp_drainage_seg",
-    ]
-    for key in exp_keys:
-        if key in st.session_state:
-            del st.session_state[key]
-    st.session_state["prev_main_tab"] = None
-    st.session_state["exp_reset_cnt"] = st.session_state.get("exp_reset_cnt", 0) + 1
 
 
 # 이전 스크리닝 히스토리 삭제 함수
@@ -364,12 +345,8 @@ if not due_category:
                 unsafe_allow_html=True,
             )
 
-            reset_cnt = st.session_state.get("exp_reset_cnt", 0)
-
-            with st.expander(
-                "View Detailed Product Catalog",
-                key=f"cat_expander_{reset_cnt}",
-            ):
+            # 👈 [튕김 버그 완전 수정] 상태 간섭 없는 카탈로그 뷰어
+            with st.expander("View Detailed Product Catalog"):
                 prod_view_tab = st.segmented_control(
                     "",
                     options=[
@@ -379,23 +356,10 @@ if not due_category:
                         "Colonic",
                         "Drainage",
                     ],
-                    default=None,
-                    key="exp_main_tab_seg",
+                    default="Biliary",
+                    key="exp_catalog_main_tab",
                 )
                 st.markdown("<br>", unsafe_allow_html=True)
-
-                # 👈 [버그 수정] 탭 이동 시 이전 탭 세부 모델 선택 상태 완전 삭제하여 튕김 방지
-                if prod_view_tab != st.session_state["prev_main_tab"]:
-                    st.session_state["prev_main_tab"] = prod_view_tab
-                    for sub_key in [
-                        "exp_biliary_seg",
-                        "exp_esophageal_seg",
-                        "exp_pyloric_seg",
-                        "exp_colonic_seg",
-                        "exp_drainage_seg",
-                    ]:
-                        if sub_key in st.session_state:
-                            del st.session_state[sub_key]
 
                 if prod_view_tab == "Biliary":
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
@@ -406,14 +370,14 @@ if not due_category:
                             "Covered Stent",
                             "ComVi Stent",
                         ],
-                        default=None,
+                        default="Uncovered Stent",
                         key="exp_biliary_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
 
                     if biliary_sel == "Uncovered Stent":
                         biliary_uncovered_models = [
-                            ("S-Type", "biliary_uncovered_s.png", "NNiti-S Biliary Uncovered Stent [S-Type] is indicated for use in malignant strictures."),
+                            ("S-Type", "biliary_uncovered_s.png", "Niti-S Biliary Uncovered Stent [S-Type] is indicated for use in malignant strictures."),
                             ("D-Type", "biliary_uncovered_d.png", "Niti-S Biliary Uncovered Stent [D-Type] is indicated for use in malignant strictures."),
                             ("M-Type", "biliary_uncovered_m.png", "Niti-S Biliary Uncovered Stent [M-Type] is indicated for use in malignant strictures."),
                             ("LCD-Type", "biliary_uncovered_lcd.png", "Niti-S Biliary Uncovered Stent [LCD-Type] is indicated for use in malignant strictures."),
@@ -486,7 +450,7 @@ if not due_category:
                     esophageal_sel = st.segmented_control(
                         "",
                         options=["Covered Stent"],
-                        default=None,
+                        default="Covered Stent",
                         key="exp_esophageal_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -527,7 +491,7 @@ if not due_category:
                             "Covered Stent",
                             "ComVi Stent",
                         ],
-                        default=None,
+                        default="Uncovered Stent",
                         key="exp_pyloric_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -604,7 +568,7 @@ if not due_category:
                             "Covered Stent",
                             "ComVi Stent",
                         ],
-                        default=None,
+                        default="Uncovered Stent",
                         key="exp_colonic_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -681,7 +645,7 @@ if not due_category:
                             "Hot SPAXUS Stent",
                             "Nagi Stent",
                         ],
-                        default=None,
+                        default="SPAXUS Stent",
                         key="exp_drainage_seg",
                     )
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -1088,7 +1052,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
 
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 생성 함수
+# 🤖 공통 AI 프롬프트 생성 함수 (한글 사유 완전 제거 & Conclusion 전용)
 # --------------------------------------------------
 def generate_prompt(
     due_category, include_criteria, exclude_criteria, title, abstract_text
@@ -1112,31 +1076,27 @@ def generate_prompt(
     [논문 제목]: {title}
     [논문 초록]: {abstract_text}
 
-    답변형식 (표 한 칸에 깔끔하게 들어가야 하므로 불필요한 줄바꿈을 만들지 말고 아래 형식대로만 작성할 것):
+    답변형식 (한국어 설명 없이 오직 아래 지정된 영문 형식으로만 완벽히 작성할 것):
 
     판정: (Include 또는 Exclude)
 
-    사유:
-    (한글 사유 1문장)
-    ---
+    Conclusion:
     (영문 사유 1문장)
 
-    [사유 작성 가이드 - 매우 중요!]
-    1. 한국어 사유:
-       - '문헌 유형:', '적응증:' 같은 항목명이나 번호를 절대 붙이지 마라.
-       - 핵심 이유만 1~2문장의 단문으로 깔끔하게 작성해라.
+    [Conclusion 작성 가이드 - 매우 중요!]
+    1. 한국어(한글) 설명이나 사유는 절대로 작성하지 마라.
+    2. Include인 경우:
+       - 'Conclusion:' 이라는 말머리조차 절대로 붙이지 말고, 완결된 영문 문장 자체만 적어라.
+       - 'Included because', 'It is because' 같은 수식어를 절대 쓰지 마라.
+       - 예시: The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
 
-    2. 영어 사유 (가장 중요!):
-       - 구분선(`---`) 바로 밑에 영문 사유 문장을 적어라.
-       - Include인 경우: **Conclusion:** 이라는 말머리를 절대로 붙이지 말고, 그냥 완결된 영문 문장만 바로 작성해라. (예시: The study evaluates clinical efficacy and safety...)
-       - Exclude인 경우: 아래 4가지 말머리 중 가장 적절한 하나를 반드시 골라 붙이고 문장을 적어라:
+    3. Exclude인 경우:
+       - 아래 4가지 말머리 중 가장 적절한 하나를 반드시 골라 붙인 후 영문 사유 문장을 작성해라:
          * **Different indication:**
          * **Irrelevant article:**
          * **Insufficient information:**
          * **Literature without human clinical data:**
-       - **영문 문장 시작 부분에 'Included because', 'It is because' 같은 수식어를 절대 붙이지 말고 바로 'The study...' 형태로 문장을 시작할 것.**
-       - 예시 (Include): The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
-       - 예시 (Exclude): **Different indication:** The study is focused exclusively on esophageal stenting rather than colonic stenting.
+       - 예시: **Different indication:** The study is focused exclusively on esophageal stenting rather than colonic stenting.
     """
 
 
@@ -1257,7 +1217,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
-                titles, abstracts, results, reasons, conclusions = [], [], [], [], []
+                titles, abstracts, results, conclusions = [], [], [], []
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total = len(df)
@@ -1276,8 +1236,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                         results.append(
                             "Exclude (초록없음)" if "초록" in status else "Error"
                         )
-                        reasons.append(status)
-                        conclusions.append("-")
+                        conclusions.append(status)
                     else:
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
@@ -1287,8 +1246,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Exclude (이전중복: {prev_mod})")
-                            reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
-                            conclusions.append("-")
+                            conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1310,14 +1268,8 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 )
                                 results.append(res_label)
                                 
-                                raw_reason = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                                if "---" in raw_reason:
-                                    parts = raw_reason.split("---")
-                                    reasons.append(parts[0].strip())
-                                    conclusions.append(parts[1].strip())
-                                else:
-                                    reasons.append(raw_reason)
-                                    conclusions.append("-")
+                                raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
+                                conclusions.append(raw_conclusion)
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1326,8 +1278,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 }
                             else:
                                 results.append("Error")
-                                reasons.append(f"AI 에러: {err}")
-                                conclusions.append("-")
+                                conclusions.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
@@ -1335,7 +1286,6 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 df["논문 제목"] = titles
                 df["초록 요약"] = abstracts
                 df["AI 판정"] = results
-                df["상세 사유"] = reasons
                 df["Conclusion"] = conclusions
 
                 df.insert(0, "No", range(1, len(df) + 1))
@@ -1472,7 +1422,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
                 auto_df = pd.DataFrame({"PMID": found_pmids})
-                titles, abstracts, results, reasons, conclusions = [], [], [], [], []
+                titles, abstracts, results, conclusions = [], [], [], []
 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
@@ -1492,8 +1442,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                         results.append(
                             "Exclude (초록없음)" if "초록" in status else "Error"
                         )
-                        reasons.append(status)
-                        conclusions.append("-")
+                        conclusions.append(status)
                     else:
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
@@ -1503,8 +1452,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Exclude (이전중복: {prev_mod})")
-                            reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
-                            conclusions.append("-")
+                            conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1526,14 +1474,8 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 )
                                 results.append(res_label)
                                 
-                                raw_reason = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                                if "---" in raw_reason:
-                                    parts = raw_reason.split("---")
-                                    reasons.append(parts[0].strip())
-                                    conclusions.append(parts[1].strip())
-                                else:
-                                    reasons.append(raw_reason)
-                                    conclusions.append("-")
+                                raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
+                                conclusions.append(raw_conclusion)
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1542,8 +1484,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 }
                             else:
                                 results.append("Error")
-                                reasons.append(f"AI 에러: {err}")
-                                conclusions.append("-")
+                                conclusions.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
@@ -1551,7 +1492,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 auto_df["논문 제목"] = titles
                 auto_df["초록 요약"] = abstracts
                 auto_df["AI 판정"] = results
-                auto_df["상세 사유"] = reasons
                 auto_df["Conclusion"] = conclusions
 
                 auto_df.insert(0, "No", range(1, len(auto_df) + 1))
@@ -1612,7 +1552,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
-                titles, abstracts, results, reasons, conclusions, doi_list = [], [], [], [], [], []
+                titles, abstracts, results, conclusions, doi_list = [], [], [], [], []
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total = len(entries)
@@ -1632,8 +1572,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     if not abstract_text:
                         abstracts.append("GIE RIS 파일 내 초록(Abstract) 미포함")
                         results.append("Exclude (초록없음)")
-                        reasons.append("GIE RIS 파일 내에 Abstract 텍스트가 제공되지 않았습니다.")
-                        conclusions.append("-")
+                        conclusions.append("Abstract text is missing in the GIE RIS file.")
 
                     elif identifier in st.session_state["screened_history"]:
                         prev_info = st.session_state["screened_history"][identifier]
@@ -1641,8 +1580,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         prev_res = prev_info["result"]
                         abstracts.append(abstract_text[:150] + "...")
                         results.append(f"Exclude (이전중복: {prev_mod})")
-                        reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
-                        conclusions.append("-")
+                        conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
 
                     else:
                         abstracts.append(abstract_text[:150] + "...")
@@ -1664,14 +1602,8 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             )
                             results.append(res_label)
 
-                            raw_reason = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                            if "---" in raw_reason:
-                                parts = raw_reason.split("---")
-                                reasons.append(parts[0].strip())
-                                conclusions.append(parts[1].strip())
-                            else:
-                                reasons.append(raw_reason)
-                                conclusions.append("-")
+                            raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
+                            conclusions.append(raw_conclusion)
 
                             st.session_state["screened_history"][identifier] = {
                                 "category": due_category,
@@ -1680,8 +1612,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             }
                         else:
                             results.append("Error")
-                            reasons.append(f"AI 에러: {err}")
-                            conclusions.append("-")
+                            conclusions.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(0.5)
@@ -1692,7 +1623,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     "논문 제목": titles,
                     "초록 요약": abstracts,
                     "AI 판정": results,
-                    "상세 사유": reasons,
                     "Conclusion": conclusions
                 })
 
