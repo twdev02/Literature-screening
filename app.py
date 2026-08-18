@@ -1107,7 +1107,7 @@ def generate_prompt(
     [논문 제목]: {title}
     [논문 초록]: {abstract_text}
 
-    답변형식 (표 한 칸에 깔끔하게 들어가야 하므로 불필요한 줄바꿈을 만들지 말고 아래 형식대로만 작성할 것):
+    답변형식 (마크다운 환경에서 텍스트가 뭉치지 않도록 반드시 아래 정해진 형식대로만 작성할 것):
 
     판정: (Include 또는 Exclude)
 
@@ -1123,14 +1123,14 @@ def generate_prompt(
 
     2. 영어 사유 (가장 중요!):
        - 구분선(`---`) 바로 밑에 말머리 레이블을 붙인 후, 영문 사유 문장을 바로 적어라.
-       - Include인 경우 말머리: **Conclusion:**
-       - Exclude인 경우 말머리 아래 4가지 중 택 1:
+       - Include인 경우 말머리를 절대로 붙이지 말고 그냥 완결된 영문 문장만 적어라. (예시: The study evaluates clinical efficacy and safety...)
+       - Exclude인 경우 아래 4가지 말머리 중 가장 적절한 하나를 골라 적어라:
          * **Different indication:**
          * **Irrelevant article:**
          * **Insufficient information:**
          * **Literature without human clinical data:**
-       - **말머리 뒤에 'Included because', 'It is because' 같은 접속어/수식어를 절대 붙이지 말고, 바로 'The study...' 또는 완결된 영문 문장을 바로 시작할 것.**
-       - 예시 (Include): **Conclusion:** The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
+       - **말머리 뒤에 'Included because', 'It is because' 같은 접속어/수식어를 절대 붙이지 말고 바로 'The study...' 형태로 문장을 시작할 것.**
+       - 예시 (Include): The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
        - 예시 (Exclude): **Different indication:** The study is focused exclusively on esophageal stenting rather than colonic stenting.
     """
 
@@ -1252,7 +1252,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
-                titles, abstracts, results, reasons = [], [], [], []
+                titles, abstracts, results, reasons, conclusions = [], [], [], [], []
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total = len(df)
@@ -1272,6 +1272,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                             "Exclude (초록없음)" if "초록" in status else "Error"
                         )
                         reasons.append(status)
+                        conclusions.append("-")
                     else:
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
@@ -1282,6 +1283,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Exclude (이전중복: {prev_mod})")
                             reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
+                            conclusions.append("-")
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1302,8 +1304,15 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                     else "Exclude (제외)"
                                 )
                                 results.append(res_label)
-                                reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                                reasons.append(reason_text)
+                                
+                                raw_reason = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
+                                if "---" in raw_reason:
+                                    parts = raw_reason.split("---")
+                                    reasons.append(parts[0].strip())
+                                    conclusions.append(parts[1].strip())
+                                else:
+                                    reasons.append(raw_reason)
+                                    conclusions.append("-")
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1313,6 +1322,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                             else:
                                 results.append("Error")
                                 reasons.append(f"AI 에러: {err}")
+                                conclusions.append("-")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
@@ -1321,6 +1331,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 df["초록 요약"] = abstracts
                 df["AI 판정"] = results
                 df["상세 사유"] = reasons
+                df["Conclusion"] = conclusions
 
                 df.insert(0, "No", range(1, len(df) + 1))
                 df.index = df.index + 1
@@ -1456,7 +1467,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
                 auto_df = pd.DataFrame({"PMID": found_pmids})
-                titles, abstracts, results, reasons = [], [], [], []
+                titles, abstracts, results, reasons, conclusions = [], [], [], [], []
 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
@@ -1477,6 +1488,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                             "Exclude (초록없음)" if "초록" in status else "Error"
                         )
                         reasons.append(status)
+                        conclusions.append("-")
                     else:
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
@@ -1487,6 +1499,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Exclude (이전중복: {prev_mod})")
                             reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
+                            conclusions.append("-")
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1507,8 +1520,15 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                     else "Exclude (제외)"
                                 )
                                 results.append(res_label)
-                                reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                                reasons.append(reason_text)
+                                
+                                raw_reason = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
+                                if "---" in raw_reason:
+                                    parts = raw_reason.split("---")
+                                    reasons.append(parts[0].strip())
+                                    conclusions.append(parts[1].strip())
+                                else:
+                                    reasons.append(raw_reason)
+                                    conclusions.append("-")
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1518,6 +1538,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                             else:
                                 results.append("Error")
                                 reasons.append(f"AI 에러: {err}")
+                                conclusions.append("-")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
@@ -1526,6 +1547,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 auto_df["초록 요약"] = abstracts
                 auto_df["AI 판정"] = results
                 auto_df["상세 사유"] = reasons
+                auto_df["Conclusion"] = conclusions
 
                 auto_df.insert(0, "No", range(1, len(auto_df) + 1))
 
@@ -1585,7 +1607,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
-                titles, abstracts, results, reasons, doi_list = [], [], [], [], []
+                titles, abstracts, results, reasons, conclusions, doi_list = [], [], [], [], [], []
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total = len(entries)
@@ -1606,6 +1628,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         abstracts.append("GIE RIS 파일 내 초록(Abstract) 미포함")
                         results.append("Exclude (초록없음)")
                         reasons.append("GIE RIS 파일 내에 Abstract 텍스트가 제공되지 않았습니다.")
+                        conclusions.append("-")
 
                     elif identifier in st.session_state["screened_history"]:
                         prev_info = st.session_state["screened_history"][identifier]
@@ -1614,6 +1637,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         abstracts.append(abstract_text[:150] + "...")
                         results.append(f"Exclude (이전중복: {prev_mod})")
                         reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
+                        conclusions.append("-")
 
                     else:
                         abstracts.append(abstract_text[:150] + "...")
@@ -1634,8 +1658,15 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                                 else "Exclude (제외)"
                             )
                             results.append(res_label)
-                            reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                            reasons.append(reason_text)
+
+                            raw_reason = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
+                            if "---" in raw_reason:
+                                parts = raw_reason.split("---")
+                                reasons.append(parts[0].strip())
+                                conclusions.append(parts[1].strip())
+                            else:
+                                reasons.append(raw_reason)
+                                conclusions.append("-")
 
                             st.session_state["screened_history"][identifier] = {
                                 "category": due_category,
@@ -1645,6 +1676,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         else:
                             results.append("Error")
                             reasons.append(f"AI 에러: {err}")
+                            conclusions.append("-")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(0.5)
@@ -1655,7 +1687,8 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     "논문 제목": titles,
                     "초록 요약": abstracts,
                     "AI 판정": results,
-                    "상세 사유": reasons
+                    "상세 사유": reasons,
+                    "Conclusion": conclusions
                 })
 
                 st.session_state["tab_gie_result"] = res_df
