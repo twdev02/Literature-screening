@@ -177,6 +177,10 @@ if "tab3_result" not in st.session_state:
 if "tab_gie_result" not in st.session_state:
     st.session_state["tab_gie_result"] = None
 
+# 👈 [추가] 누적 스크리닝 이력 저장용 메모리 (Uncovered ➔ Covered 등 모델 간 중복 필터링)
+if "screened_history" not in st.session_state:
+    st.session_state["screened_history"] = {}
+
 # 접이식 카탈로그 개폐 제어 및 이전 탭 기억용 세션
 if "expander_open" not in st.session_state:
     st.session_state["expander_open"] = False
@@ -201,6 +205,12 @@ def reset_to_home():
             st.session_state[key] = None
     st.session_state["prev_main_tab"] = None
     st.session_state["exp_reset_cnt"] = st.session_state.get("exp_reset_cnt", 0) + 1
+
+
+# 👈 [추가] 이전 스크리닝 히스토리 삭제 함수
+def clear_history():
+    st.session_state["screened_history"] = {}
+    st.toast("이전 스크리닝 누적 기록이 초기화되었습니다.")
 
 
 # --------------------------------------------------
@@ -292,6 +302,13 @@ with st.sidebar:
             ],
             key="sb_drainage",
         )
+
+    # 👈 [추가] 누적 스크리닝 현황 표기 및 리셋 버튼
+    st.markdown("---")
+    history_cnt = len(st.session_state["screened_history"])
+    st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
+    if st.button("이전 스크리닝 기록 초기화", help="이전 모델 스크리닝 이력을 비우고 다시 시작합니다."):
+        clear_history()
 
     # HOME 버튼
     st.markdown("---")
@@ -1221,30 +1238,48 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                         )
                         reasons.append(status)
                     else:
-                        titles.append(title)
-                        abstracts.append(abs_text[:150] + "...")
-
-                        prompt = generate_prompt(
-                            due_category,
-                            include_criteria,
-                            exclude_criteria,
-                            title,
-                            abs_text,
-                        )
-                        ans, err = call_gemini_with_retry(model, prompt)
-
-                        if ans:
-                            results.append(
-                                "Include (포함)"
-                                if "Include" in ans and "Exclude" not in ans.split("판정:")[1]
-                                else "Exclude (제외)"
-                            )
-                            reasons.append(
-                                ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                            )
+                        # 👈 [추가] 이전 품목/모델 스크리닝 이력과 중복되는지 검사
+                        identifier = pmid
+                        if identifier in st.session_state["screened_history"]:
+                            prev_info = st.session_state["screened_history"][identifier]
+                            prev_mod = prev_info["sub_model"]
+                            prev_res = prev_info["result"]
+                            titles.append(title)
+                            abstracts.append(abs_text[:150] + "...")
+                            results.append(f"Exclude (이전중복: {prev_mod})")
+                            reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
                         else:
-                            results.append("Error")
-                            reasons.append(f"AI 에러: {err}")
+                            titles.append(title)
+                            abstracts.append(abs_text[:150] + "...")
+
+                            prompt = generate_prompt(
+                                due_category,
+                                include_criteria,
+                                exclude_criteria,
+                                title,
+                                abs_text,
+                            )
+                            ans, err = call_gemini_with_retry(model, prompt)
+
+                            if ans:
+                                res_label = (
+                                    "Include (포함)"
+                                    if "Include" in ans and "Exclude" not in ans.split("판정:")[1]
+                                    else "Exclude (제외)"
+                                )
+                                results.append(res_label)
+                                reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
+                                reasons.append(reason_text)
+
+                                # 👈 [추가] 스크리닝 이력 기록
+                                st.session_state["screened_history"][identifier] = {
+                                    "category": due_category,
+                                    "sub_model": sub_model,
+                                    "result": res_label
+                                }
+                            else:
+                                results.append("Error")
+                                reasons.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
@@ -1410,30 +1445,48 @@ elif selected_mode == "PubMed PICO 자동 검색":
                         )
                         reasons.append(status)
                     else:
-                        titles.append(title)
-                        abstracts.append(abs_text[:150] + "...")
-
-                        prompt = generate_prompt(
-                            due_category,
-                            include_criteria,
-                            exclude_criteria,
-                            title,
-                            abs_text,
-                        )
-                        ans, err = call_gemini_with_retry(model, prompt)
-
-                        if ans:
-                            results.append(
-                                "Include (포함)"
-                                if "Include" in ans and "Exclude" not in ans.split("판정:")[1]
-                                else "Exclude (제외)"
-                            )
-                            reasons.append(
-                                ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                            )
+                        # 👈 [추가] 이전 품목/모델 스크리닝 이력과 중복되는지 검사
+                        identifier = pmid
+                        if identifier in st.session_state["screened_history"]:
+                            prev_info = st.session_state["screened_history"][identifier]
+                            prev_mod = prev_info["sub_model"]
+                            prev_res = prev_info["result"]
+                            titles.append(title)
+                            abstracts.append(abs_text[:150] + "...")
+                            results.append(f"Exclude (이전중복: {prev_mod})")
+                            reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
                         else:
-                            results.append("Error")
-                            reasons.append(f"AI 에러: {err}")
+                            titles.append(title)
+                            abstracts.append(abs_text[:150] + "...")
+
+                            prompt = generate_prompt(
+                                due_category,
+                                include_criteria,
+                                exclude_criteria,
+                                title,
+                                abs_text,
+                            )
+                            ans, err = call_gemini_with_retry(model, prompt)
+
+                            if ans:
+                                res_label = (
+                                    "Include (포함)"
+                                    if "Include" in ans and "Exclude" not in ans.split("판정:")[1]
+                                    else "Exclude (제외)"
+                                )
+                                results.append(res_label)
+                                reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
+                                reasons.append(reason_text)
+
+                                # 👈 [추가] 스크리닝 이력 기록
+                                st.session_state["screened_history"][identifier] = {
+                                    "category": due_category,
+                                    "sub_model": sub_model,
+                                    "result": res_label
+                                }
+                            else:
+                                results.append("Error")
+                                reasons.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
@@ -1511,9 +1564,12 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                 for idx, entry in enumerate(entries):
                     title = entry.get("title", entry.get("primary_title", "제목 없음"))
                     abstract_text = entry.get("abstract", "").strip()
-                    doi = entry.get("doi", entry.get("url", "-"))
+                    doi = entry.get("doi", entry.get("url", "-")).strip()
 
                     status_text.text(f"[{idx+1}/{total}] GIE 초록 AI 분석 중... ({title[:30]}...)")
+
+                    # 👈 [추가] DOI 또는 제목 기반 고유 식별자 생성
+                    identifier = doi.lower() if doi and doi != "-" else title.lower()
 
                     doi_list.append(doi)
                     titles.append(title)
@@ -1522,6 +1578,16 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         abstracts.append("GIE RIS 파일 내 초록(Abstract) 미포함")
                         results.append("Exclude (초록없음)")
                         reasons.append("GIE RIS 파일 내에 Abstract 텍스트가 제공되지 않았습니다.")
+
+                    # 👈 [추가] 이전 스크리닝 이력과 중복 검사
+                    elif identifier in st.session_state["screened_history"]:
+                        prev_info = st.session_state["screened_history"][identifier]
+                        prev_mod = prev_info["sub_model"]
+                        prev_res = prev_info["result"]
+                        abstracts.append(abstract_text[:150] + "...")
+                        results.append(f"Exclude (이전중복: {prev_mod})")
+                        reasons.append(f"이전 [{prev_mod}] 스크리닝 단계에서 이미 평가 완료된 문헌입니다. (이전 판정: {prev_res})")
+
                     else:
                         abstracts.append(abstract_text[:150] + "...")
 
@@ -1535,14 +1601,21 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         ans, err = call_gemini_with_retry(model, prompt)
 
                         if ans:
-                            results.append(
+                            res_label = (
                                 "Include (포함)"
                                 if "Include" in ans and "Exclude" not in ans.split("판정:")[1]
                                 else "Exclude (제외)"
                             )
-                            reasons.append(
-                                ans.split("사유:")[-1].strip() if "사유:" in ans else ans
-                            )
+                            results.append(res_label)
+                            reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
+                            reasons.append(reason_text)
+
+                            # 👈 [추가] 스크리닝 이력 기록
+                            st.session_state["screened_history"][identifier] = {
+                                "category": due_category,
+                                "sub_model": sub_model,
+                                "result": res_label
+                            }
                         else:
                             results.append("Error")
                             reasons.append(f"AI 에러: {err}")
