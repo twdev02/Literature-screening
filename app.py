@@ -345,7 +345,7 @@ if not due_category:
 <div class="hero-tag">TAEWOONG MEDICAL CLINICAL EVALUATION PLATFORM</div>
 <div class="dept-tag">Development Department | Development 2nd Team</div>
 </div>
-<div class="hero-title">PubMed & GIE Journal AI 문헌 스크리닝 시스템</div>
+<div class="hero-title">AI 문헌 스크리닝 시스템</div>
 <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
 </div>""",
         unsafe_allow_html=True,
