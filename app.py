@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 import google.generativeai as genai
 import pandas as pd
 import requests
-import rispy  # 👈 GIE RIS 파일 파싱을 위해 추가
+import rispy  # 👈 GIE RIS 파일 파싱용
 import streamlit as st
 
 st.set_page_config(
@@ -116,7 +116,7 @@ st.markdown(
         margin: 0;
     }
 
-    /* 🔥 세그먼티드 컨트롤 커스텀 (상단 탭 줄바꿈 꺾임 완벽 방지) */
+    /* 🔥 세그먼티드 컨트롤 커스텀 */
     div[data-testid="stSegmentedControl"] {
         background-color: #f1f5f9;
         padding: 6px;
@@ -177,18 +177,18 @@ if "tab3_result" not in st.session_state:
 if "tab_gie_result" not in st.session_state:
     st.session_state["tab_gie_result"] = None
 
-# 누적 스크리닝 이력 저장용 메모리 (Uncovered ➔ Covered 등 모델 간 중복 필터링)
+# 누적 스크리닝 이력 저장용 메모리
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 
-# 접이식 카탈로그 개폐 제어 및 이전 탭 기억용 세션
+# 접이식 카탈로그 개폐 제어 세션
 if "expander_open" not in st.session_state:
     st.session_state["expander_open"] = False
 if "prev_main_tab" not in st.session_state:
     st.session_state["prev_main_tab"] = None
 
 
-# 👈 [추가] 품목/세부모델 변경 시 이전 화면 결과를 자동으로 리셋하는 콜백 함수
+# 품목/세부모델 변경 시 이전 화면 결과를 리셋하는 콜백
 def clear_screening_results():
     st.session_state["tab1_result"] = None
     st.session_state["tab2_result"] = None
@@ -196,9 +196,9 @@ def clear_screening_results():
     st.session_state["tab_gie_result"] = None
 
 
-# HOME 버튼 클릭 시 카탈로그를 닫고 내부 세그먼트 상태도 리셋
+# HOME 버튼 클릭 시 리셋
 def reset_to_home():
-    clear_screening_results()  # 👈 홈 이동 시도 결과 리셋
+    clear_screening_results()
     if "radio_category" in st.session_state:
         del st.session_state["radio_category"]
     exp_keys = [
@@ -261,7 +261,7 @@ with st.sidebar:
         options=category_options,
         index=None,
         key="radio_category",
-        on_change=clear_screening_results,  # 👈 품목 변경 시 결과 자동 리셋
+        on_change=clear_screening_results,
     )
 
     # 세부 모델 선택
@@ -275,14 +275,14 @@ with st.sidebar:
                 "ComVi Biliary Stent",
             ],
             key="sb_biliary",
-            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
+            on_change=clear_screening_results,
         )
     elif due_category == "2. Esophageal Stent":
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
             options=["Niti-S Esophageal Covered Stent"],
             key="sb_esophageal",
-            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
+            on_change=clear_screening_results,
         )
     elif due_category == "3. Pyloric/Duodenal Stent":
         sub_model = st.selectbox(
@@ -293,7 +293,7 @@ with st.sidebar:
                 "ComVi Pyloric/Duodenal Stent",
             ],
             key="sb_pyloric",
-            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
+            on_change=clear_screening_results,
         )
     elif due_category == "4. Colonic Stent":
         sub_model = st.selectbox(
@@ -304,7 +304,7 @@ with st.sidebar:
                 "ComVi Enteral Colonic Stent",
             ],
             key="sb_colonic",
-            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
+            on_change=clear_screening_results,
         )
     elif due_category == "5. Drainage Stent":
         sub_model = st.selectbox(
@@ -315,7 +315,7 @@ with st.sidebar:
                 "Niti-S Nagi Stent",
             ],
             key="sb_drainage",
-            on_change=clear_screening_results,  # 👈 세부 모델 변경 시 결과 자동 리셋
+            on_change=clear_screening_results,
         )
 
     # 누적 스크리닝 현황 표기 및 리셋 버튼
@@ -345,7 +345,7 @@ if not due_category:
 <div class="hero-tag">TAEWOONG MEDICAL CLINICAL EVALUATION PLATFORM</div>
 <div class="dept-tag">Development Department | Development 2nd Team</div>
 </div>
-<div class="hero-title">AI 문헌 스크리닝 시스템</div>
+<div class="hero-title">PubMed & GIE Journal AI 문헌 스크리닝 시스템</div>
 <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
 </div>""",
         unsafe_allow_html=True,
@@ -1138,7 +1138,7 @@ def generate_prompt(
 
 
 # --------------------------------------------------
-# ✨ 세그먼티드 컨트롤 메뉴 및 선택된 품목 하이라이트 헤더
+# ✨ 2단계 세그먼티드 컨트롤 메뉴 개편 (큰 버튼 ➔ 세부 버튼)
 # --------------------------------------------------
 st.markdown(
     f"""
@@ -1150,18 +1150,40 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 👈 PubMed 모드와 GIE RIS 업로드 모드로 명확하게 이원화
-selected_mode = st.segmented_control(
+# 1단계: 큰 플랫폼 엔진 선택 (PubMed / GIE Journal)
+target_engine = st.segmented_control(
     "",
     options=[
-        "단일 PMID 입력",
-        "PMID 리스트 CSV 업로드",
-        "PubMed PICO 자동 검색",
-        "GIE RIS 파일 일괄 스크리닝",  # 👈 GIE 전용 버튼 추가!
+        "🌐 PubMed Engine",
+        "📖 GIE Journal Engine",
     ],
-    default="PubMed PICO 자동 검색",
-    key="main_mode_seg",
+    default="🌐 PubMed Engine",
+    key="engine_mode_seg",
 )
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# 2단계: 선택된 엔진에 따른 세부 입력 모드 노출
+if target_engine == "🌐 PubMed Engine":
+    selected_mode = st.segmented_control(
+        "",
+        options=[
+            "PubMed PICO 자동 검색",
+            "PMID 리스트 CSV 업로드",
+            "단일 PMID 입력",
+        ],
+        default="PubMed PICO 자동 검색",
+        key="pubmed_sub_mode_seg",
+    )
+else:
+    selected_mode = st.segmented_control(
+        "",
+        options=[
+            "GIE RIS 파일 일괄 스크리닝",
+        ],
+        default="GIE RIS 파일 일괄 스크리닝",
+        key="gie_sub_mode_seg",
+    )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1253,7 +1275,6 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                         )
                         reasons.append(status)
                     else:
-                        # 👈 이전 품목/모델 스크리닝 이력과 중복되는지 검사
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
@@ -1286,7 +1307,6 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
                                 reasons.append(reason_text)
 
-                                # 👈 스크리닝 이력 기록
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
                                     "sub_model": sub_model,
@@ -1460,7 +1480,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
                         )
                         reasons.append(status)
                     else:
-                        # 👈 이전 품목/모델 스크리닝 이력과 중복되는지 검사
                         identifier = pmid
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
@@ -1493,7 +1512,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
                                 reasons.append(reason_text)
 
-                                # 👈 스크리닝 이력 기록
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
                                     "sub_model": sub_model,
@@ -1534,7 +1552,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         )
 
 # --------------------------------------------------
-# 🔥 MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝 (신규 추가)
+# MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
 # --------------------------------------------------
 elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
     st.subheader("GIE Journal RIS 파일 업로드 스크리닝")
@@ -1552,7 +1570,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
         elif not gie_file:
             st.error("GIE RIS 파일을 업로드해 주세요!")
         else:
-            # 1. RIS 파일 텍스트 디코딩 및 파싱
             try:
                 content = gie_file.getvalue().decode("utf-8")
             except UnicodeDecodeError:
@@ -1575,7 +1592,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                 status_text = st.empty()
                 total = len(entries)
 
-                # 2. RIS 내부 Abstract 데이터를 직접 읽어 Gemini AI로 스크리닝
                 for idx, entry in enumerate(entries):
                     title = entry.get("title", entry.get("primary_title", "제목 없음"))
                     abstract_text = entry.get("abstract", "").strip()
@@ -1583,7 +1599,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 
                     status_text.text(f"[{idx+1}/{total}] GIE 초록 AI 분석 중... ({title[:30]}...)")
 
-                    # DOI 또는 제목 기반 고유 식별자 생성
                     identifier = doi.lower() if doi and doi != "-" else title.lower()
 
                     doi_list.append(doi)
@@ -1594,7 +1609,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         results.append("Exclude (초록없음)")
                         reasons.append("GIE RIS 파일 내에 Abstract 텍스트가 제공되지 않았습니다.")
 
-                    # 👈 이전 스크리닝 이력과 중복 검사
                     elif identifier in st.session_state["screened_history"]:
                         prev_info = st.session_state["screened_history"][identifier]
                         prev_mod = prev_info["sub_model"]
@@ -1625,7 +1639,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             reason_text = ans.split("사유:")[-1].strip() if "사유:" in ans else ans
                             reasons.append(reason_text)
 
-                            # 👈 스크리닝 이력 기록
                             st.session_state["screened_history"][identifier] = {
                                 "category": due_category,
                                 "sub_model": sub_model,
