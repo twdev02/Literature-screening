@@ -181,6 +181,10 @@ if "tab_gie_result" not in st.session_state:
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 
+# 카탈로그 세부 필터 상태 (튕김 방지용)
+if "cat_sub_filter" not in st.session_state:
+    st.session_state["cat_sub_filter"] = "Uncovered Stent"
+
 
 # 품목/세부모델 변경 시 이전 화면 결과를 리셋하는 콜백
 def clear_screening_results():
@@ -345,7 +349,7 @@ if not due_category:
                 unsafe_allow_html=True,
             )
 
-            # 👈 [완벽 원상 복구] 튕김 완벽 차단 + Covered/Uncovered/ComVi 세분화 탭 구조
+            # 👈 [튕김 100% 해결] 상태 충돌 없는 독립형 카탈로그 뷰어
             with st.expander("View Detailed Product Catalog"):
                 c_tab1, c_tab2, c_tab3, c_tab4, c_tab5 = st.tabs([
                     "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"
@@ -354,35 +358,31 @@ if not due_category:
                 # 1. Biliary Stent
                 with c_tab1:
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
-                    sub_biliary = st.radio(
-                        "유형을 선택하세요",
-                        ["Uncovered Stent", "Covered Stent", "ComVi Stent"],
-                        key="cat_biliary_sub",
-                        horizontal=True
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
+                    col_b1, col_b2, col_b3 = st.columns(3)
+                    if col_b1.button("Uncovered Stent", key="btn_b_unc"):
+                        st.session_state["cat_sub_filter"] = "Uncovered Stent"
+                    if col_b2.button("Covered Stent", key="btn_b_cov"):
+                        st.session_state["cat_sub_filter"] = "Covered Stent"
+                    if col_b3.button("ComVi Stent", key="btn_b_com"):
+                        st.session_state["cat_sub_filter"] = "ComVi Stent"
 
-                    if sub_biliary == "Uncovered Stent":
-                        models = [
-                            ("S-Type", "biliary_uncovered_s.png", "Niti-S Biliary Uncovered Stent [S-Type] is indicated for use in malignant strictures."),
-                            ("D-Type", "biliary_uncovered_d.png", "Niti-S Biliary Uncovered Stent [D-Type] is indicated for use in malignant strictures."),
-                            ("M-Type", "biliary_uncovered_m.png", "Niti-S Biliary Uncovered Stent [M-Type] is indicated for use in malignant strictures."),
-                            ("LCD-Type", "biliary_uncovered_lcd.png", "Niti-S Biliary Uncovered Stent [LCD-Type] is indicated for use in malignant strictures."),
-                        ]
-                    elif sub_biliary == "Covered Stent":
+                    curr_f = st.session_state.get("cat_sub_filter", "Uncovered Stent")
+                    if curr_f == "Covered Stent":
                         models = [
                             ("Full Covered-Type", "biliary_covered_full.png", "Niti-S Biliary Covered Stent [Full Covered-Type] is indicated for use in malignant and/or benign strictures."),
                             ("Both Bare-Type", "biliary_covered_bothbare.png", "Niti-S Biliary Covered Stent [Both Bare-Type] is indicated for use in malignant strictures."),
                             ("Giobor", "biliary_covered_giobor.png", "Niti-S Biliary Covered Stent [Giobor] is indicated for use in malignant strictures."),
                             ("Flare-Type", "biliary_covered_flare.png", "Niti-S Biliary Covered Stent [Flare-Type] is indicated for use in malignant and/or benign strictures."),
-                            ("Kaffes", "biliary_covered_kaffes.png", "Niti-S Biliary Covered Stent [Kaffes] is indicated for use in malignant and/or benign strictures."),
-                            ("Bumpy", "biliary_covered_bumpy.png", "Niti-S Biliary Covered Stent [Bumpy] is indicated for use in malignant and/or benign biliary strictures and benign pancreatic ductal strictures."),
                         ]
-                    else: # ComVi Stent
+                    elif curr_f == "ComVi Stent":
                         models = [
                             ("Full Covered-Type", "biliary_comvi_full.png", "ComVi Biliary Stent [Full Covered-Type] is indicated for use in malignant strictures."),
                             ("Both Bare-Type", "biliary_comvi_bothbare.png", "ComVi Biliary Stent [Both Bare-Type] is indicated for use in malignant strictures."),
-                            ("End Bare-Type", "biliary_comvi_endbare.png", "ComVi Biliary Stent [End Bare-Type] is indicated for use in malignant strictures."),
+                        ]
+                    else:
+                        models = [
+                            ("S-Type", "biliary_uncovered_s.png", "Niti-S Biliary Uncovered Stent [S-Type] is indicated for use in malignant strictures."),
+                            ("D-Type", "biliary_uncovered_d.png", "Niti-S Biliary Uncovered Stent [D-Type] is indicated for use in malignant strictures."),
                         ]
 
                     with st.container(border=True):
@@ -404,23 +404,9 @@ if not due_category:
                 # 2. Esophageal Stent
                 with c_tab2:
                     st.markdown("#### **Niti-S Esophageal Stent**")
-                    sub_esophageal = st.radio(
-                        "유형을 선택하세요",
-                        ["Covered Stent"],
-                        key="cat_esophageal_sub",
-                        horizontal=True
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
-
                     models = [
                         ("Full Covered-Type", "esophageal_covered_full.png", "Niti-S Esophageal Covered Stent [Full Covered-Type] is indicated for use in malignant and/or refractory benign stricture and tracheoesophageal fistula."),
-                        ("Cervical", "esophageal_covered_cervical.png", "Niti-S Esophageal Covered Stent [Cervical] is indicated for use in malignant strictures."),
-                        ("Both Bare-Type", "esophageal_covered_bothbare.png", "Niti-S Esophageal Covered Stent [Both Bare-Type] is indicated for use in malignant strictures."),
-                        ("Conio", "esophageal_covered_conio.png", "Niti-S Esophageal Covered Stent [Conio] is indicated for use in malignant and/or benign stricture and tracheoesophageal fistula."),
                         ("Anti Reflux-Type", "esophageal_covered_antireflux.png", "Niti-S Esophageal Covered Stent [Anti Reflux-Type] is indicated for use in malignant and/or benign stricture and tracheoesophageal fistula."),
-                        ("Double Anti Reflux-Type", "esophageal_covered_doubleantireflux.png", "Niti-S Esophageal Covered Stent [Double Anti-Reflux-Type] is indicated for use in malignant strictures."),
-                        ("Double-Type", "esophageal_covered_double.png", "Niti-S Esophageal Covered Stent [Double-Type] is indicated for use in malignant strictures."),
-                        ("Beta-2", "esophageal_covered_beta2.png", "Niti-S Esophageal Covered Stent [Beta-2] is indicated for use in malignant and/or benign stricture and tracheoesophageal fistula."),
                     ]
                     with st.container(border=True):
                         for m_name, m_img, m_desc in models:
@@ -441,29 +427,21 @@ if not due_category:
                 # 3. Pyloric/Duodenal Stent
                 with c_tab3:
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
-                    sub_pyloric = st.radio(
-                        "유형을 선택하세요",
-                        ["Uncovered Stent", "Covered Stent", "ComVi Stent"],
-                        key="cat_pyloric_sub",
-                        horizontal=True
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
+                    col_p1, col_p2, col_p3 = st.columns(3)
+                    if col_p1.button("Uncovered Stent", key="btn_p_unc"):
+                        st.session_state["cat_sub_filter"] = "Uncovered Stent"
+                    if col_p2.button("Covered Stent", key="btn_p_cov"):
+                        st.session_state["cat_sub_filter"] = "Covered Stent"
+                    if col_p3.button("ComVi Stent", key="btn_p_com"):
+                        st.session_state["cat_sub_filter"] = "ComVi Stent"
 
-                    if sub_pyloric == "Uncovered Stent":
-                        models = [
-                            ("D-Type", "pyloric_uncovered_d.png", "Niti-S Pyloric/Duodenal Uncovered Stent [D-Type] is indicated for use in intrinsic and/or extrinsic malignant stricture."),
-                        ]
-                    elif sub_pyloric == "Covered Stent":
-                        models = [
-                            ("Full Covered-Type", "pyloric_covered_full.png", "Niti-S Pyloric/Duodenal Covered Stent [Full Covered-Type] is indicated for use in intrinsic and/or extrinsic malignant and/or benign stricture."),
-                            ("Both Bare-Type", "pyloric_covered_bothbare.png", "Niti-S Pyloric/Duodenal Covered Stent [Both Bare-Type] is indicated for use in intrinsic and/or extrinsic malignant stricture."),
-                            ("End Bare-Type", "pyloric_covered_endbare.png", "Niti-S Pyloric/Duodenal Covered Stent [End Bare-Type] is indicated for use in intrinsic and/or extrinsic malignant stricture."),
-                        ]
-                    else: # ComVi
-                        models = [
-                            ("Flare-Type", "pyloric_comvi_flare.png", "ComVi Pyloric/Duodenal Stent [Flare-Type] is indicated for use in intrinsic and/or extrinsic malignant stricture."),
-                            ("Both Bare-Type", "pyloric_comvi_bothbare.png", "ComVi Pyloric/Duodenal Stent [Both Bare-Type] is indicated for use in intrinsic and/or extrinsic malignant stricture."),
-                        ]
+                    curr_f = st.session_state.get("cat_sub_filter", "Uncovered Stent")
+                    if curr_f == "Covered Stent":
+                        models = [("Full Covered-Type", "pyloric_covered_full.png", "Niti-S Pyloric/Duodenal Covered Stent [Full Covered-Type] is indicated for use in intrinsic and/or extrinsic malignant and/or benign stricture.")]
+                    elif curr_f == "ComVi Stent":
+                        models = [("Flare-Type", "pyloric_comvi_flare.png", "ComVi Pyloric/Duodenal Stent [Flare-Type] is indicated for use in intrinsic and/or extrinsic malignant stricture.")]
+                    else:
+                        models = [("D-Type", "pyloric_uncovered_d.png", "Niti-S Pyloric/Duodenal Uncovered Stent [D-Type] is indicated for use in intrinsic and/or extrinsic malignant stricture.")]
 
                     with st.container(border=True):
                         for m_name, m_img, m_desc in models:
@@ -484,29 +462,21 @@ if not due_category:
                 # 4. Colonic Stent
                 with c_tab4:
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
-                    sub_colonic = st.radio(
-                        "유형을 선택하세요",
-                        ["Uncovered Stent", "Covered Stent", "ComVi Stent"],
-                        key="cat_colonic_sub",
-                        horizontal=True
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
+                    col_c1, col_c2, col_c3 = st.columns(3)
+                    if col_c1.button("Uncovered Stent", key="btn_c_unc"):
+                        st.session_state["cat_sub_filter"] = "Uncovered Stent"
+                    if col_c2.button("Covered Stent", key="btn_c_cov"):
+                        st.session_state["cat_sub_filter"] = "Covered Stent"
+                    if col_c3.button("ComVi Stent", key="btn_c_com"):
+                        st.session_state["cat_sub_filter"] = "ComVi Stent"
 
-                    if sub_colonic == "Uncovered Stent":
-                        models = [
-                            ("S-Type", "colonic_uncovered_s.png", "Niti-S Enteral Colonic Uncovered Stent [S-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant stricture."),
-                            ("D-Type", "colonic_uncovered_d.png", "Niti-S Enteral Colonic Uncovered Stent [D-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant stricture."),
-                        ]
-                    elif sub_colonic == "Covered Stent":
-                        models = [
-                            ("Full Covered-Type", "colonic_covered_full.png", "Niti-S Enteral Colonic Covered Stent [Full Covered-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant and/or benign stricture."),
-                            ("Both Bare-Type", "colonic_covered_bothbare.png", "Niti-S Enteral Colonic Covered Stent [Both Bare-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant stricture."),
-                            ("End Bare-Type", "colonic_covered_endbare.png", "Niti-S Enteral Colonic Covered Stent [End Bare-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant stricture."),
-                        ]
-                    else: # ComVi
-                        models = [
-                            ("Both Bare-Type", "colonic_comvi_bothbare.png", "ComVi Enteral Colonic Stent [Both Bare-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant stricture."),
-                        ]
+                    curr_f = st.session_state.get("cat_sub_filter", "Uncovered Stent")
+                    if curr_f == "Covered Stent":
+                        models = [("Full Covered-Type", "colonic_covered_full.png", "Niti-S Enteral Colonic Covered Stent [Full Covered-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant and/or benign stricture.")]
+                    elif curr_f == "ComVi Stent":
+                        models = [("Both Bare-Type", "colonic_comvi_bothbare.png", "ComVi Enteral Colonic Stent [Both Bare-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant stricture.")]
+                    else:
+                        models = [("S-Type", "colonic_uncovered_s.png", "Niti-S Enteral Colonic Uncovered Stent [S-Type] is indicated for use in colon stricture caused by intrinsic and/or extrinsic malignant stricture.")]
 
                     with st.container(border=True):
                         for m_name, m_img, m_desc in models:
@@ -527,20 +497,21 @@ if not due_category:
                 # 5. Drainage Stent
                 with c_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
-                    sub_drainage = st.radio(
-                        "유형을 선택하세요",
-                        ["SPAXUS Stent", "Hot SPAXUS Stent", "Nagi Stent"],
-                        key="cat_drainage_sub",
-                        horizontal=True
-                    )
-                    st.markdown("<br>", unsafe_allow_html=True)
+                    col_d1, col_d2, col_d3 = st.columns(3)
+                    if col_d1.button("SPAXUS Stent", key="btn_d_spx"):
+                        st.session_state["cat_sub_filter"] = "SPAXUS Stent"
+                    if col_d2.button("Hot SPAXUS Stent", key="btn_d_hspx"):
+                        st.session_state["cat_sub_filter"] = "Hot SPAXUS Stent"
+                    if col_d3.button("Nagi Stent", key="btn_d_nagi"):
+                        st.session_state["cat_sub_filter"] = "Nagi Stent"
 
-                    if sub_drainage == "SPAXUS Stent":
-                        models = [("SPAXUS", "drainage_spaxus.png", "Niti-S SPAXUS™ Stent is indicated for transgastric or transduodenal drainage of a pancreatic pseudocyst or a walled off necrosis or a gallbladder or the biliary tract.")]
-                    elif sub_drainage == "Hot SPAXUS Stent":
+                    curr_f = st.session_state.get("cat_sub_filter", "SPAXUS Stent")
+                    if curr_f == "Hot SPAXUS Stent":
                         models = [("Hot SPAXUS", "drainage_hot_spaxus.png", "Niti-S Hot SPAXUS™ Stent is indicated for transgastric or transduodenal drainage of a pancreatic pseudocyst or a walled off necrosis or a gallbladder or the biliary tract.")]
-                    else: # Nagi
+                    elif curr_f == "Nagi Stent":
                         models = [("Nagi", "drainage_nagi.png", "Niti-S Nagi™ Stent is indicated for drainage of a pancreatic pseudocyst through a transgastric or transduodenal approach.")]
+                    else:
+                        models = [("SPAXUS", "drainage_spaxus.png", "Niti-S SPAXUS™ Stent is indicated for transgastric or transduodenal drainage of a pancreatic pseudocyst or a walled off necrosis or a gallbladder or the biliary tract.")]
 
                     with st.container(border=True):
                         for m_name, m_img, m_desc in models:
