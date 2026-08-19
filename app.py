@@ -1215,7 +1215,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                             prev_res = prev_info["result"]
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
-                            results.append(f"Exclude (이전중복: {prev_mod})")
+                            results.append(f"Duplicated (이전중복: {prev_mod})")
                             conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
                         else:
                             titles.append(title)
@@ -1426,7 +1426,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                             prev_res = prev_info["result"]
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
-                            results.append(f"Exclude (이전중복: {prev_mod})")
+                            results.append(f"Duplicated (이전중복: {prev_mod})")
                             conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
                         else:
                             titles.append(title)
@@ -1559,7 +1559,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         prev_mod = prev_info["sub_model"]
                         prev_res = prev_info["result"]
                         abstracts.append(abstract_text[:150] + "...")
-                        results.append(f"Exclude (이전중복: {prev_mod})")
+                        results.append(f"Duplicated (이전중복: {prev_mod})")
                         conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
 
                     else:
