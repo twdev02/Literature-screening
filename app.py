@@ -1,5 +1,6 @@
 import io
 import os
+import re  # 👈 유니코드 변환용 정규표현식 라이브러리
 import time
 import xml.etree.ElementTree as ET
 import google.generativeai as genai
@@ -11,6 +12,22 @@ import streamlit as st
 st.set_page_config(
     page_title="Taewoong Medical - AI 문헌 스크리닝", layout="wide"
 )
+
+# --------------------------------------------------
+# 🔤 마크다운 별표(**)를 유니코드 굵은 글씨로 변환하는 함수
+# --------------------------------------------------
+def to_unicode_bold(text):
+    if not text:
+        return text
+    bold_map = {
+        'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉', 'K': '𝐊', 'L': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓', 'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
+        'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳'
+    }
+    def replace_bold(match):
+        word = match.group(1)
+        return "".join(bold_map.get(c, c) for c in word)
+    
+    return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
 # 🎨 고급 커스텀 CSS (태웅메디칼 브랜딩 & UI 개선)
@@ -181,7 +198,6 @@ if "tab_gie_result" not in st.session_state:
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 
-# 👈 [오류 수정] 사이드바 선택 품목 상태 초기화 (None 세팅)
 if "radio_category" not in st.session_state:
     st.session_state["radio_category"] = None
 
@@ -197,7 +213,7 @@ def clear_screening_results():
 # HOME 버튼 클릭 시 완전히 초기화
 def reset_to_home():
     clear_screening_results()
-    st.session_state["radio_category"] = None  # 👈 del 대신 안전하게 None으로 리셋
+    st.session_state["radio_category"] = None
 
 
 # 이전 스크리닝 히스토리 삭제 함수
@@ -240,7 +256,6 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
-    # 👈 [버그 완벽 수정] index를 세션 상태와 연동하여 튕김 및 인지 오류 원천 차단
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
@@ -1007,7 +1022,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
 
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 생성 함수 (한글 사유 완전 제거 & Conclusion 전용)
+# 🤖 공통 AI 프롬프트 생성 함수
 # --------------------------------------------------
 def generate_prompt(
     due_category, include_criteria, exclude_criteria, title, abstract_text
@@ -1039,7 +1054,7 @@ def generate_prompt(
     (영문 사유 1문장)
 
     [Conclusion 작성 가이드 - 매우 중요!]
-    1. 한국어(한글) 설명이나 사유는 절대로 작성하지 마라.
+    1. 한국어(한글) 설명이나 '판정:' 같은 단어는 Conclusion 항목 안에 절대 넣지 마라.
     2. Include인 경우:
        - 'Conclusion:' 이라는 말머리조차 절대로 붙이지 말고, 완결된 영문 문장 자체만 적어라.
        - 'Included because', 'It is because' 같은 수식어를 절대 쓰지 마라.
@@ -1224,7 +1239,8 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 results.append(res_label)
                                 
                                 raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
-                                conclusions.append(raw_conclusion)
+                                # 👈 [유니코드 굵은 글씨 후처리 적용]
+                                conclusions.append(to_unicode_bold(raw_conclusion))
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1430,7 +1446,8 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 results.append(res_label)
                                 
                                 raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
-                                conclusions.append(raw_conclusion)
+                                # 👈 [유니코드 굵은 글씨 후처리 적용]
+                                conclusions.append(to_unicode_bold(raw_conclusion))
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1558,7 +1575,8 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             results.append(res_label)
 
                             raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
-                            conclusions.append(raw_conclusion)
+                            # 👈 [유니코드 굵은 글씨 후처리 적용]
+                            conclusions.append(to_unicode_bold(raw_conclusion))
 
                             st.session_state["screened_history"][identifier] = {
                                 "category": due_category,
