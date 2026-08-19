@@ -1238,8 +1238,12 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 )
                                 results.append(res_label)
                                 
-                                raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
-                                # 👈 [유니코드 굵은 글씨 후처리 적용]
+                                # 👈 [파싱 로직 수정] 상단 '판정: Include' 문구를 떼어내고 Conclusion 이하 정밀 추출
+                                if "Conclusion:" in ans:
+                                    raw_conclusion = ans.split("Conclusion:")[-1].strip()
+                                else:
+                                    raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
+                                
                                 conclusions.append(to_unicode_bold(raw_conclusion))
 
                                 st.session_state["screened_history"][identifier] = {
@@ -1445,8 +1449,12 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 )
                                 results.append(res_label)
                                 
-                                raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
-                                # 👈 [유니코드 굵은 글씨 후처리 적용]
+                                # 👈 [파싱 로직 수정] 상단 '판정: Include' 문구를 떼어내고 Conclusion 이하 정밀 추출
+                                if "Conclusion:" in ans:
+                                    raw_conclusion = ans.split("Conclusion:")[-1].strip()
+                                else:
+                                    raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
+                                
                                 conclusions.append(to_unicode_bold(raw_conclusion))
 
                                 st.session_state["screened_history"][identifier] = {
@@ -1574,8 +1582,12 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             )
                             results.append(res_label)
 
-                            raw_conclusion = ans.split("Conclusion:")[-1].strip() if "Conclusion:" in ans else ans
-                            # 👈 [유니코드 굵은 글씨 후처리 적용]
+                            # 👈 [파싱 로직 수정] 상단 '판정: Include' 문구를 떼어내고 Conclusion 이하 정밀 추출
+                            if "Conclusion:" in ans:
+                                raw_conclusion = ans.split("Conclusion:")[-1].strip()
+                            else:
+                                raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
+
                             conclusions.append(to_unicode_bold(raw_conclusion))
 
                             st.session_state["screened_history"][identifier] = {
