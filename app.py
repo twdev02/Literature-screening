@@ -181,6 +181,10 @@ if "tab_gie_result" not in st.session_state:
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 
+# 👈 [오류 수정] 사이드바 선택 품목 상태 초기화 (None 세팅)
+if "radio_category" not in st.session_state:
+    st.session_state["radio_category"] = None
+
 
 # 품목/세부모델 변경 시 이전 화면 결과를 리셋하는 콜백
 def clear_screening_results():
@@ -190,11 +194,10 @@ def clear_screening_results():
     st.session_state["tab_gie_result"] = None
 
 
-# HOME 버튼 클릭 시 리셋
+# HOME 버튼 클릭 시 완전히 초기화
 def reset_to_home():
     clear_screening_results()
-    if "radio_category" in st.session_state:
-        del st.session_state["radio_category"]
+    st.session_state["radio_category"] = None  # 👈 del 대신 안전하게 None으로 리셋
 
 
 # 이전 스크리닝 히스토리 삭제 함수
@@ -237,10 +240,15 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
+    # 👈 [버그 완벽 수정] index를 세션 상태와 연동하여 튕김 및 인지 오류 원천 차단
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
-        index=None,
+        index=(
+            category_options.index(st.session_state["radio_category"])
+            if st.session_state.get("radio_category") in category_options
+            else None
+        ),
         key="radio_category",
         on_change=clear_screening_results,
     )
@@ -345,13 +353,12 @@ if not due_category:
                 unsafe_allow_html=True,
             )
 
-            # 👈 [100% 원복 & 튕김 차단] 하위 탭 구조로 모든 원본 제품 데이터 완전 보존
             with st.expander("View Detailed Product Catalog"):
                 c_tab1, c_tab2, c_tab3, c_tab4, c_tab5 = st.tabs([
                     "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"
                 ])
 
-                # 1. Biliary Stent (전체 원본 리스트)
+                # 1. Biliary Stent
                 with c_tab1:
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
                     b_sub1, b_sub2, b_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -426,7 +433,7 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 2. Esophageal Stent (전체 원본 리스트)
+                # 2. Esophageal Stent
                 with c_tab2:
                     st.markdown("#### **Niti-S Esophageal Stent**")
                     e_sub1 = st.tabs(["Covered Stent"])[0]
@@ -457,7 +464,7 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 3. Pyloric/Duodenal Stent (전체 원본 리스트)
+                # 3. Pyloric/Duodenal Stent
                 with c_tab3:
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
                     p_sub1, p_sub2, p_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -525,7 +532,7 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 4. Colonic Stent (전체 원본 리스트)
+                # 4. Colonic Stent
                 with c_tab4:
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
                     col_sub1, col_sub2, col_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -593,7 +600,7 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 5. Drainage Stent (전체 원본 리스트)
+                # 5. Drainage Stent
                 with c_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
                     d_sub1, d_sub2, d_sub3 = st.tabs(["SPAXUS Stent", "Hot SPAXUS Stent", "Nagi Stent"])
