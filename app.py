@@ -1518,7 +1518,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 )
 
                 with st.expander(
-                    "자동 생성된 PubMed 조합 쿼리식 확인 (CER 제출용)", expanded=True
+                    "자동 생성된 PubMed 조합 쿼리식 확인", expanded=True
                 ):
                     st.code(used_query, language="sql")
 
