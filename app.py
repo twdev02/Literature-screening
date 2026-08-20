@@ -45,16 +45,17 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS
+# 🎨 고급 커스텀 CSS (반응형 레이아웃 붕괴 방지 최적화)
 # --------------------------------------------------
 st.markdown(
     """
 <style>
-    /* 1. 기본 레이아웃 여백 넉넉하게 조정 */
+    /* 1. 기본 레이아웃 여백 및 고정 폭 최적화 (해상도 깨짐 방지) */
     .block-container {
         padding-top: 2rem !important;
         padding-bottom: 3rem !important;
-        max-width: 96% !important;
+        max-width: 1400px !important;
+        width: 94% !important;
     }
 
     /* 2. 홈 화면 전체 세로 스크롤 허용 */
@@ -77,7 +78,7 @@ st.markdown(
         padding: 8px 12px !important;
     }
 
-    /* 👈 파일 업로더 라벨 한 줄 정렬 */
+    /* 파일 업로더 라벨 한 줄 정렬 */
     div[data-testid="stFileUploader"] label p {
         letter-spacing: -0.8px !important;
         white-space: nowrap !important;
@@ -86,7 +87,7 @@ st.markdown(
     /* 상단 메인 히어로 배너 디자인 */
     .hero-container {
         background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%);
-        padding: 28px 32px;
+        padding: 24px 28px;
         border-radius: 16px;
         color: #ffffff;
         box-shadow: 0 10px 20px -3px rgba(11, 26, 45, 0.3);
@@ -97,12 +98,14 @@ st.markdown(
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
         margin-bottom: 10px;
     }
     .hero-tag {
         background: linear-gradient(90deg, #84cc16 0%, #06b6d4 100%);
         color: #ffffff;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
         padding: 4px 12px;
         border-radius: 20px;
@@ -117,38 +120,50 @@ st.markdown(
         letter-spacing: 0.3px;
     }
     .hero-title {
-        font-size: 26px;
+        font-size: clamp(20px, 2.2vw, 26px) !important;
         font-weight: 800;
         color: #ffffff;
         margin: 4px 0px 6px 0px;
         letter-spacing: -0.5px;
+        word-break: keep-all;
     }
     .hero-subtitle {
-        font-size: 14px;
+        font-size: 13px;
         color: #cbd5e1;
         margin-bottom: 0px;
         font-weight: 400;
+        word-break: keep-all;
+    }
+
+    /* 상단 대시보드 카드 컨테이너 높이 맞춤 */
+    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] > div[data-testid="stCustomComponentV1"] {
+        height: 100%;
     }
 
     /* 카드 박스 내부 텍스트 스타일 */
     .card-title {
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         color: #0284c7;
         text-transform: uppercase;
         margin-bottom: 4px;
+        letter-spacing: 0.5px;
     }
     .card-value {
-        font-size: 14px;
+        font-size: 14px !important;
         font-weight: 700;
         color: #0f172a;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
         letter-spacing: -0.3px;
+        white-space: normal !important;
+        word-break: keep-all !important;
+        line-height: 1.35;
     }
     .card-desc {
         font-size: 12px;
         color: #64748b;
-        margin-bottom: 12px;
+        margin-bottom: 0px;
+        word-break: keep-all;
     }
 
     /* 선택된 품목 반투명 하이라이트 박스 */
@@ -175,7 +190,7 @@ st.markdown(
         margin: 0;
     }
 
-    /* 🔥 세그먼티드 컨트롤 커스텀 */
+    /* 세그먼티드 컨트롤 커스텀 */
     div[data-testid="stSegmentedControl"] {
         background-color: #f1f5f9;
         padding: 6px;
@@ -220,14 +235,16 @@ st.markdown(
         line-height: 1.5;
     }
 
-    /* 📊 스크리닝 결과창 전용 세련된 깔끔 메트릭 도식화 디자인 */
+    /* 스크리닝 결과창 메트릭 도식화 디자인 */
     .result-summary-box {
         display: flex;
         gap: 12px;
         margin-bottom: 16px;
+        flex-wrap: wrap;
     }
     .res-card {
         flex: 1;
+        min-width: 120px;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
@@ -300,14 +317,14 @@ def reset_to_home():
     st.session_state["radio_category"] = None
 
 
-# 🔥 이전 스크리닝 히스토리 전용 삭제 함수 (업로드 위젯 강제 리셋 포함)
+# 이전 스크리닝 히스토리 전용 삭제 함수 (업로드 위젯 강제 리셋 포함)
 def clear_history():
     st.session_state["screened_history"] = {}
     st.session_state["uploader_key"] += 1  # 키 값을 증가시켜 uploader 위젯을 완전히 새로 만듦
     st.session_state["show_reset_msg"] = True  # 버튼 직하단 메시지 출력을 위한 스위치 ON
 
 
-# 📊 스크리닝 결과 깔끔한 상단 도식화 렌더링 함수
+# 스크리닝 결과 깔끔한 상단 도식화 렌더링 함수
 def render_result_dashboard(df):
     total_cnt = len(df)
     inc_cnt = len(df[df["AI 판정"] == "Include (포함)"])
@@ -509,7 +526,7 @@ with st.sidebar:
     if st.button("이전 스크리닝 기록 초기화"):
         clear_history()
 
-    # 👇 2초 동안 메시지를 보여준 뒤 자동으로 싹 없애는 로직
+    # 2초 동안 메시지를 보여준 뒤 자동으로 없애는 로직
     if st.session_state.get("show_reset_msg", False):
         st.success("✅ 누적 기록 및 업로드 파일이  \n성공적으로 초기화되었습니다.")
         st.session_state["show_reset_msg"] = False  # 스위치 OFF
@@ -526,7 +543,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 품목이나 세부 모델이 모두 선택되지 않았을 때 (원본 Home 대시보드 화면 유지)
+# 🏠 품목이나 세부 모델이 모두 선택되지 않았을 때 (개선된 Home 대시보드 화면)
 # --------------------------------------------------
 if not due_category or not sub_model:
     st.markdown(
@@ -541,7 +558,8 @@ if not due_category or not sub_model:
         unsafe_allow_html=True,
     )
 
-    col_ov1, col_ov2, col_ov3 = st.columns([2.5, 1, 1.5])
+    # 비율 조정으로 반응형 해상도 안정성 향상
+    col_ov1, col_ov2, col_ov3 = st.columns([2, 1, 1])
 
     with col_ov1:
         with st.container(border=True):
@@ -549,7 +567,7 @@ if not due_category or not sub_model:
                 """
                 <div class="card-title">TARGET PRODUCTS</div>
                 <div class="card-value">Taewoong Medical’s Stent Product Lines</div>
-                <div class="card-desc">아래 상자를 클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
+                <div class="card-desc">아래 상자를 클릭하여 세부 라인업 및 카탈로그를 확인하세요.</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -872,8 +890,7 @@ if not due_category or not sub_model:
                 """
                 <div class="card-title">AI PIPELINE</div>
                 <div class="card-value">Gemini 3.6 Flash + PubMed & GIE Engine</div>
-                <div class="card-desc">AI 기반 문헌 스크리닝</div>
-                <br>
+                <div class="card-desc">AI 기반 문헌 스크리닝 자동화 플랫폼</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -883,9 +900,8 @@ if not due_category or not sub_model:
             st.markdown(
                 """
                 <div class="card-title">REGULATORY GOAL</div>
-                <div class="card-value" style="white-space: nowrap; font-size: 14px;">Standardization and Automation of Literature Review</div>
-                <div class="card-desc">일관성 및 추적성을 확보한 스크리닝 기록</div>
-                <br>
+                <div class="card-value">Standardization and Automation of Literature Review</div>
+                <div class="card-desc">일관성 및 추적성을 확보한 스크리닝 기록 제공</div>
                 """,
                 unsafe_allow_html=True,
             )
