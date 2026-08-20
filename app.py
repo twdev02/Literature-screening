@@ -902,7 +902,7 @@ else:
 
 
 # --------------------------------------------------
-# PubMed API 기능 및 XML 파싱 함수
+# PubMed API 기능 및 XML 파싱 함수 (개선판)
 # --------------------------------------------------
 
 def parse_pico_input(text):
@@ -1024,13 +1024,19 @@ def fetch_pubmed_by_pmid(pmid):
             else "제목 없음"
         )
 
+        # 1. 표준 Abstract 확인
         abstract_elem = article.find(".//Abstract")
+        
+        # 2. Abstract가 없을 경우 OtherAbstract 구조 탐색
         if abstract_elem is None:
-            return title, None, "초록(Abstract)이 없는 문헌입니다."
+            abstract_elem = root.find(".//OtherAbstract")
+
+        if abstract_elem is None:
+            return title, None, "No Abstract Available (Full-text Review Required)"
 
         abstract_text = "".join(abstract_elem.itertext()).strip()
         if not abstract_text:
-            return title, None, "초록(Abstract) 내용이 비어있습니다."
+            return title, None, "No Abstract Available (Full-text Review Required)"
 
         return title, abstract_text, "성공"
 
@@ -1165,8 +1171,13 @@ if selected_mode == "단일 PMID 입력":
             with st.spinner("PubMed 공식 API에서 논문 정보 조회 중..."):
                 title, abstract_text, status = fetch_pubmed_by_pmid(single_pmid)
 
+            pmid_url = f"https://pubmed.ncbi.nlm.nih.gov/{single_pmid.strip()}/"
+
             if not abstract_text:
-                st.error(f"데이터 조회 실패: {status}")
+                st.warning(f"**논문 제목:** {title if title else '제목 없음'}")
+                st.info(f"📌 **원문 링크:** [{pmid_url}]({pmid_url})")
+                st.error(f"판정: **Pending (초록 미포함 - 전문 검토 필요)**")
+                st.caption(f"Reason: **Insufficient information:** Abstract is unavailable in PubMed database. Manual full-text review is required.")
             else:
                 st.success(f"**논문 제목:** {title}")
                 st.info(f"**초록 내용:**\n{abstract_text[:400]}...")
@@ -1218,7 +1229,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
-                titles, abstracts, results, conclusions = [], [], [], []
+                titles, abstracts, results, conclusions, pubmed_urls = [], [], [], [], []
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total = len(df)
@@ -1230,24 +1241,28 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                     )
 
                     title, abs_text, status = fetch_pubmed_by_pmid(pmid)
+                    pmid_url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+                    pubmed_urls.append(pmid_url)
 
+                    # 1) 초록이 없는 경우
                     if not abs_text:
                         titles.append(title if title else "조회 실패")
-                        abstracts.append(status)
-                        results.append(
-                            "Exclude (초록없음)" if "초록" in status else "Error"
+                        abstracts.append("No Abstract Available")
+                        results.append("Pending (초록 미포함 - 전문 검토 필요)")
+                        conclusions.append(
+                            to_unicode_bold(f"Insufficient information: Abstract is unavailable in PubMed database. Manual full-text review is required (PMID: {pmid}).")
                         )
-                        conclusions.append(status)
                     else:
                         identifier = pmid
+                        # 2) 이전 중복 논문인 경우
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
-                            prev_res = prev_info["result"]
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Duplicated (이전중복: {prev_mod})")
                             conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
+                        # 3) 정상 AI 분석 대상인 경우
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1292,6 +1307,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 df["초록 요약"] = abstracts
                 df["AI 판정"] = results
                 df["Conclusion"] = conclusions
+                df["PubMed Link"] = pubmed_urls
 
                 df.insert(0, "No", range(1, len(df) + 1))
                 df.index = df.index + 1
@@ -1300,19 +1316,44 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
 
     if st.session_state["tab2_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] 일괄 스크리닝 결과")
-        st.dataframe(st.session_state["tab2_result"], hide_index=True)
 
-        csv_data = (
-            st.session_state["tab2_result"]
-            .to_csv(index=False)
-            .encode("utf-8-sig")
-        )
-        st.download_button(
-            "결과 CSV 다운로드",
-            data=csv_data,
-            file_name="cer_screening_result.csv",
-            mime="text/csv",
-        )
+        # 상단 현황 요약 메트릭
+        res_df = st.session_state["tab2_result"]
+        inc_cnt = len(res_df[res_df["AI 판정"] == "Include (포함)"])
+        exc_cnt = len(res_df[res_df["AI 판정"] == "Exclude (제외)"])
+        pending_cnt = len(res_df[res_df["AI 판정"].str.contains("Pending", na=False)])
+        dup_cnt = len(res_df[res_df["AI 판정"].str.contains("Duplicated", na=False)])
+
+        m1, m2, m3, m4, m5 = st.columns(5)
+        m1.metric("총 스크리닝 대상", f"{len(res_df)}건")
+        m2.metric("Include (포함)", f"{inc_cnt}건")
+        m3.metric("Exclude (제외)", f"{exc_cnt}건")
+        m4.metric("Pending (초록미포함)", f"{pending_cnt}건")
+        m5.metric("Duplicated (중복)", f"{dup_cnt}건")
+
+        st.dataframe(res_df, hide_index=True)
+
+        col_dl1, col_dl2 = st.columns(2)
+        with col_dl1:
+            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
+            st.download_button(
+                "전체 결과 CSV 다운로드",
+                data=csv_data,
+                file_name="cer_screening_result_all.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        with col_dl2:
+            if pending_cnt > 0:
+                pending_df = res_df[res_df["AI 판정"].str.contains("Pending", na=False)]
+                pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
+                st.download_button(
+                    "⚠️ 초록 미포함(수동검토 필요) 건만 CSV 다운로드",
+                    data=pending_csv,
+                    file_name="cer_screening_pending_manual_review.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
 
 # --------------------------------------------------
 # MODE 3: PubMed PICO 키워드 자동 검색 & 스크리닝
@@ -1373,7 +1414,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     if st.button("PICO 다중 조합 검색 및 AI 스크리닝 실행"):
         if not api_key:
             st.error("API Key가 설정되지 않았습니다!")
-        # 👈 [PICO 개별 입력 허용] 4가지 항목 중 최소 1개 이상만 채워져 있으면 바로 실행
         elif not (p_val.strip() or i_val.strip() or c_val.strip() or o_val.strip()):
             st.error("최소한 하나 이상의 PICO 키워드를 입력해 주세요!")
         else:
@@ -1428,7 +1468,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
                 auto_df = pd.DataFrame({"PMID": found_pmids})
-                titles, abstracts, results, conclusions = [], [], [], []
+                titles, abstracts, results, conclusions, pubmed_urls = [], [], [], [], []
 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
@@ -1441,24 +1481,28 @@ elif selected_mode == "PubMed PICO 자동 검색":
                     )
 
                     title, abs_text, status = fetch_pubmed_by_pmid(pmid)
+                    pmid_url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+                    pubmed_urls.append(pmid_url)
 
+                    # 1) 초록이 없는 경우
                     if not abs_text:
                         titles.append(title if title else "조회 실패")
-                        abstracts.append(status)
-                        results.append(
-                            "Exclude (초록없음)" if "초록" in status else "Error"
+                        abstracts.append("No Abstract Available")
+                        results.append("Pending (초록 미포함 - 전문 검토 필요)")
+                        conclusions.append(
+                            to_unicode_bold(f"Insufficient information: Abstract is unavailable in PubMed database. Manual full-text review is required (PMID: {pmid}).")
                         )
-                        conclusions.append(status)
                     else:
                         identifier = pmid
+                        # 2) 이전 중복 논문인 경우
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
-                            prev_res = prev_info["result"]
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Duplicated (이전중복: {prev_mod})")
                             conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
+                        # 3) 정상 AI 분석 대상인 경우
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1503,6 +1547,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 auto_df["초록 요약"] = abstracts
                 auto_df["AI 판정"] = results
                 auto_df["Conclusion"] = conclusions
+                auto_df["PubMed Link"] = pubmed_urls
 
                 auto_df.insert(0, "No", range(1, len(auto_df) + 1))
 
@@ -1510,21 +1555,43 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     if st.session_state["tab3_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
-        st.dataframe(st.session_state["tab3_result"], hide_index=True)
 
-        csv_data = (
-            st.session_state["tab3_result"]
-            .to_csv(index=False)
-            .encode("utf-8-sig")
-        )
-        st.download_button(
-            "PICO 스크리닝 결과 CSV 다운로드",
-            data=csv_data,
-            file_name=(
-                f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv"
-            ),
-            mime="text/csv",
-        )
+        res_df = st.session_state["tab3_result"]
+        inc_cnt = len(res_df[res_df["AI 판정"] == "Include (포함)"])
+        exc_cnt = len(res_df[res_df["AI 판정"] == "Exclude (제외)"])
+        pending_cnt = len(res_df[res_df["AI 판정"].str.contains("Pending", na=False)])
+        dup_cnt = len(res_df[res_df["AI 판정"].str.contains("Duplicated", na=False)])
+
+        m1, m2, m3, m4, m5 = st.columns(5)
+        m1.metric("총 스크리닝 대상", f"{len(res_df)}건")
+        m2.metric("Include (포함)", f"{inc_cnt}건")
+        m3.metric("Exclude (제외)", f"{exc_cnt}건")
+        m4.metric("Pending (초록미포함)", f"{pending_cnt}건")
+        m5.metric("Duplicated (중복)", f"{dup_cnt}건")
+
+        st.dataframe(res_df, hide_index=True)
+
+        col_dl1, col_dl2 = st.columns(2)
+        with col_dl1:
+            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
+            st.download_button(
+                "PICO 스크리닝 결과 CSV 다운로드",
+                data=csv_data,
+                file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        with col_dl2:
+            if pending_cnt > 0:
+                pending_df = res_df[res_df["AI 판정"].str.contains("Pending", na=False)]
+                pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
+                st.download_button(
+                    "⚠️ 초록 미포함(수동검토 필요) 건만 CSV 다운로드",
+                    data=pending_csv,
+                    file_name=f"pico_pending_manual_review_{start_year}{start_month:02d}.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1579,19 +1646,23 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     doi_list.append(doi)
                     titles.append(title)
 
+                    # 1) RIS 파일 내 초록이 비어있는 경우
                     if not abstract_text:
-                        abstracts.append("GIE RIS 파일 내 초록(Abstract) 미포함")
-                        results.append("Exclude (초록없음)")
-                        conclusions.append("Abstract text is missing in the GIE RIS file.")
+                        abstracts.append("No Abstract Available")
+                        results.append("Pending (초록 미포함 - 전문 검토 필요)")
+                        conclusions.append(
+                            to_unicode_bold(f"Insufficient information: Abstract text is missing in the GIE RIS file. Manual full-text review is required.")
+                        )
 
+                    # 2) 이전 중복 논문인 경우
                     elif identifier in st.session_state["screened_history"]:
                         prev_info = st.session_state["screened_history"][identifier]
                         prev_mod = prev_info["sub_model"]
-                        prev_res = prev_info["result"]
                         abstracts.append(abstract_text[:150] + "...")
                         results.append(f"Duplicated (이전중복: {prev_mod})")
                         conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
 
+                    # 3) 정상 AI 분석 대상인 경우
                     else:
                         abstracts.append(abstract_text[:150] + "...")
 
@@ -1644,16 +1715,40 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 
     if st.session_state["tab_gie_result"] is not None and selected_mode == "GIE RIS 파일 일괄 스크리닝":
         st.success(f"[{due_category} - {sub_model}] GIE RIS 스크리닝 완료 결과")
-        st.dataframe(st.session_state["tab_gie_result"], hide_index=True)
 
-        csv_data = (
-            st.session_state["tab_gie_result"]
-            .to_csv(index=False)
-            .encode("utf-8-sig")
-        )
-        st.download_button(
-            "GIE 스크리닝 결과 CSV 다운로드",
-            data=csv_data,
-            file_name="gie_ris_screening_result.csv",
-            mime="text/csv",
-        )
+        res_df = st.session_state["tab_gie_result"]
+        inc_cnt = len(res_df[res_df["AI 판정"] == "Include (포함)"])
+        exc_cnt = len(res_df[res_df["AI 판정"] == "Exclude (제외)"])
+        pending_cnt = len(res_df[res_df["AI 판정"].str.contains("Pending", na=False)])
+        dup_cnt = len(res_df[res_df["AI 판정"].str.contains("Duplicated", na=False)])
+
+        m1, m2, m3, m4, m5 = st.columns(5)
+        m1.metric("총 스크리닝 대상", f"{len(res_df)}건")
+        m2.metric("Include (포함)", f"{inc_cnt}건")
+        m3.metric("Exclude (제외)", f"{exc_cnt}건")
+        m4.metric("Pending (초록미포함)", f"{pending_cnt}건")
+        m5.metric("Duplicated (중복)", f"{dup_cnt}건")
+
+        st.dataframe(res_df, hide_index=True)
+
+        col_dl1, col_dl2 = st.columns(2)
+        with col_dl1:
+            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
+            st.download_button(
+                "GIE 스크리닝 결과 CSV 다운로드",
+                data=csv_data,
+                file_name="gie_ris_screening_result.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        with col_dl2:
+            if pending_cnt > 0:
+                pending_df = res_df[res_df["AI 판정"].str.contains("Pending", na=False)]
+                pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
+                st.download_button(
+                    "⚠️ 초록 미포함(수동검토 필요) 건만 CSV 다운로드",
+                    data=pending_csv,
+                    file_name="gie_pending_manual_review.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
