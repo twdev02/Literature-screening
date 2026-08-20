@@ -509,10 +509,12 @@ with st.sidebar:
     if st.button("이전 스크리닝 기록 초기화"):
         clear_history()
 
-    # 👇 초기화 버튼 클릭 직후 사용자의 시선 위치(버튼 바로 아래)에 알림 박스 출력
+    # 👇 2초 동안 메시지를 보여준 뒤 자동으로 싹 없애는 로직
     if st.session_state.get("show_reset_msg", False):
         st.success("✅ 누적 기록 및 업로드 파일이  \n성공적으로 초기화되었습니다.")
-        st.session_state["show_reset_msg"] = False
+        st.session_state["show_reset_msg"] = False  # 스위치 OFF
+        time.sleep(2)  # 2초 동안 알림 유지
+        st.rerun()    # 화면을 자동으로 새로고침하여 메시지 완전히 삭제
 
     # HOME 버튼
     st.markdown("---")
