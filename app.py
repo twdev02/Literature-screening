@@ -896,19 +896,81 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🏠 2. 카테고리는 선택되었으나 세부 모델이 아직 선택되지 않았을 때 안내 표시
+# 🏠 2. 카테고리는 선택되었으나 세부 모델이 아직 선택되지 않았을 때 안내 및 라인업 개요 카드 표시
 # --------------------------------------------------
 if not sub_model:
     st.markdown(
         f"""
 <div class="selected-category-box">
     <div class="selected-category-label">CATEGORY SELECTED</div>
-    <div class="selected-category-title">{due_category}</div>
+    <div class="selected-category-title">📂 {due_category}</div>
 </div>
 """,
         unsafe_allow_html=True,
     )
-    st.info("👈 **사이드바에서 스크리닝할 세부 모델(Sub-model)을 선택해 주세요.**")
+    
+    st.info("👈 **왼쪽 사이드바에서 스크리닝을 진행할 '세부 모델(Sub-model)'을 선택해 주세요.**")
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown("##### 📌 **선택된 카테고리 내 주요 세부 라인업 개요**")
+    
+    if due_category == "1. Biliary Stent":
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            with st.container(border=True):
+                st.markdown("**Niti-S Uncovered**\n\n• S / D / M / LCD-Type\n• 악성 담도 협착 재개통\n• Stent Patency & Bilirubin 감축")
+        with c2:
+            with st.container(border=True):
+                st.markdown("**Niti-S Covered**\n\n• Full Covered / Both Bare / Giobor 등\n• 악성 및 양성 담도 협착/췌관 협착\n• Stent Migration 방지 및 Removal")
+        with c3:
+            with st.container(border=True):
+                st.markdown("**ComVi Biliary**\n\n• Full Covered / Both Bare / End Bare\n• 다층 구조 피복 기술 적용\n• 악성 담도 협착 재개통")
+
+    elif due_category == "2. Esophageal Stent":
+        c1, c2 = st.columns(2)
+        with c1:
+            with st.container(border=True):
+                st.markdown("**Niti-S Covered (Standard)**\n\n• Full Covered / Both Bare / Cervical\n• 악성/난치성 양성 식도 협착\n• Dysphagia(연하곤란) 개선")
+        with c2:
+            with st.container(border=True):
+                st.markdown("**Specialized Types**\n\n• Conio / Anti-Reflux / Beta-2\n• 기관식도누공(TEF) 폐쇄\n• 역류 방지 및 마이그레이션 방지")
+
+    elif due_category == "3. Pyloric/Duodenal Stent":
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            with st.container(border=True):
+                st.markdown("**Niti-S Uncovered**\n\n• D-Type\n• 악성 위배출구 폐색(GOO)\n• GOOSS 스코어 & 섭식 개선")
+        with c2:
+            with st.container(border=True):
+                st.markdown("**Niti-S Covered**\n\n• Full Covered / Both Bare / End Bare\n• 악성 및 양성 십이지장/幽門 협착\n• Tumoral Ingrowth 방지")
+        with c3:
+            with st.container(border=True):
+                st.markdown("**ComVi Pyloric/Duodenal**\n\n• Flare-Type / Both Bare\n• 다층 피복막 기술 적용\n• GOO 통증/폐쇄 완화")
+
+    elif due_category == "4. Colonic Stent":
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            with st.container(border=True):
+                st.markdown("**Niti-S Uncovered**\n\n• S-Type / D-Type\n• 악성 대장/결직장 폐쇄\n• Bridge to Surgery (BTS) 용도")
+        with c2:
+            with st.container(border=True):
+                st.markdown("**Niti-S Covered**\n\n• Full Covered / Both Bare / End Bare\n• 악성 및 양성 결직장 협착\n• 완화 치료(Palliative) 및 Removal")
+        with c3:
+            with st.container(border=True):
+                st.markdown("**ComVi Colonic**\n\n• Both Bare-Type\n• 결직장 내강 개통 유지\n• 천공/마이그레이션 안전성")
+
+    elif due_category == "5. Drainage Stent":
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            with st.container(border=True):
+                st.markdown("**Niti-S SPAXUS™**\n\n• LAMS (Lumen-Apposing)\n• 췌장 가성낭종 / 낭성괴사(WON)\n• 담낭 및 담도 초음파 배액술")
+        with c2:
+            with st.container(border=True):
+                st.markdown("**Niti-S Hot SPAXUS™**\n\n• Electrocautery Delivery System\n• 통전 절삭 & 스텐트 전달 통합\n• EUS 가이드하 낭종/담낭 배액")
+        with c3:
+            with st.container(border=True):
+                st.markdown("**Niti-S Nagi™**\n\n• Biflanged Metal Stent (BFMS)\n• 경위/경십이지장 낭종 배액\n• Wide Flare 마이그레이션 방지")
+
     st.stop()
 
 # --------------------------------------------------
@@ -1241,7 +1303,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
 
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 생성 함수 (PICO 명확화 및 CER 통합 보고서 연속성 지침 반영)
+# 🤖 공통 AI 프롬프트 생성 함수 (UI 검색창은 깔끔하게 유지하되, AI 백그라운드 지침으로 Benign 포용)
 # --------------------------------------------------
 def generate_prompt(
     due_category, include_criteria, exclude_criteria, title, abstract_text
