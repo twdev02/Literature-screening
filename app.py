@@ -1241,7 +1241,7 @@ if selected_mode == "단일 PMID 입력":
 
             if not abstract_text:
                 st.warning(f"**논문 제목:** {title if title else '제목 없음'}")
-                st.info(f"📌 **원문 직접 링크:** [{pmid_url}]({pmid_url})")
+                st.info(f"**원문 직접 링크:** [{pmid_url}]({pmid_url})")
                 st.error(f"판정: **Full-text Screening Needed (Abstract Missing)**")
                 st.caption(f"Reason: **Insufficient information:** Abstract is unavailable in PubMed database. Manual full-text review is required.")
             else:
