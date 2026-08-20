@@ -95,7 +95,7 @@ st.markdown(
     .card-desc {
         font-size: 11px;
         color: #64748b;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
     }
 
     /* 선택된 품목 슬림 하이라이트 박스 */
@@ -336,9 +336,9 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 품목 선택이 안 되었을 때 (홈 대시보드 화면)
+# 🏠 품목과 세부 모델이 모두 선택되지 않았을 때 (홈 대시보드 화면 유지)
 # --------------------------------------------------
-if not due_category:
+if not due_category or not sub_model:
     st.markdown(
         """<div class="hero-container">
 <div class="hero-header-flex">
@@ -702,11 +702,6 @@ if not due_category:
 
     st.stop()
 
-# 단계별 대기 처리 1
-if not sub_model:
-    st.info("👈 사이드바에서 **세부 모델/유형**을 선택해 주세요.")
-    st.stop()
-
 # --------------------------------------------------
 # 🔬 품목 선택 시 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
 # --------------------------------------------------
@@ -1023,7 +1018,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
 
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 생성 함수
+# 🤖 공통 AI 프롬프트 생성 함수 (말머리 대문자 표기)
 # --------------------------------------------------
 def generate_prompt(
     due_category, include_criteria, exclude_criteria, title, abstract_text
