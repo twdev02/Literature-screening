@@ -511,7 +511,6 @@ with st.sidebar:
         "HOME",
         type="secondary",
         use_container_width=True,
-        help="홈 대시보드로 이동",
         on_click=reset_to_home,
     )
 
