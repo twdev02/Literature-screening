@@ -529,9 +529,9 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 품목이나 세부 모델이 모두 선택되지 않았을 때 (원본 Home 대시보드 화면 유지)
+# 🏠 1. 카테고리가 아예 선택되지 않았을 때만 홈 대시보드 표시
 # --------------------------------------------------
-if not due_category or not sub_model:
+if not due_category:
     st.markdown(
         """<div class="hero-container">
 <div class="hero-header-flex">
@@ -896,6 +896,22 @@ if not due_category or not sub_model:
     st.stop()
 
 # --------------------------------------------------
+# 🏠 2. 카테고리는 선택되었으나 세부 모델이 아직 선택되지 않았을 때 안내 표시
+# --------------------------------------------------
+if not sub_model:
+    st.markdown(
+        f"""
+<div class="selected-category-box">
+    <div class="selected-category-label">CATEGORY SELECTED</div>
+    <div class="selected-category-title">{due_category}</div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    st.info("👈 **사이드바에서 스크리닝할 세부 모델(Sub-model)을 선택해 주세요.**")
+    st.stop()
+
+# --------------------------------------------------
 # 🔬 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅 (UI 검색창은 깔끔하게 유지)
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
@@ -1225,7 +1241,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
 
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 생성 함수 (UI 검색창은 깔끔하게 유지하되, AI 백그라운드 지침으로 Benign 포용)
+# 🤖 공통 AI 프롬프트 생성 함수 (PICO 명확화 및 CER 통합 보고서 연속성 지침 반영)
 # --------------------------------------------------
 def generate_prompt(
     due_category, include_criteria, exclude_criteria, title, abstract_text
