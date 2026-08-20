@@ -896,7 +896,7 @@ if not due_category or not sub_model:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅 (UI 검색창은 깔끔하게 유지)
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -943,8 +943,8 @@ elif due_category == "2. Esophageal Stent":
 6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, Ultraflex, Evolution, Hanarostent, Aixstent, EGIS, Bonastent, Micro-Tech)
 7. Outcomes: Stent patency, Dysphagia improvement, Fistula closure, Removal (in benign strictures)"""
     exclude_criteria = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
-2. Different indication: Non-esophageal target areas only (e.g., airway/tracheal stenting, EIs/TAA injections, gastric conduit salvage, sub-stent dissection, photothermal-chemo/biodegradable stents)
-3. Irrelevant articles: Articles not related to esophageal stenting, stricture dilation, or TE fistula management
+2. Different indication: Non-esophageal target areas only (e.g., pure systemic/chemotherapy outcomes, non-stricture indications)
+3. Irrelevant articles: Articles not related to esophageal stenting, stricture dilation, or TE fistula management (e.g., airway/tracheal stenting via endotracheal tube, EIs/TAA injections, gastric conduit salvage, sub-stent dissection, photothermal-chemo/biodegradable stents)
 4. Non-study publications: Editorials, letters, comments, study protocols (단, Review 및 Case report는 제외하지 않음)
 5. Insufficient Information: Valid information relevant to performance and/or safety is limited (e.g., Non-free/paywall articles or limited full-text availability).
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
@@ -1225,7 +1225,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
 
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 생성 함수 (전체 품목 1~5번 학습 데이터 통합 적용)
+# 🤖 공통 AI 프롬프트 생성 함수 (UI 검색창은 깔끔하게 유지하되, AI 백그라운드 지침으로 Benign 포용)
 # --------------------------------------------------
 def generate_prompt(
     due_category, include_criteria, exclude_criteria, title, abstract_text
@@ -1237,22 +1237,27 @@ def generate_prompt(
     [선택된 카테고리/분류]: {due_category} ({sub_model})
 
     [엄격한 판정 가이드라인]:
-    1. Include 조건: [포함기준]을 완벽히 만족하고, [제외기준]에 단 하나도 해당하지 않는 경우만 'Include'로 판정한다.
-    2. Exclude 판단 핵심 규칙:
+    1. Include 조건: [포함기준]을 완벽히 만족하고, 컴포넌트나 적응증이 임상적으로 타당한 경우 'Include'로 판정한다.
+    2. CER 통합 보고서 연속성 및 Benign(양성) 처리 핵심 지침 (중요!):
+       - 현재 선택된 모델이 Uncovered 라 하더라도, 논문에 Benign(양성) 적응증 관련 내용이 포함되어 있다는 이유만으로 선제적 배제(Exclude)를 하지 말 것!
+       - 이유: 본 스크리닝은 하나의 통합 CER 보고서 섹션으로 취급되므로, Uncovered 단계에서 Benign 논문이 불필요하게 Exclude 되면 차후 Covered 단계 검토 시 'Duplicated(중복)' 처리되어 영구 누락되는 사고가 발생함. 양성/악성 모두 유연하게 포용하여 판단할 것.
+    3. Exclude 판단 핵심 규칙:
        - **Insufficient information: Valid information relevant to performance and/or safety is limited.**
-         : 초록상 유효 데이터가 부족하거나, 원문(Full-text)을 직접 다운로드할 수 없거나(Non-free/Paywall) 스텐트의 실제 성능 및 안전성에 관한 유효 데이터 확보가 제한된 논문은 반드시 'Insufficient information: Valid information relevant to performance and/or safety is limited.'로 Exclude 한다.
+         : 초록상 유효 데이터가 부족하거나, 원문(Full-text)을 직접 다운로드할 수 없거나(Non-free/Paywall) 스텐트의 실제 성능 및 안전성에 관한 유효 데이터 확보가 제한된 경우.
        - **Insufficient information: Letter / Protocol**
-         : 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우 유효 데이터 부족으로 Exclude 한다.
+         : 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우.
        - **This article is already held by Taewoong Medical.**
-         : 태웅메디칼 내부적으로 이미 보유하고 있거나 이전에 검토 완료된 문헌인 경우 Exclude 한다.
+         : 태웅메디칼 내부 보유 또는 이전에 검토 완료된 문헌인 경우.
        - **Irrelevant article**
-         : 스텐트 자체의 performance/safety 평가가 아닌 대상 질환 치료법(EUS-GE, SGJ, RFA, 수술법 전용, 이미지 진단 기술, 유전자/바이오마커 연구, 타 장기 적용 등)을 다룬 논문은 'Irrelevant article'로 Exclude 한다.
+         : 평가 대상 스텐트 기구(I)가 아닌 타 장기 기구(예: 식도 스텐트 심사 시 기도/기관지 스텐트 사용)를 사용했거나, 스텐트 성과/안전성과 무관한 타 시술/수술(RFA, EIs, 진단 기술 등)이 주인 경우.
+       - **Different indication**
+         : 평가 대상 스텐트 기구(I)를 사용했으나, 전혀 무관한 질환/목적으로 사용된 경우.
        - **Literature without human clinical data**
-         : Preclinical proof-of-concept, In-vitro, 동물실험 연구는 Exclude 한다.
+         : Preclinical proof-of-concept, In-vitro, 동물실험 연구.
 
     [품목별 인간 평가자 주요 판정 학습 예시 (Few-shot Examples)]:
     - Biliary: Covered SEMS vs Uncovered SEMS 유효성/안전성 Meta-analysis 및 RCT -> Include
-    - Esophageal: FC-SEMS 마이그레이션 방지(Suturing 등) 비교 연구 -> Include | 단순 구제 요법 소아 사례 -> Exclude (Irrelevant)
+    - Esophageal: FC-SEMS 마이그레이션 방지(Suturing 등) 비교 연구 -> Include | 기도/기관지 스텐트(Airway stent) 사용 연구 -> Exclude (Irrelevant article: The study focuses on airway/tracheal stenting rather than esophageal stent placement.)
     - Pyloric/Duodenal: EUS-GJ vs Duodenal SEMS vs SGJ 삼자 비교 Review -> Include | Balloon dilation vs SEMS 비교 -> Include | 2차 Duodenal SEMS 재시술 성과 -> Include
     - Colonic: Emergency Surgery 대비 Bridge to Surgery(BTS) SEMS 성과/생존율 -> Include | CReST2 Trial(완화 목적 Covered vs Uncovered) -> Include | Stent Patency 예측 모델 개발 -> Include
     - Drainage: Percutaneous cystogastrostomy / EUS-GBD / EUS-BD 1년 이상 추적 임상 성과 -> Include | High-surgical-risk 환자 배액술 가이드라인/Delphi consensus -> Include | EUS-BD 수련/안전성 실무 임상 -> Include
@@ -1274,13 +1279,12 @@ def generate_prompt(
     Conclusion:
     (영문 사유 1문장)
 
-    [Conclusion 작성 규칙]
+    [Conclusion 작성 규칙]:
     1. 마크다운 별표(**)를 절대로 사용하지 마라.
     2. Include인 경우: 'Conclusion:' 이라는 말머리나 수식어('Included because' 등)를 일체 붙이지 말고 완결된 1개 영문 문장 자체만 적어라.
-       (예: The study was included as it evaluates the clinical efficacy and safety of self-expandable metal stents for malignant obstruction.)
     3. Exclude인 경우: 반드시 아래 지정된 말머리 중 가장 정확한 하나를 맨 앞에 붙이고 사유를 적어라:
-       * Different indication:
-       * Irrelevant article:
+       * Irrelevant article: [기구(I) 불일치 및 주제 불일치] 평가 대상 스텐트가 아닌 타 장기 기구(기도/기관지 스텐트 등)를 사용했거나, 스텐트 단독 평가가 아닌 다른 시술/수술이 주목적인 경우.
+       * Different indication: [적응증(P) 불일치] 평가 대상 스텐트(I)를 사용했으나 Target 적응증이 아닌 전혀 다른 질환에 사용된 경우.
        * Insufficient information: Valid information relevant to performance and/or safety is limited. (또는 Letter / Protocol)
        * This article is already held by Taewoong Medical.
        * Literature without human clinical data:
@@ -1407,13 +1411,13 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
 
                 titles, abstracts, results, conclusions, pubmed_urls = [], [], [], [], []
                 progress_bar = st.progress(0)
-                status_text = st.empty()
+                status_text = st.empty()  # 동적 텍스트용 컨테이너
                 total = len(df)
 
                 for idx, row in df.iterrows():
                     pmid = str(row["PMID"]).replace(".0", "").strip()
-                    status_text.text(
-                        f"[{idx+1}/{total}] PubMed API 수집 & 분석 중... PMID: {pmid}"
+                    status_text.markdown(
+                        f"⏳ **[{idx+1}/{total}] PubMed API 수집 & AI 분석 진행 중...** (PMID: {pmid})"
                     )
 
                     title, abs_text, status = fetch_pubmed_by_pmid(pmid)
@@ -1474,7 +1478,11 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 conclusions.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(1)
+                    time.sleep(0.3)
+
+                # 스크리닝 완료 시 진행 메시지 및 바 삭제
+                status_text.empty()
+                progress_bar.empty()
 
                 df["카테고리"] = due_category
                 df["세부 모델"] = sub_model
@@ -1628,8 +1636,10 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 )
 
                 st.markdown("---")
-                st.subheader("추출된 PMID 기반 AI 스크리닝 진행 중...")
 
+                # --------------------------------------------------
+                # 추출된 PMID 기반 AI 스크리닝 진행 (완료 시 깔끔히 삭제 처리)
+                # --------------------------------------------------
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash")
 
@@ -1642,8 +1652,8 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
                 for idx, row in auto_df.iterrows():
                     pmid = str(row["PMID"])
-                    status_text.text(
-                        f"[{idx+1}/{total}] PubMed 초록 분석 중... PMID: {pmid}"
+                    status_text.markdown(
+                        f"⏳ **[{idx+1}/{total}] AI 스크리닝 분석 진행 중...** (PMID: {pmid})"
                     )
 
                     title, abs_text, status = fetch_pubmed_by_pmid(pmid)
@@ -1704,7 +1714,11 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 conclusions.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(1)
+                    time.sleep(0.3)
+
+                # 스크리닝 완료 시 진행 메시지 및 바 삭제
+                status_text.empty()
+                progress_bar.empty()
 
                 auto_df["카테고리"] = due_category
                 auto_df["세부 모델"] = sub_model
@@ -1800,7 +1814,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     abstract_text = entry.get("abstract", "").strip()
                     doi = entry.get("doi", entry.get("url", "-")).strip()
 
-                    status_text.text(f"[{idx+1}/{total}] GIE 초록 AI 분석 중... ({title[:30]}...)")
+                    status_text.markdown(f"⏳ **[{idx+1}/{total}] GIE 초록 AI 분석 진행 중...** ({title[:30]}...)")
 
                     identifier = doi.lower() if doi and doi != "-" else title.lower()
 
@@ -1858,7 +1872,11 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             conclusions.append(f"AI 에러: {err}")
 
                     progress_bar.progress((idx + 1) / total)
-                    time.sleep(0.5)
+                    time.sleep(0.3)
+
+                # 스크리닝 완료 시 진행 메시지 및 바 삭제
+                status_text.empty()
+                progress_bar.empty()
 
                 res_df = pd.DataFrame({
                     "No": range(1, len(entries) + 1),
