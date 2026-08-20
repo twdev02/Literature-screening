@@ -393,7 +393,7 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 세부 모델 선택 (초기 미선택 상태)
+    # 🔥 [개선안 2 적용] 세부 모델 선택 (디폴트로 대표 1번 모델 즉시 자동 선택)
     sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -403,8 +403,7 @@ with st.sidebar:
                 "Niti-S Biliary Covered Stent",
                 "ComVi Biliary Stent",
             ],
-            index=None,
-            placeholder="세부 모델을 선택하세요",
+            index=0,  # 👈 자동 1번 모델 즉시 선택
             key="sb_biliary",
             on_change=clear_screening_results,
         )
@@ -412,8 +411,7 @@ with st.sidebar:
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
             options=["Niti-S Esophageal Covered Stent"],
-            index=None,
-            placeholder="세부 모델을 선택하세요",
+            index=0,  # 👈 자동 1번 모델 즉시 선택
             key="sb_esophageal",
             on_change=clear_screening_results,
         )
@@ -425,8 +423,7 @@ with st.sidebar:
                 "Niti-S Pyloric/Duodenal Covered Stent",
                 "ComVi Pyloric/Duodenal Stent",
             ],
-            index=None,
-            placeholder="세부 모델을 선택하세요",
+            index=0,  # 👈 자동 1번 모델 즉시 선택
             key="sb_pyloric",
             on_change=clear_screening_results,
         )
@@ -438,8 +435,7 @@ with st.sidebar:
                 "Niti-S Enteral Colonic Covered Stent",
                 "ComVi Enteral Colonic Stent",
             ],
-            index=None,
-            placeholder="세부 모델을 선택하세요",
+            index=0,  # 👈 자동 1번 모델 즉시 선택
             key="sb_colonic",
             on_change=clear_screening_results,
         )
@@ -451,8 +447,7 @@ with st.sidebar:
                 "Niti-S Hot SPAXUS Stent",
                 "Niti-S Nagi Stent",
             ],
-            index=None,
-            placeholder="세부 모델을 선택하세요",
+            index=0,  # 👈 자동 1번 모델 즉시 선택
             key="sb_drainage",
             on_change=clear_screening_results,
         )
@@ -892,55 +887,6 @@ if not due_category:
                 """,
                 unsafe_allow_html=True,
             )
-
-    st.stop()
-
-# --------------------------------------------------
-# 🏠 2. 카테고리는 선택되었으나 세부 모델이 아직 선택되지 않았을 때 (개선안 1: 세련된 안내 대시보드)
-# --------------------------------------------------
-if not sub_model:
-    st.markdown(
-        f"""
-        <div class="selected-category-box" style="margin-bottom: 20px;">
-            <div class="selected-category-label">STEP 1 COMPLETE</div>
-            <div class="selected-category-title">📂 {due_category} 카테고리 선택됨</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    
-    st.markdown("### 👈 **다음 단계: 사이드바에서 '세부 모델'을 선택해 주세요**")
-    st.caption("선택하신 카테고리의 세부 모델을 지정하시면 맞춤형 PICO 키워드 및 AI 스크리닝 엔진이 활성화됩니다.")
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # 🎨 카테고리별 대표 세부 모델 라인업 정보 안내
-    if due_category == "1. Biliary Stent":
-        st.markdown("#### **포함된 세부 모델 라인업**")
-        st.markdown("- 🔹 **Niti-S Biliary Uncovered Stent** (S-Type, D-Type, M-Type, LCD-Type)")
-        st.markdown("- 🔹 **Niti-S Biliary Covered Stent** (Full Covered, Both Bare, Giobor, Flare, Kaffes, Bumpy)")
-        st.markdown("- 🔹 **ComVi Biliary Stent** (Full Covered, Both Bare, End Bare)")
-
-    elif due_category == "2. Esophageal Stent":
-        st.markdown("#### **포함된 세부 모델 라인업**")
-        st.markdown("- 🔹 **Niti-S Esophageal Covered Stent** (Full Covered, Cervical, Both Bare, Conio, Anti Reflux, Double, Beta-2)")
-
-    elif due_category == "3. Pyloric/Duodenal Stent":
-        st.markdown("#### **포함된 세부 모델 라인업**")
-        st.markdown("- 🔹 **Niti-S Pyloric/Duodenal Uncovered Stent** (D-Type)")
-        st.markdown("- 🔹 **Niti-S Pyloric/Duodenal Covered Stent** (Full Covered, Both Bare, End Bare)")
-        st.markdown("- 🔹 **ComVi Pyloric/Duodenal Stent** (Flare-Type, Both Bare)")
-
-    elif due_category == "4. Colonic Stent":
-        st.markdown("#### **포함된 세부 모델 라인업**")
-        st.markdown("- 🔹 **Niti-S Enteral Colonic Uncovered Stent** (S-Type, D-Type)")
-        st.markdown("- 🔹 **Niti-S Enteral Colonic Covered Stent** (Full Covered, Both Bare, End Bare)")
-        st.markdown("- 🔹 **ComVi Enteral Colonic Stent** (Both Bare-Type)")
-
-    elif due_category == "5. Drainage Stent":
-        st.markdown("#### **포함된 세부 모델 라인업**")
-        st.markdown("- 🔹 **Niti-S SPAXUS™ Stent** (LAMS - Lumen Apposing Metal Stent)")
-        st.markdown("- 🔹 **Niti-S Hot SPAXUS™ Stent** (Electrocautery Delivery System)")
-        st.markdown("- 🔹 **Niti-S Nagi™ Stent** (Biflanged Metal Stent)")
 
     st.stop()
 
