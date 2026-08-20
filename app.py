@@ -30,15 +30,35 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (태웅메디칼 브랜딩 & UI 개선)
+# 🎨 고급 커스텀 CSS (시원하고 가독성 높은 폰트 & UI 적용)
 # --------------------------------------------------
 st.markdown(
     """
 <style>
-    /* 1. 홈 화면 전체 세로 스크롤 허용 (창 짤림 방지) */
+    /* 1. 기본 레이아웃 여백 넉넉하게 조정 */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 96% !important;
+    }
+
+    /* 2. 홈 화면 전체 세로 스크롤 허용 */
     html, body, [data-testid="stAppViewContainer"] {
         overflow-y: auto !important;
         height: auto !important;
+    }
+
+    /* 3. 사이드바 입력창 및 텍스트 글씨 크기 확대 */
+    section[data-testid="stSidebar"] {
+        font-size: 15px !important;
+    }
+    section[data-testid="stSidebar"] label {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+    }
+    section[data-testid="stSidebar"] input {
+        font-size: 14px !important;
+        padding: 8px 12px !important;
     }
 
     /* 상단 메인 히어로 배너 디자인 */
@@ -268,7 +288,7 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 세부 모델 선택 (index=None을 주어 초기 미선택 상태로 설정)
+    # 세부 모델 선택 (초기 미선택 상태)
     sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -350,7 +370,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 품목 또는 세부 모델이 선택되지 않았을 때 (홈 대시보드 화면 유지)
+# 🏠 품목과 세부 모델이 모두 선택되지 않았을 때 (홈 대시보드 화면 유지)
 # --------------------------------------------------
 if not due_category or not sub_model:
     st.markdown(
@@ -1081,7 +1101,7 @@ def generate_prompt(
 
 
 # --------------------------------------------------
-# ✨ 2단계 세그먼티드 컨트롤 메뉴 개편 (큰 버튼 ➔ 세부 버튼)
+# ✨ 2단계 세그먼티드 컨트롤 메뉴 개편 (선택 안내 카드)
 # --------------------------------------------------
 st.markdown(
     f"""
@@ -1630,7 +1650,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             .encode("utf-8-sig")
         )
         st.download_button(
-            "GIE 스크리닝 결과 CSV 다운Lok",
+            "GIE 스크리닝 결과 CSV 다운로드",
             data=csv_data,
             file_name="gie_ris_screening_result.csv",
             mime="text/csv",
