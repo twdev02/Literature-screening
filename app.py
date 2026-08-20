@@ -30,7 +30,7 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (도식화 카드 & UI 적용)
+# 🎨 고급 커스텀 CSS (원래 원본 100% 동일 + 결과창 도식화 스타일 추가)
 # --------------------------------------------------
 st.markdown(
     """
@@ -108,6 +108,27 @@ st.markdown(
         font-weight: 400;
     }
 
+    /* 카드 박스 내부 텍스트 스타일 */
+    .card-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0284c7;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+    .card-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        letter-spacing: -0.3px;
+    }
+    .card-desc {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 12px;
+    }
+
     /* 선택된 품목 반투명 하이라이트 박스 */
     .selected-category-box {
         background-color: rgba(11, 26, 45, 0.04);
@@ -160,60 +181,6 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 📊 대시보드 전용 커스텀 도식화 요약 카드 디자인 */
-    .metric-card {
-        background: #ffffff;
-        border-radius: 14px;
-        padding: 18px 16px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        text-align: center;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .metric-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-    }
-    .metric-card-title {
-        font-size: 12px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-    }
-    .metric-card-value {
-        font-size: 28px;
-        font-weight: 900;
-        line-height: 1.1;
-    }
-    .metric-card-desc {
-        font-size: 11px;
-        color: #94a3b8;
-        margin-top: 6px;
-        font-weight: 500;
-    }
-
-    /* 색상 테마별 개별 클래스 */
-    .theme-total { border-top: 4px solid #3b82f6; }
-    .theme-total .metric-card-title { color: #2563eb; }
-    .theme-total .metric-card-value { color: #1e40af; }
-
-    .theme-include { border-top: 4px solid #10b981; }
-    .theme-include .metric-card-title { color: #059669; }
-    .theme-include .metric-card-value { color: #065f46; }
-
-    .theme-exclude { border-top: 4px solid #ef4444; }
-    .theme-exclude .metric-card-title { color: #dc2626; }
-    .theme-exclude .metric-card-value { color: #991b1b; }
-
-    .theme-pending { border-top: 4px solid #f59e0b; background-color: #fffbeb; }
-    .theme-pending .metric-card-title { color: #d97706; }
-    .theme-pending .metric-card-value { color: #92400e; }
-
-    .theme-dup { border-top: 4px solid #6b7280; }
-    .theme-dup .metric-card-title { color: #4b5563; }
-    .theme-dup .metric-card-value { color: #1f2937; }
-
     /* 제품명 상자 이탈 방지 & 자동 줄바꿈 스타일 */
     .prod-item-title {
         font-weight: 700;
@@ -230,6 +197,40 @@ st.markdown(
         word-break: break-word !important;
         line-height: 1.5;
     }
+
+    /* 📊 스크리닝 결과창 전용 세련된 깔끔 메트릭 도식화 디자인 */
+    .result-summary-box {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .res-card {
+        flex: 1;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 14px;
+        text-align: center;
+    }
+    .res-card-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+    .res-card-val {
+        font-size: 22px;
+        font-weight: 800;
+    }
+    .res-card.inc { border-top: 3px solid #10b981; background: #f0fdf4; }
+    .res-card.inc .res-card-val { color: #166534; }
+    .res-card.exc { border-top: 3px solid #ef4444; background: #fef2f2; }
+    .res-card.exc .res-card-val { color: #991b1b; }
+    .res-card.pending { border-top: 3px solid #f59e0b; background: #fffbeb; }
+    .res-card.pending .res-card-val { color: #92400e; }
+    .res-card.dup { border-top: 3px solid #64748b; background: #f8fafc; }
+    .res-card.dup .res-card-val { color: #334155; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -275,66 +276,45 @@ def clear_history():
     st.toast("이전 스크리닝 누적 기록이 초기화되었습니다.")
 
 
-# 📊 대시보드 요약 도식화 UI 생성 전용 컴포넌트 함수
-def render_dashboard_metrics(df):
+# 📊 스크리닝 결과 깔끔한 상단 도식화 렌더링 함수
+def render_result_dashboard(df):
     total_cnt = len(df)
     inc_cnt = len(df[df["AI 판정"] == "Include (포함)"])
     exc_cnt = len(df[df["AI 판정"] == "Exclude (제외)"])
     pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
-    m1, m2, m3, m4, m5 = st.columns(5)
-    
-    with m1:
-        st.markdown(f"""
-        <div class="metric-card theme-total">
-            <div class="metric-card-title">📚 총 스크리닝 대상</div>
-            <div class="metric-card-value">{total_cnt}</div>
-            <div class="metric-card-desc">Total Screened</div>
+    st.markdown(
+        f"""
+        <div class="result-summary-box">
+            <div class="res-card">
+                <div class="res-card-label">전체 대상</div>
+                <div class="res-card-val">{total_cnt}건</div>
+            </div>
+            <div class="res-card inc">
+                <div class="res-card-label">Include (포함)</div>
+                <div class="res-card-val">{inc_cnt}건</div>
+            </div>
+            <div class="res-card exc">
+                <div class="res-card-label">Exclude (제외)</div>
+                <div class="res-card-val">{exc_cnt}건</div>
+            </div>
+            <div class="res-card pending">
+                <div class="res-card-label">Full-Text Review Needed</div>
+                <div class="res-card-val">{pending_cnt}건</div>
+            </div>
+            <div class="res-card dup">
+                <div class="res-card-label">Duplicated (중복)</div>
+                <div class="res-card-val">{dup_cnt}건</div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-        
-    with m2:
-        st.markdown(f"""
-        <div class="metric-card theme-include">
-            <div class="metric-card-title">✅ Include (포함)</div>
-            <div class="metric-card-value">{inc_cnt}</div>
-            <div class="metric-card-desc">Criteria Matched</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with m3:
-        st.markdown(f"""
-        <div class="metric-card theme-exclude">
-            <div class="metric-card-title">❌ Exclude (제외)</div>
-            <div class="metric-card-value">{exc_cnt}</div>
-            <div class="metric-card-desc">Criteria Mismatched</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with m4:
-        st.markdown(f"""
-        <div class="metric-card theme-pending">
-            <div class="metric-card-title">⚠️ Full-Text Screening</div>
-            <div class="metric-card-value">{pending_cnt}</div>
-            <div class="metric-card-desc">Abstract Missing (Manual)</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with m5:
-        st.markdown(f"""
-        <div class="metric-card theme-dup">
-            <div class="metric-card-title">🔄 Duplicated (중복)</div>
-            <div class="metric-card-value">{dup_cnt}</div>
-            <div class="metric-card-desc">Previously Screened</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # --------------------------------------------------
-# ⚙️ 사이드바 UI 구성
+# ⚙️ 사이드바 UI 구성 (순서: 설정 -> 품목 -> 세부모델 -> HOME)
 # --------------------------------------------------
 with st.sidebar:
     st.header("시스템 설정")
@@ -379,7 +359,7 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 세부 모델 선택
+    # 세부 모델 선택 (초기 미선택 상태)
     sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -443,12 +423,14 @@ with st.sidebar:
             on_change=clear_screening_results,
         )
 
+    # 누적 스크리닝 현황 표기 및 리셋 버튼
     st.markdown("---")
     history_cnt = len(st.session_state["screened_history"])
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
     if st.button("이전 스크리닝 기록 초기화", help="이전 모델 스크리닝 이력을 비우고 다시 시작합니다."):
         clear_history()
 
+    # HOME 버튼
     st.markdown("---")
     st.button(
         "HOME",
@@ -459,7 +441,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 홈 대시보드 화면 유지
+# 🏠 품목이나 세부 모델이 모두 선택되지 않았을 때 (원본 Home 대시보드 화면 유지)
 # --------------------------------------------------
 if not due_category or not sub_model:
     st.markdown(
@@ -492,6 +474,7 @@ if not due_category or not sub_model:
                     "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"
                 ])
 
+                # 1. Biliary Stent
                 with c_tab1:
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
                     b_sub1, b_sub2, b_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -566,6 +549,7 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
+                # 2. Esophageal Stent
                 with c_tab2:
                     st.markdown("#### **Niti-S Esophageal Stent**")
                     e_sub1 = st.tabs(["Covered Stent"])[0]
@@ -596,6 +580,7 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
+                # 3. Pyloric/Duodenal Stent
                 with c_tab3:
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
                     p_sub1, p_sub2, p_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -663,6 +648,7 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
+                # 4. Colonic Stent
                 with c_tab4:
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
                     col_sub1, col_sub2, col_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -730,6 +716,7 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
+                # 5. Drainage Stent
                 with c_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
                     d_sub1, d_sub2, d_sub3 = st.tabs(["SPAXUS Stent", "Hot SPAXUS Stent", "Nagi Stent"])
@@ -1392,7 +1379,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
         st.success(f"[{due_category} - {sub_model}] 일괄 스크리닝 결과")
 
         res_df = st.session_state["tab2_result"]
-        render_dashboard_metrics(res_df)
+        render_result_dashboard(res_df)
 
         pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
@@ -1411,9 +1398,9 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
 
         with v_tab2:
             if len(pending_df) == 0:
-                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다! 모든 문헌이 상위 스크리닝을 완료했습니다.")
+                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다.")
             else:
-                st.warning("아래 목록은 PubMed API상 초록(Abstract)이 포함되지 않아 담당 연구원의 Full-text 수동 검토가 필요한 문헌들입니다.")
+                st.warning("아래 목록은 PubMed API상 초록(Abstract)이 포함되지 않아 Full-text 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
                 st.download_button(
@@ -1421,8 +1408,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                     data=pending_csv,
                     file_name="cer_manual_fulltext_review_needed.csv",
                     mime="text/csv",
-                    use_container_width=True,
-                    type="primary"
+                    use_container_width=True
                 )
 
 # --------------------------------------------------
@@ -1620,7 +1606,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         st.success(f"[{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
 
         res_df = st.session_state["tab3_result"]
-        render_dashboard_metrics(res_df)
+        render_result_dashboard(res_df)
 
         pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
@@ -1639,9 +1625,9 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
         with v_tab2:
             if len(pending_df) == 0:
-                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다! 모든 문헌이 정상 스크리닝되었습니다.")
+                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다.")
             else:
-                st.warning("아래 목록은 PubMed API상 초록(Abstract)이 미포함되어 담당 연구원의 Full-text 수동 검토가 필요한 문헌들입니다.")
+                st.warning("아래 목록은 PubMed API상 초록(Abstract)이 미포함되어 Full-text 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
                 st.download_button(
@@ -1649,8 +1635,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                     data=pending_csv,
                     file_name=f"pico_manual_fulltext_review_needed_{start_year}{start_month:02d}.csv",
                     mime="text/csv",
-                    use_container_width=True,
-                    type="primary"
+                    use_container_width=True
                 )
 
 # --------------------------------------------------
@@ -1774,7 +1759,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
         st.success(f"[{due_category} - {sub_model}] GIE RIS 스크리닝 완료 결과")
 
         res_df = st.session_state["tab_gie_result"]
-        render_dashboard_metrics(res_df)
+        render_result_dashboard(res_df)
 
         pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
@@ -1793,9 +1778,9 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 
         with v_tab2:
             if len(pending_df) == 0:
-                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다! 모든 문헌이 정상 스크리닝되었습니다.")
+                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다.")
             else:
-                st.warning("아래 목록은 GIE RIS 파일 내 초록이 없어 담당 연구원의 Full-text 수동 검토가 필요한 문헌들입니다.")
+                st.warning("아래 목록은 GIE RIS 파일 내 초록이 없어 Full-text 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
                 st.download_button(
@@ -1803,6 +1788,5 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     data=pending_csv,
                     file_name="gie_manual_fulltext_review_needed.csv",
                     mime="text/csv",
-                    use_container_width=True,
-                    type="primary"
+                    use_container_width=True
                 )
