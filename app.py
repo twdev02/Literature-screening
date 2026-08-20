@@ -908,8 +908,10 @@ if due_category == "1. Biliary Stent":
 7. Outcomes: Stent patency, Decreased bilirubin, Technical/Clinical success, Complications, Stent removal (for benign cases)"""
     exclude_criteria = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
 2. Different indication: Non-biliary/pancreatic target areas only (e.g., vascular, esophageal, colonic, tracheal)
-3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management
-4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
+3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management (e.g., EUS-CDS, EUS-HGS primary LAMS procedures, RFA combined therapies, vascular reconstructions)
+4. Non-study publications: Editorials, letters, comments, study protocols (단, Review 및 Case report는 제외하지 않음)
+5. Insufficient Information: Valid information relevant to performance and/or safety is limited (e.g., Non-free/paywall articles or limited full-text availability).
+6. Held by Taewoong: This article is already held by Taewoong Medical."""
 
     if sub_model == "Niti-S Biliary Uncovered Stent":
         default_p = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction"
@@ -941,9 +943,11 @@ elif due_category == "2. Esophageal Stent":
 6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, Ultraflex, Evolution, Hanarostent, Aixstent, EGIS, Bonastent, Micro-Tech)
 7. Outcomes: Stent patency, Dysphagia improvement, Fistula closure, Removal (in benign strictures)"""
     exclude_criteria = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
-2. Different indication: Non-esophageal target areas only (e.g., pure biliary, colonic, duodenal, vascular)
+2. Different indication: Non-esophageal target areas only (e.g., airway/tracheal stenting, EIs/TAA injections, gastric conduit salvage, sub-stent dissection, photothermal-chemo/biodegradable stents)
 3. Irrelevant articles: Articles not related to esophageal stenting, stricture dilation, or TE fistula management
-4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
+4. Non-study publications: Editorials, letters, comments, study protocols (단, Review 및 Case report는 제외하지 않음)
+5. Insufficient Information: Valid information relevant to performance and/or safety is limited (e.g., Non-free/paywall articles or limited full-text availability).
+6. Held by Taewoong: This article is already held by Taewoong Medical."""
 
     default_p = "Esophageal stricture\nEsophageal obstruction\nMalignant esophageal stricture\nMalignant esophageal obstruction\nBenign esophageal stricture\nRefractory benign esophageal stricture\nBenign esophgeal obstruction\nTracheoesophageal fistula"
     default_i = "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent"
@@ -959,9 +963,11 @@ elif due_category == "3. Pyloric/Duodenal Stent":
 6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, WallFlex Soft, Hanarostent, Evolution, EGIS, Bonastent)
 7. Outcomes: Stent patency, Obstruction relief/resolution/improvement, GOOSS score / Oral intake, Technical/Clinical success, Complications, Stent removal (for benign strictures)"""
     exclude_criteria = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
-2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, esophageal, colonic, or vascular stents without duodenal/gastric outlet involvement)
+2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, EUS-CDS/LAMS, PTGBD->EUS-HGS conversion, EUS-GE/SGJ exclusive reviews)
 3. Irrelevant articles: Articles not related to pyloric/duodenal stenting or GOO management
-4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
+4. Non-study publications: Editorials, letters, comments, study protocols (단, Review 및 Case report는 제외하지 않음)
+5. Insufficient Information: Valid information relevant to performance and/or safety is limited (e.g., Non-free/paywall articles or limited full-text availability).
+6. Held by Taewoong: This article is already held by Taewoong Medical."""
 
     if sub_model == "Niti-S Pyloric/Duodenal Uncovered Stent":
         default_p = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction"
@@ -993,9 +999,11 @@ elif due_category == "4. Colonic Stent":
 6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, WallFlex Soft, Hanarostent, Micro-Tech, Bonastent)
 7. Outcomes: Stent patency, Obstruction relief/resolution/improvement, Technical/Clinical success, Complications, Stent removal (for benign strictures)"""
     exclude_criteria = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
-2. Different indication: Non-colonic target areas only (e.g., pure biliary, esophageal, pyloric/duodenal, or vascular stents without colonic/colorectal involvement)
+2. Different indication: Non-colonic target areas only (e.g., pure pathological stage 3 lymph node / tumor marker CEA/CA19-9 studies without direct stent performance assessment)
 3. Irrelevant articles: Articles not related to colonic stenting or colorectal obstruction management
-4. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
+4. Non-study publications: Editorials, letters, comments, study protocols (단, Review 및 Case report는 제외하지 않음)
+5. Insufficient Information: Valid information relevant to performance and/or safety is limited (e.g., Non-free/paywall articles or limited full-text availability).
+6. Held by Taewoong: This article is already held by Taewoong Medical."""
 
     if sub_model == "Niti-S Enteral Colonic Uncovered Stent":
         default_p = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction"
@@ -1027,8 +1035,11 @@ elif due_category == "5. Drainage Stent":
 6. Comparators: Surgery, Percutaneous drainage, Plastic double-pigtail stents, or competitor LAMS (e.g., AXIOS / Hot AXIOS)
 7. Outcomes: Technical/Clinical success rate, Drainage efficacy, Resolution of pseudocyst/necrosis, Complications (Bleeding, Stent migration, Perforation, Occlusion), Removal rate"""
     exclude_criteria = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
-2. Different indication/Irrelevant: Non-drainage target indications or vascular/intraluminal stenting without transluminal/EUS drainage purpose
-3. Non-study publications: Editorials, letters, comments (단, Review 및 Case report는 제외하지 않음)"""
+2. Different indication: Non-drainage target indications (e.g., ERCP prophylaxis, pancreatic endotherapy QoL, war injuries, 3D volume estimates, fibrosis biomarkers, EUS-RV/HGS/CDS technical variations without direct drainage stent outcome)
+3. Irrelevant articles: Articles not related to transluminal/EUS-guided drainage or LAMS management
+4. Non-study publications: Editorials, letters, comments, study protocols (단, Review 및 Case report는 제외하지 않음)
+5. Insufficient Information: Valid information relevant to performance and/or safety is limited (e.g., Non-free/paywall articles or limited full-text availability).
+6. Held by Taewoong: This article is already held by Taewoong Medical."""
 
     if sub_model == "Niti-S SPAXUS Stent":
         default_p = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract"
@@ -1214,20 +1225,37 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
 
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 생성 함수
+# 🤖 공통 AI 프롬프트 생성 함수 (전체 품목 1~5번 학습 데이터 통합 적용)
 # --------------------------------------------------
 def generate_prompt(
     due_category, include_criteria, exclude_criteria, title, abstract_text
 ):
     return f"""
-    너는 임상평가(CER) 전문가야. 아래 논문 초록을 읽고 선택된 카테고리의 포함기준과 제외기준을 평가해 판정해 줘.
+    너는 의료기기 임상평가(CER) 및 체계적 문헌고찰(Systematic Review) 전문가야. 
+    아래 논문 제목과 초록을 읽고, 제공된 [포함기준]과 [제외기준] 및 [인간 평가자 실제 판정 예시]를 정밀 학습하여 정확한 판정을 내려라.
 
     [선택된 카테고리/분류]: {due_category} ({sub_model})
 
-    [판정 규칙]:
-    1. [포함기준]을 모두 만족하고, [제외기준]에 하나도 해당하지 않는 경우만 'Include'로 판정한다.
-    2. [포함기준]을 하나라도 만족하지 못하거나, [제외기준]에 하나라도 해당하는 경우 'Exclude'로 판정한다.
-    3. 중요: 종설(Review) 논문이나 증례 보고(Case report/series)라 하더라도, 대상 적응증과 관련 내용이 일치한다면 포함(Include) 대상으로 간주한다. 절대 '논문 유형'만을 이유로 Exclude 판정을 내리지 마라.
+    [엄격한 판정 가이드라인]:
+    1. Include 조건: [포함기준]을 완벽히 만족하고, [제외기준]에 단 하나도 해당하지 않는 경우만 'Include'로 판정한다.
+    2. Exclude 판단 핵심 규칙:
+       - **Insufficient information: Valid information relevant to performance and/or safety is limited.**
+         : 초록상 유효 데이터가 부족하거나, 원문(Full-text)을 직접 다운로드할 수 없거나(Non-free/Paywall) 스텐트의 실제 성능 및 안전성에 관한 유효 데이터 확보가 제한된 논문은 반드시 'Insufficient information: Valid information relevant to performance and/or safety is limited.'로 Exclude 한다.
+       - **Insufficient information: Letter / Protocol**
+         : 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우 유효 데이터 부족으로 Exclude 한다.
+       - **This article is already held by Taewoong Medical.**
+         : 태웅메디칼 내부적으로 이미 보유하고 있거나 이전에 검토 완료된 문헌인 경우 Exclude 한다.
+       - **Irrelevant article**
+         : 스텐트 자체의 performance/safety 평가가 아닌 대상 질환 치료법(EUS-GE, SGJ, RFA, 수술법 전용, 이미지 진단 기술, 유전자/바이오마커 연구, 타 장기 적용 등)을 다룬 논문은 'Irrelevant article'로 Exclude 한다.
+       - **Literature without human clinical data**
+         : Preclinical proof-of-concept, In-vitro, 동물실험 연구는 Exclude 한다.
+
+    [품목별 인간 평가자 주요 판정 학습 예시 (Few-shot Examples)]:
+    - Biliary: Covered SEMS vs Uncovered SEMS 유효성/안전성 Meta-analysis 및 RCT -> Include
+    - Esophageal: FC-SEMS 마이그레이션 방지(Suturing 등) 비교 연구 -> Include | 단순 구제 요법 소아 사례 -> Exclude (Irrelevant)
+    - Pyloric/Duodenal: EUS-GJ vs Duodenal SEMS vs SGJ 삼자 비교 Review -> Include | Balloon dilation vs SEMS 비교 -> Include | 2차 Duodenal SEMS 재시술 성과 -> Include
+    - Colonic: Emergency Surgery 대비 Bridge to Surgery(BTS) SEMS 성과/생존율 -> Include | CReST2 Trial(완화 목적 Covered vs Uncovered) -> Include | Stent Patency 예측 모델 개발 -> Include
+    - Drainage: Percutaneous cystogastrostomy / EUS-GBD / EUS-BD 1년 이상 추적 임상 성과 -> Include | High-surgical-risk 환자 배액술 가이드라인/Delphi consensus -> Include | EUS-BD 수련/안전성 실무 임상 -> Include
 
     [포함기준]:
     {include_criteria}
@@ -1235,8 +1263,9 @@ def generate_prompt(
     [제외기준]:
     {exclude_criteria}
 
-    [논문 제목]: {title}
-    [논문 초록]: {abstract_text}
+    [평가 대상 논문]
+    - [논문 제목]: {title}
+    - [논문 초록]: {abstract_text}
 
     답변형식 (한국어 설명 없이 오직 아래 지정된 영문 형식으로만 완벽히 작성할 것):
 
@@ -1245,21 +1274,16 @@ def generate_prompt(
     Conclusion:
     (영문 사유 1문장)
 
-    [Conclusion 작성 가이드 - 매우 중요!]
-    1. 한국어(한글) 설명이나 '판정:' 같은 단어는 Conclusion 항목 안에 절대 넣지 마라.
-    2. 마크다운 볼드 서식인 별표(**)를 절대로 쓰지 마라.
-    3. Include인 경우:
-       - 'Conclusion:' 이라는 말머리조차 절대로 붙이지 말고, 완결된 영문 문장 자체만 적어라.
-       - 'Included because', 'It is because' 같은 수식어를 절대 쓰지 마라.
-       - 예시: The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
-
-    4. Exclude인 경우:
-       - 아래 4가지 말머리 중 가장 적절한 하나를 반드시 골라 붙이고 문장을 적어라:
-         * **Different indication:**
-         * **Irrelevant article:**
-         * **Insufficient information:**
-         * **Literature without human clinical data:**
-       - 예시: **Different indication:** The study is focused exclusively on esophageal stenting rather than colonic stenting.
+    [Conclusion 작성 규칙]
+    1. 마크다운 별표(**)를 절대로 사용하지 마라.
+    2. Include인 경우: 'Conclusion:' 이라는 말머리나 수식어('Included because' 등)를 일체 붙이지 말고 완결된 1개 영문 문장 자체만 적어라.
+       (예: The study was included as it evaluates the clinical efficacy and safety of self-expandable metal stents for malignant obstruction.)
+    3. Exclude인 경우: 반드시 아래 지정된 말머리 중 가장 정확한 하나를 맨 앞에 붙이고 사유를 적어라:
+       * Different indication:
+       * Irrelevant article:
+       * Insufficient information: Valid information relevant to performance and/or safety is limited. (또는 Letter / Protocol)
+       * This article is already held by Taewoong Medical.
+       * Literature without human clinical data:
     """
 
 
