@@ -288,7 +288,7 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 세부 모델 선택 (index=None을 주어 초기 미선택 상태로 설정)
+    # 세부 모델 선택 (초기 미선택 상태)
     sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -1373,8 +1373,9 @@ elif selected_mode == "PubMed PICO 자동 검색":
     if st.button("PICO 다중 조합 검색 및 AI 스크리닝 실행"):
         if not api_key:
             st.error("API Key가 설정되지 않았습니다!")
-        elif not p_val.strip() or not i_val.strip():
-            st.error("최소한 P(환자군)와 I(시술법) 키워드는 입력해야 합니다!")
+        # 👈 [PICO 개별 입력 허용] 4가지 항목 중 최소 1개 이상만 채워져 있으면 바로 실행
+        elif not (p_val.strip() or i_val.strip() or c_val.strip() or o_val.strip()):
+            st.error("최소한 하나 이상의 PICO 키워드를 입력해 주세요!")
         else:
             date_range_label = (
                 f"{start_year}년 {start_month:02d}월 ~ {end_year}년"
