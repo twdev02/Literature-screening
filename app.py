@@ -1,6 +1,6 @@
 import io
 import os
-import re  # 👈 유니코드 변환용 정규표현식 라이브러리
+import re
 import time
 import xml.etree.ElementTree as ET
 import google.generativeai as genai
@@ -268,8 +268,8 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 세부 모델 선택
-    sub_model = "전체 (All Models)"
+    # 👈 [요청 1 반영] 세부 모델 선택 상자를 초기 미선택 상태(index=None)로 생성
+    sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
@@ -278,6 +278,8 @@ with st.sidebar:
                 "Niti-S Biliary Covered Stent",
                 "ComVi Biliary Stent",
             ],
+            index=None,
+            placeholder="세부 모델을 선택하세요",
             key="sb_biliary",
             on_change=clear_screening_results,
         )
@@ -285,6 +287,8 @@ with st.sidebar:
         sub_model = st.selectbox(
             "세부 모델/유형을 선택하세요",
             options=["Niti-S Esophageal Covered Stent"],
+            index=None,
+            placeholder="세부 모델을 선택하세요",
             key="sb_esophageal",
             on_change=clear_screening_results,
         )
@@ -296,6 +300,8 @@ with st.sidebar:
                 "Niti-S Pyloric/Duodenal Covered Stent",
                 "ComVi Pyloric/Duodenal Stent",
             ],
+            index=None,
+            placeholder="세부 모델을 선택하세요",
             key="sb_pyloric",
             on_change=clear_screening_results,
         )
@@ -307,6 +313,8 @@ with st.sidebar:
                 "Niti-S Enteral Colonic Covered Stent",
                 "ComVi Enteral Colonic Stent",
             ],
+            index=None,
+            placeholder="세부 모델을 선택하세요",
             key="sb_colonic",
             on_change=clear_screening_results,
         )
@@ -318,6 +326,8 @@ with st.sidebar:
                 "Niti-S Hot SPAXUS Stent",
                 "Niti-S Nagi Stent",
             ],
+            index=None,
+            placeholder="세부 모델을 선택하세요",
             key="sb_drainage",
             on_change=clear_screening_results,
         )
@@ -706,6 +716,11 @@ if not due_category:
 
     st.stop()
 
+# 👈 [단계별 대기 처리 1] 세부 모델이 선택되지 않은 경우 진행 차단
+if not sub_model:
+    st.info("👈 사이드바에서 **세부 모델/유형**을 선택해 주세요.")
+    st.stop()
+
 # --------------------------------------------------
 # 🔬 품목 선택 시 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
 # --------------------------------------------------
@@ -1055,18 +1070,19 @@ def generate_prompt(
 
     [Conclusion 작성 가이드 - 매우 중요!]
     1. 한국어(한글) 설명이나 '판정:' 같은 단어는 Conclusion 항목 안에 절대 넣지 마라.
-    2. Include인 경우:
+    2. 마크다운 볼드 서식인 별표(**)를 절대로 쓰지 마라.
+    3. Include인 경우:
        - 'Conclusion:' 이라는 말머리조차 절대로 붙이지 말고, 완결된 영문 문장 자체만 적어라.
        - 'Included because', 'It is because' 같은 수식어를 절대 쓰지 마라.
        - 예시: The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
 
-    3. Exclude인 경우:
-       - 아래 4가지 말머리 중 가장 적절한 하나를 반드시 골라 붙이고 문장을 적어라:
-         * **Different indication:**
-         * **Irrelevant article:**
-         * **Insufficient information:**
-         * **Literature without human clinical data:**
-       - 예시: **Different indication:** The study is focused exclusively on esophageal stenting rather than colonic stenting.
+    4. Exclude인 경우:
+       - 아래 4가지 말머리 중 가장 적절한 하나를 반드시 골라 대문자(UPPERCASE)로 작성하고 영문 문장을 적어라:
+         * DIFFERENT INDICATION:
+         * IRRELEVANT ARTICLE:
+         * INSUFFICIENT INFORMATION:
+         * LITERATURE WITHOUT HUMAN CLINICAL DATA:
+       - 예시: DIFFERENT INDICATION: The study is focused exclusively on esophageal stenting rather than colonic stenting.
     """
 
 
@@ -1083,18 +1099,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 1단계: 큰 플랫폼 엔진 선택 (PubMed / GIE Journal)
+# 👈 [요청 2 반영] 1단계 엔진 선택의 기본 선택값 제거(default=None)
 target_engine = st.segmented_control(
     "",
     options=[
         "PubMed Engine",
         "GIE Journal Engine",
     ],
-    default="PubMed Engine",
+    default=None,
     key="engine_mode_seg",
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
+
+# 👈 [단계별 대기 처리 2] 엔진이 선택되지 않은 경우 선택 안내
+if not target_engine:
+    st.info("💡 스크리닝을 진행할 **엔진 (PubMed Engine 또는 GIE Journal Engine)**을 선택해 주세요.")
+    st.stop()
 
 # 2단계: 선택된 엔진에 따른 세부 입력 모드 노출
 if target_engine == "PubMed Engine":
@@ -1238,13 +1259,13 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 )
                                 results.append(res_label)
                                 
-                                # 👈 [파싱 로직 수정] 상단 '판정: Include' 문구를 떼어내고 Conclusion 이하 정밀 추출
                                 if "Conclusion:" in ans:
                                     raw_conclusion = ans.split("Conclusion:")[-1].strip()
                                 else:
                                     raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
                                 
-                                conclusions.append(to_unicode_bold(raw_conclusion))
+                                clean_conclusion = raw_conclusion.replace("**", "").strip()
+                                conclusions.append(clean_conclusion)
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1449,13 +1470,13 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 )
                                 results.append(res_label)
                                 
-                                # 👈 [파싱 로직 수정] 상단 '판정: Include' 문구를 떼어내고 Conclusion 이하 정밀 추출
                                 if "Conclusion:" in ans:
                                     raw_conclusion = ans.split("Conclusion:")[-1].strip()
                                 else:
                                     raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
                                 
-                                conclusions.append(to_unicode_bold(raw_conclusion))
+                                clean_conclusion = raw_conclusion.replace("**", "").strip()
+                                conclusions.append(clean_conclusion)
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category,
@@ -1582,13 +1603,13 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             )
                             results.append(res_label)
 
-                            # 👈 [파싱 로직 수정] 상단 '판정: Include' 문구를 떼어내고 Conclusion 이하 정밀 추출
                             if "Conclusion:" in ans:
                                 raw_conclusion = ans.split("Conclusion:")[-1].strip()
                             else:
                                 raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
 
-                            conclusions.append(to_unicode_bold(raw_conclusion))
+                            clean_conclusion = raw_conclusion.replace("**", "").strip()
+                            conclusions.append(clean_conclusion)
 
                             st.session_state["screened_history"][identifier] = {
                                 "category": due_category,
