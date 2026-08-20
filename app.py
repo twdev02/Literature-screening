@@ -14,28 +14,19 @@ st.set_page_config(
 )
 
 # --------------------------------------------------
-# 🔤 마크다운 별표(**)를 유니코드 굵은 글씨로 변환하는 함수
-# --------------------------------------------------
-def to_unicode_bold(text):
-    if not text:
-        return text
-    bold_map = {
-        'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉', 'K': '𝐊', 'L': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓', 'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
-        'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳'
-    }
-    def replace_bold(match):
-        word = match.group(1)
-        return "".join(bold_map.get(c, c) for c in word)
-    
-    return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
-
-# --------------------------------------------------
-# 🎨 고급 커스텀 CSS (태웅메디칼 브랜딩 & UI 개선)
+# 🎨 고급 커스텀 CSS (여백 축소 & 시원한 레이아웃 개선)
 # --------------------------------------------------
 st.markdown(
     """
 <style>
-    /* 1. 홈 화면 전체 세로 스크롤 허용 (창 짤림 방지) */
+    /* 1. 상단 기본 여백 및 패딩 최소화로 화면 넓게 활용 */
+    .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 95% !important;
+    }
+
+    /* 2. 홈 화면 전체 세로 스크롤 허용 */
     html, body, [data-testid="stAppViewContainer"] {
         overflow-y: auto !important;
         height: auto !important;
@@ -44,25 +35,25 @@ st.markdown(
     /* 상단 메인 히어로 배너 디자인 */
     .hero-container {
         background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%);
-        padding: 28px 32px;
-        border-radius: 16px;
+        padding: 22px 28px;
+        border-radius: 14px;
         color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(11, 26, 45, 0.3);
-        margin-bottom: 20px;
+        box-shadow: 0 8px 16px -3px rgba(11, 26, 45, 0.25);
+        margin-bottom: 16px;
         border-left: 6px solid #00a8ff;
     }
     .hero-header-flex {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: 6px;
     }
     .hero-tag {
         background: linear-gradient(90deg, #84cc16 0%, #06b6d4 100%);
         color: #ffffff;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
-        padding: 4px 12px;
+        padding: 3px 10px;
         border-radius: 20px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -70,19 +61,18 @@ st.markdown(
     }
     .dept-tag {
         color: #94a3b8;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
-        letter-spacing: 0.3px;
     }
     .hero-title {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 800;
         color: #ffffff;
-        margin: 4px 0px 6px 0px;
+        margin: 2px 0px 4px 0px;
         letter-spacing: -0.5px;
     }
     .hero-subtitle {
-        font-size: 14px;
+        font-size: 13px;
         color: #cbd5e1;
         margin-bottom: 0px;
         font-weight: 400;
@@ -90,54 +80,53 @@ st.markdown(
 
     /* 카드 박스 내부 텍스트 스타일 */
     .card-title {
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         color: #0284c7;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
     .card-value {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
         color: #0f172a;
-        margin-bottom: 4px;
-        letter-spacing: -0.3px;
+        margin-bottom: 2px;
     }
     .card-desc {
-        font-size: 12px;
+        font-size: 11px;
         color: #64748b;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
 
-    /* 선택된 품목 반투명 하이라이트 박스 */
+    /* 선택된 품목 슬림 하이라이트 박스 */
     .selected-category-box {
         background-color: rgba(11, 26, 45, 0.04);
         border: 1px solid rgba(11, 26, 45, 0.12);
         border-left: 5px solid #0284c7;
-        border-radius: 12px;
-        padding: 16px 22px;
-        margin-bottom: 18px;
+        border-radius: 10px;
+        padding: 10px 16px;
+        margin-bottom: 12px;
     }
     .selected-category-label {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 800;
         color: #0284c7;
         text-transform: uppercase;
         letter-spacing: 0.8px;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
     .selected-category-title {
-        font-size: 20px;
+        font-size: 17px;
         font-weight: 800;
         color: #0f172a;
         margin: 0;
     }
 
-    /* 🔥 세그먼티드 컨트롤 커스텀 */
+    /* 🔥 세그먼티드 컨트롤 커스텀 (슬림화) */
     div[data-testid="stSegmentedControl"] {
         background-color: #f1f5f9;
-        padding: 6px;
-        border-radius: 12px;
+        padding: 4px;
+        border-radius: 10px;
         border: 1px solid #e2e8f0;
         display: flex !important;
         flex-wrap: nowrap !important;
@@ -145,11 +134,11 @@ st.markdown(
     }
     
     div[data-testid="stSegmentedControl"] button {
-        border-radius: 8px !important;
-        font-weight: 1000 !important;
+        border-radius: 6px !important;
+        font-weight: 800 !important;
         font-size: 13px !important;
         border: none !important;
-        padding: 8px 14px !important;
+        padding: 6px 12px !important;
         white-space: nowrap !important;
         transition: all 0.2s ease !important;
         flex: 1 1 auto !important;
@@ -158,24 +147,21 @@ st.markdown(
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
         background-color: #0b1a2d !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* 제품명 상자 이탈 방지 & 자동 줄바꿈 스타일 */
+    /* 제품명 상자 스타일 */
     .prod-item-title {
         font-weight: 700;
-        font-size: 15px;
+        font-size: 14px;
         color: #0f172a;
-        white-space: normal !important;
-        word-break: keep-all !important;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
 
     .prod-item-desc {
-        font-size: 13px;
+        font-size: 12px;
         color: #475569;
-        word-break: break-word !important;
-        line-height: 1.5;
+        line-height: 1.4;
     }
 </style>
 """,
@@ -268,7 +254,7 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 👈 [요청 1 반영] 세부 모델 선택 상자를 초기 미선택 상태(index=None)로 생성
+    # 세부 모델 선택
     sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -716,7 +702,7 @@ if not due_category:
 
     st.stop()
 
-# 👈 [단계별 대기 처리 1] 세부 모델이 선택되지 않은 경우 진행 차단
+# 단계별 대기 처리 1
 if not sub_model:
     st.info("👈 사이드바에서 **세부 모델/유형**을 선택해 주세요.")
     st.stop()
@@ -1087,7 +1073,7 @@ def generate_prompt(
 
 
 # --------------------------------------------------
-# ✨ 2단계 세그먼티드 컨트롤 메뉴 개편 (큰 버튼 ➔ 세부 버튼)
+# ✨ 2단계 세그먼티드 컨트롤 메뉴 개편 (선택 안내 카드)
 # --------------------------------------------------
 st.markdown(
     f"""
@@ -1099,7 +1085,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 👈 [요청 2 반영] 1단계 엔진 선택의 기본 선택값 제거(default=None)
+# 1단계 엔진 선택 (default=None)
 target_engine = st.segmented_control(
     "",
     options=[
@@ -1110,9 +1096,7 @@ target_engine = st.segmented_control(
     key="engine_mode_seg",
 )
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-# 👈 [단계별 대기 처리 2] 엔진이 선택되지 않은 경우 선택 안내
+# 단계별 대기 처리 2
 if not target_engine:
     st.info("💡 스크리닝을 진행할 **엔진 (PubMed Engine 또는 GIE Journal Engine)**을 선택해 주세요.")
     st.stop()
