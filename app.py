@@ -66,8 +66,6 @@ st.markdown(
     /* 3. 사이드바 입력창 및 텍스트 글씨 크기 확대 */
     section[data-testid="stSidebar"] {
         font-size: 15px !important;
-        width: calc(var(--sidebar-width, 21rem) + 0.5cm) !important;
-        min-width: calc(var(--sidebar-width, 21rem) + 0.5cm) !important;
     }
     
     section[data-testid="stSidebar"] label {
@@ -77,6 +75,12 @@ st.markdown(
     section[data-testid="stSidebar"] input {
         font-size: 14px !important;
         padding: 8px 12px !important;
+    }
+
+/* 👈 여기 추가! (파일 업로더 라벨 한 줄 정렬) */
+    div[data-testid="stFileUploader"] label p {
+        letter-spacing: -0.8px !important;
+        white-space: nowrap !important;
     }
 
     /* 상단 메인 히어로 배너 디자인 */
