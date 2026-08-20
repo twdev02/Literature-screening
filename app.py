@@ -285,10 +285,13 @@ def reset_to_home():
     st.session_state["radio_category"] = None
 
 
-# 이전 스크리닝 히스토리 전용 삭제 함수 (버튼을 누를 때만 실행)
+# 이전 스크리닝 히스토리 전용 삭제 함수 (업로드 파일 UI까지 함께 초기화)
 def clear_history():
     st.session_state["screened_history"] = {}
-    st.toast("이전 스크리닝 누적 기록이 초기화되었습니다.")
+    # 업로드 위젯의 세션 키를 제거하여 업로드된 파일 UI도 함께 비움
+    if "history_csv_uploader" in st.session_state:
+        del st.session_state["history_csv_uploader"]
+    st.toast("이전 스크리닝 누적 기록 및 업로드 파일이 초기화되었습니다.")
 
 
 # 📊 스크리닝 결과 깔끔한 상단 도식화 렌더링 함수
