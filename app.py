@@ -66,8 +66,10 @@ st.markdown(
     /* 3. 사이드바 입력창 및 텍스트 글씨 크기 확대 */
     section[data-testid="stSidebar"] {
         font-size: 15px !important;
-        min-width: calc(100% + 0.5cm) !important;
+        width: calc(var(--sidebar-width, 21rem) + 0.5cm) !important;
+        min-width: calc(var(--sidebar-width, 21rem) + 0.5cm) !important;
     }
+    
     section[data-testid="stSidebar"] label {
         font-size: 14px !important;
         font-weight: 700 !important;
