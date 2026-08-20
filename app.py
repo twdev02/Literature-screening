@@ -263,6 +263,10 @@ if "tab3_result" not in st.session_state:
 if "tab_gie_result" not in st.session_state:
     st.session_state["tab_gie_result"] = None
 
+# uploader 강제 리셋용 동적 키 카운터
+if "uploader_key" not in st.session_state:
+    st.session_state["uploader_key"] = 0
+
 # 누적 스크리닝 이력 저장용 메모리 (절대 함부로 삭제되지 않음)
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
@@ -285,12 +289,10 @@ def reset_to_home():
     st.session_state["radio_category"] = None
 
 
-# 이전 스크리닝 히스토리 전용 삭제 함수 (업로드 파일 UI까지 함께 초기화)
+# 🔥 이전 스크리닝 히스토리 전용 삭제 함수 (업로드 위젯 강제 리셋 포함)
 def clear_history():
     st.session_state["screened_history"] = {}
-    # 업로드 위젯의 세션 키를 제거하여 업로드된 파일 UI도 함께 비움
-    if "history_csv_uploader" in st.session_state:
-        del st.session_state["history_csv_uploader"]
+    st.session_state["uploader_key"] += 1  # 키 값을 증가시켜 uploader 위젯을 완전히 새로 만듦
     st.toast("이전 스크리닝 누적 기록 및 업로드 파일이 초기화되었습니다.")
 
 
@@ -447,14 +449,14 @@ with st.sidebar:
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
 
     # --------------------------------------------------
-    # 📥 [신규 추가] 이전 스크리닝 CSV 업로드를 통한 히스토리 복원
+    # 📥 이전 스크리닝 CSV 업로드를 통한 히스토리 복원 (동적 키 적용)
     # --------------------------------------------------
     with st.expander("이전 스크리닝 CSV 불러오기"):
         history_files = st.file_uploader(
             "과거 스크리닝 결과 CSV 선택 (복수 가능)",
             type=["csv"],
             accept_multiple_files=True,
-            key="history_csv_uploader",
+            key=f"history_csv_uploader_{st.session_state['uploader_key']}", # Dynamic Key 적용
         )
         if st.button("이력 메모리에 복원", use_container_width=True):
             if history_files:
@@ -493,7 +495,7 @@ with st.sidebar:
             else:
                 st.warning("복원할 CSV 파일을 선택하세요.")
 
-    if st.button("이전 스크리닝 기록 초기화", help="이전 모델 스크리닝 이력을 비우고 다시 시작합니다."):
+    if st.button("이전 스크리닝 기록 초기화", help="이전 모델 스크리닝 이력을 비우고 업로드 박스를 초기화합니다."):
         clear_history()
 
     # HOME 버튼
