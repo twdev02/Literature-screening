@@ -30,7 +30,7 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (시원하고 가독성 높은 폰트 & UI 적용)
+# 🎨 고급 커스텀 CSS (도식화 카드 & UI 적용)
 # --------------------------------------------------
 st.markdown(
     """
@@ -108,27 +108,6 @@ st.markdown(
         font-weight: 400;
     }
 
-    /* 카드 박스 내부 텍스트 스타일 */
-    .card-title {
-        font-size: 12px;
-        font-weight: 700;
-        color: #0284c7;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-    .card-value {
-        font-size: 14px;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 4px;
-        letter-spacing: -0.3px;
-    }
-    .card-desc {
-        font-size: 12px;
-        color: #64748b;
-        margin-bottom: 12px;
-    }
-
     /* 선택된 품목 반투명 하이라이트 박스 */
     .selected-category-box {
         background-color: rgba(11, 26, 45, 0.04);
@@ -180,6 +159,60 @@ st.markdown(
         color: #ffffff !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
+
+    /* 📊 대시보드 전용 커스텀 도식화 요약 카드 디자인 */
+    .metric-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 18px 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+    .metric-card-title {
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+    .metric-card-value {
+        font-size: 28px;
+        font-weight: 900;
+        line-height: 1.1;
+    }
+    .metric-card-desc {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: 6px;
+        font-weight: 500;
+    }
+
+    /* 색상 테마별 개별 클래스 */
+    .theme-total { border-top: 4px solid #3b82f6; }
+    .theme-total .metric-card-title { color: #2563eb; }
+    .theme-total .metric-card-value { color: #1e40af; }
+
+    .theme-include { border-top: 4px solid #10b981; }
+    .theme-include .metric-card-title { color: #059669; }
+    .theme-include .metric-card-value { color: #065f46; }
+
+    .theme-exclude { border-top: 4px solid #ef4444; }
+    .theme-exclude .metric-card-title { color: #dc2626; }
+    .theme-exclude .metric-card-value { color: #991b1b; }
+
+    .theme-pending { border-top: 4px solid #f59e0b; background-color: #fffbeb; }
+    .theme-pending .metric-card-title { color: #d97706; }
+    .theme-pending .metric-card-value { color: #92400e; }
+
+    .theme-dup { border-top: 4px solid #6b7280; }
+    .theme-dup .metric-card-title { color: #4b5563; }
+    .theme-dup .metric-card-value { color: #1f2937; }
 
     /* 제품명 상자 이탈 방지 & 자동 줄바꿈 스타일 */
     .prod-item-title {
@@ -242,8 +275,66 @@ def clear_history():
     st.toast("이전 스크리닝 누적 기록이 초기화되었습니다.")
 
 
+# 📊 대시보드 요약 도식화 UI 생성 전용 컴포넌트 함수
+def render_dashboard_metrics(df):
+    total_cnt = len(df)
+    inc_cnt = len(df[df["AI 판정"] == "Include (포함)"])
+    exc_cnt = len(df[df["AI 판정"] == "Exclude (제외)"])
+    pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed", na=False)])
+    dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
+
+    m1, m2, m3, m4, m5 = st.columns(5)
+    
+    with m1:
+        st.markdown(f"""
+        <div class="metric-card theme-total">
+            <div class="metric-card-title">📚 총 스크리닝 대상</div>
+            <div class="metric-card-value">{total_cnt}</div>
+            <div class="metric-card-desc">Total Screened</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with m2:
+        st.markdown(f"""
+        <div class="metric-card theme-include">
+            <div class="metric-card-title">✅ Include (포함)</div>
+            <div class="metric-card-value">{inc_cnt}</div>
+            <div class="metric-card-desc">Criteria Matched</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with m3:
+        st.markdown(f"""
+        <div class="metric-card theme-exclude">
+            <div class="metric-card-title">❌ Exclude (제외)</div>
+            <div class="metric-card-value">{exc_cnt}</div>
+            <div class="metric-card-desc">Criteria Mismatched</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with m4:
+        st.markdown(f"""
+        <div class="metric-card theme-pending">
+            <div class="metric-card-title">⚠️ Full-Text Screening</div>
+            <div class="metric-card-value">{pending_cnt}</div>
+            <div class="metric-card-desc">Abstract Missing (Manual)</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with m5:
+        st.markdown(f"""
+        <div class="metric-card theme-dup">
+            <div class="metric-card-title">🔄 Duplicated (중복)</div>
+            <div class="metric-card-value">{dup_cnt}</div>
+            <div class="metric-card-desc">Previously Screened</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+
 # --------------------------------------------------
-# ⚙️ 사이드바 UI 구성 (순서: 설정 -> 품목 -> 세부모델 -> HOME)
+# ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
 with st.sidebar:
     st.header("시스템 설정")
@@ -288,7 +379,7 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 세부 모델 선택 (초기 미선택 상태)
+    # 세부 모델 선택
     sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -352,14 +443,12 @@ with st.sidebar:
             on_change=clear_screening_results,
         )
 
-    # 누적 스크리닝 현황 표기 및 리셋 버튼
     st.markdown("---")
     history_cnt = len(st.session_state["screened_history"])
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
     if st.button("이전 스크리닝 기록 초기화", help="이전 모델 스크리닝 이력을 비우고 다시 시작합니다."):
         clear_history()
 
-    # HOME 버튼
     st.markdown("---")
     st.button(
         "HOME",
@@ -370,7 +459,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 품목이나 세부 모델이 모두 선택되지 않았을 때 (홈 대시보드 화면 유지)
+# 🏠 홈 대시보드 화면 유지
 # --------------------------------------------------
 if not due_category or not sub_model:
     st.markdown(
@@ -403,7 +492,6 @@ if not due_category or not sub_model:
                     "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"
                 ])
 
-                # 1. Biliary Stent
                 with c_tab1:
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
                     b_sub1, b_sub2, b_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -478,7 +566,6 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
-                # 2. Esophageal Stent
                 with c_tab2:
                     st.markdown("#### **Niti-S Esophageal Stent**")
                     e_sub1 = st.tabs(["Covered Stent"])[0]
@@ -509,7 +596,6 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
-                # 3. Pyloric/Duodenal Stent
                 with c_tab3:
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
                     p_sub1, p_sub2, p_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -577,7 +663,6 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
-                # 4. Colonic Stent
                 with c_tab4:
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
                     col_sub1, col_sub2, col_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -645,7 +730,6 @@ if not due_category or not sub_model:
                                     )
                                 st.divider()
 
-                # 5. Drainage Stent
                 with c_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
                     d_sub1, d_sub2, d_sub3 = st.tabs(["SPAXUS Stent", "Hot SPAXUS Stent", "Nagi Stent"])
@@ -737,7 +821,7 @@ if not due_category or not sub_model:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 품목 선택 시 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 자동 세팅
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -902,7 +986,7 @@ else:
 
 
 # --------------------------------------------------
-# PubMed API 기능 및 XML 파싱 함수 (개선판)
+# PubMed API 기능 및 XML 파싱 함수
 # --------------------------------------------------
 
 def parse_pico_input(text):
@@ -1024,19 +1108,16 @@ def fetch_pubmed_by_pmid(pmid):
             else "제목 없음"
         )
 
-        # 1. 표준 Abstract 확인
         abstract_elem = article.find(".//Abstract")
-        
-        # 2. Abstract가 없을 경우 OtherAbstract 구조 탐색
         if abstract_elem is None:
             abstract_elem = root.find(".//OtherAbstract")
 
         if abstract_elem is None:
-            return title, None, "No Abstract Available (Full-text Review Required)"
+            return title, None, "Full-text Screening Needed (Abstract Missing)"
 
         abstract_text = "".join(abstract_elem.itertext()).strip()
         if not abstract_text:
-            return title, None, "No Abstract Available (Full-text Review Required)"
+            return title, None, "Full-text Screening Needed (Abstract Missing)"
 
         return title, abstract_text, "성공"
 
@@ -1108,7 +1189,7 @@ def generate_prompt(
 
 
 # --------------------------------------------------
-# ✨ 2단계 세그먼티드 컨트롤 메뉴 개편 (선택 안내 카드)
+# ✨ 2단계 세그먼티드 컨트롤 메뉴
 # --------------------------------------------------
 st.markdown(
     f"""
@@ -1120,7 +1201,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 1단계: 큰 플랫폼 엔진 선택 (PubMed / GIE Journal)
 target_engine = st.segmented_control(
     "",
     options=[
@@ -1133,7 +1213,6 @@ target_engine = st.segmented_control(
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 2단계: 선택된 엔진에 따른 세부 입력 모드 노출
 if target_engine == "PubMed Engine":
     selected_mode = st.segmented_control(
         "",
@@ -1175,8 +1254,8 @@ if selected_mode == "단일 PMID 입력":
 
             if not abstract_text:
                 st.warning(f"**논문 제목:** {title if title else '제목 없음'}")
-                st.info(f"📌 **원문 링크:** [{pmid_url}]({pmid_url})")
-                st.error(f"판정: **Pending (초록 미포함 - 전문 검토 필요)**")
+                st.info(f"📌 **원문 직접 링크:** [{pmid_url}]({pmid_url})")
+                st.error(f"판정: **Full-text Screening Needed (Abstract Missing)**")
                 st.caption(f"Reason: **Insufficient information:** Abstract is unavailable in PubMed database. Manual full-text review is required.")
             else:
                 st.success(f"**논문 제목:** {title}")
@@ -1218,9 +1297,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 df = pd.read_csv(uploaded_file, encoding="cp949")
 
             if "PMID" not in df.columns:
-                st.error(
-                    "CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다."
-                )
+                st.error("CSV 파일 안에 'PMID' 라는 이름의 열(Column)이 있어야 합니다.")
             else:
                 df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
                 if "No" in df.columns:
@@ -1244,17 +1321,15 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                     pmid_url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
                     pubmed_urls.append(pmid_url)
 
-                    # 1) 초록이 없는 경우
                     if not abs_text:
                         titles.append(title if title else "조회 실패")
                         abstracts.append("No Abstract Available")
-                        results.append("Pending (초록 미포함 - 전문 검토 필요)")
+                        results.append("Full-text Screening Needed (Abstract Missing)")
                         conclusions.append(
                             to_unicode_bold(f"Insufficient information: Abstract is unavailable in PubMed database. Manual full-text review is required (PMID: {pmid}).")
                         )
                     else:
                         identifier = pmid
-                        # 2) 이전 중복 논문인 경우
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
@@ -1262,7 +1337,6 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Duplicated (이전중복: {prev_mod})")
                             conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
-                        # 3) 정상 AI 분석 대상인 경우
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1317,42 +1391,38 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
     if st.session_state["tab2_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] 일괄 스크리닝 결과")
 
-        # 상단 현황 요약 메트릭
         res_df = st.session_state["tab2_result"]
-        inc_cnt = len(res_df[res_df["AI 판정"] == "Include (포함)"])
-        exc_cnt = len(res_df[res_df["AI 판정"] == "Exclude (제외)"])
-        pending_cnt = len(res_df[res_df["AI 판정"].str.contains("Pending", na=False)])
-        dup_cnt = len(res_df[res_df["AI 판정"].str.contains("Duplicated", na=False)])
+        render_dashboard_metrics(res_df)
 
-        m1, m2, m3, m4, m5 = st.columns(5)
-        m1.metric("총 스크리닝 대상", f"{len(res_df)}건")
-        m2.metric("Include (포함)", f"{inc_cnt}건")
-        m3.metric("Exclude (제외)", f"{exc_cnt}건")
-        m4.metric("Pending (초록미포함)", f"{pending_cnt}건")
-        m5.metric("Duplicated (중복)", f"{dup_cnt}건")
+        pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
-        st.dataframe(res_df, hide_index=True)
-
-        col_dl1, col_dl2 = st.columns(2)
-        with col_dl1:
+        v_tab1, v_tab2 = st.tabs(["📋 전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
+        
+        with v_tab1:
+            st.dataframe(res_df, hide_index=True)
             csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
             st.download_button(
-                "전체 결과 CSV 다운로드",
+                "전체 스크리닝 결과 CSV 다운로드",
                 data=csv_data,
                 file_name="cer_screening_result_all.csv",
                 mime="text/csv",
                 use_container_width=True
             )
-        with col_dl2:
-            if pending_cnt > 0:
-                pending_df = res_df[res_df["AI 판정"].str.contains("Pending", na=False)]
+
+        with v_tab2:
+            if len(pending_df) == 0:
+                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다! 모든 문헌이 상위 스크리닝을 완료했습니다.")
+            else:
+                st.warning("아래 목록은 PubMed API상 초록(Abstract)이 포함되지 않아 담당 연구원의 Full-text 수동 검토가 필요한 문헌들입니다.")
+                st.dataframe(pending_df, hide_index=True)
                 pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
                 st.download_button(
-                    "⚠️ 초록 미포함(수동검토 필요) 건만 CSV 다운로드",
+                    "⚠️ 수동 검토 필요(초록 미포함) 대상만 CSV 다운로드",
                     data=pending_csv,
-                    file_name="cer_screening_pending_manual_review.csv",
+                    file_name="cer_manual_fulltext_review_needed.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    use_container_width=True,
+                    type="primary"
                 )
 
 # --------------------------------------------------
@@ -1361,8 +1431,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
 elif selected_mode == "PubMed PICO 자동 검색":
     st.subheader(f"PubMed PICO 다중 키워드 입력")
     st.caption(
-        "선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로"
-        " 세팅되었습니다. 필요 시 추가/수정이 가능합니다."
+        "선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다."
     )
 
     col_pico1, col_pico2 = st.columns(2)
@@ -1422,8 +1491,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 f" {end_month:02d}월"
             )
             with st.spinner(
-                f"PubMed에서 [{date_range_label}] 기간의 PICO 조합 조건으로"
-                " 검색 중..."
+                f"PubMed에서 [{date_range_label}] 기간의 PICO 조합 조건으로 검색 중..."
             ):
                 found_pmids, used_query = search_pubmed_pmids_pico(
                     p_text=p_val,
@@ -1440,14 +1508,12 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
             if not found_pmids:
                 st.warning(
-                    f"[{date_range_label}] 기간 및 입력하신 PICO 조건에 부합하는"
-                    " PubMed 논문이 없습니다."
+                    f"[{date_range_label}] 기간 및 입력하신 PICO 조건에 부합하는 PubMed 논문이 없습니다."
                 )
                 st.info(f"생성된 조합 쿼리:\n`{used_query}`")
             else:
                 st.success(
-                    f"**[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의"
-                    " PMID가 추출되었습니다!"
+                    f"**[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의 PMID가 추출되었습니다!"
                 )
 
                 with st.expander(
@@ -1484,17 +1550,15 @@ elif selected_mode == "PubMed PICO 자동 검색":
                     pmid_url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
                     pubmed_urls.append(pmid_url)
 
-                    # 1) 초록이 없는 경우
                     if not abs_text:
                         titles.append(title if title else "조회 실패")
                         abstracts.append("No Abstract Available")
-                        results.append("Pending (초록 미포함 - 전문 검토 필요)")
+                        results.append("Full-text Screening Needed (Abstract Missing)")
                         conclusions.append(
                             to_unicode_bold(f"Insufficient information: Abstract is unavailable in PubMed database. Manual full-text review is required (PMID: {pmid}).")
                         )
                     else:
                         identifier = pmid
-                        # 2) 이전 중복 논문인 경우
                         if identifier in st.session_state["screened_history"]:
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
@@ -1502,7 +1566,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
                             abstracts.append(abs_text[:150] + "...")
                             results.append(f"Duplicated (이전중복: {prev_mod})")
                             conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
-                        # 3) 정상 AI 분석 대상인 경우
                         else:
                             titles.append(title)
                             abstracts.append(abs_text[:150] + "...")
@@ -1557,40 +1620,37 @@ elif selected_mode == "PubMed PICO 자동 검색":
         st.success(f"[{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
 
         res_df = st.session_state["tab3_result"]
-        inc_cnt = len(res_df[res_df["AI 판정"] == "Include (포함)"])
-        exc_cnt = len(res_df[res_df["AI 판정"] == "Exclude (제외)"])
-        pending_cnt = len(res_df[res_df["AI 판정"].str.contains("Pending", na=False)])
-        dup_cnt = len(res_df[res_df["AI 판정"].str.contains("Duplicated", na=False)])
+        render_dashboard_metrics(res_df)
 
-        m1, m2, m3, m4, m5 = st.columns(5)
-        m1.metric("총 스크리닝 대상", f"{len(res_df)}건")
-        m2.metric("Include (포함)", f"{inc_cnt}건")
-        m3.metric("Exclude (제외)", f"{exc_cnt}건")
-        m4.metric("Pending (초록미포함)", f"{pending_cnt}건")
-        m5.metric("Duplicated (중복)", f"{dup_cnt}건")
+        pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
-        st.dataframe(res_df, hide_index=True)
-
-        col_dl1, col_dl2 = st.columns(2)
-        with col_dl1:
+        v_tab1, v_tab2 = st.tabs(["📋 전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
+        
+        with v_tab1:
+            st.dataframe(res_df, hide_index=True)
             csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
             st.download_button(
-                "PICO 스크리닝 결과 CSV 다운로드",
+                "PICO 스크리닝 전체 결과 CSV 다운로드",
                 data=csv_data,
                 file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv",
                 mime="text/csv",
                 use_container_width=True
             )
-        with col_dl2:
-            if pending_cnt > 0:
-                pending_df = res_df[res_df["AI 판정"].str.contains("Pending", na=False)]
+
+        with v_tab2:
+            if len(pending_df) == 0:
+                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다! 모든 문헌이 정상 스크리닝되었습니다.")
+            else:
+                st.warning("아래 목록은 PubMed API상 초록(Abstract)이 미포함되어 담당 연구원의 Full-text 수동 검토가 필요한 문헌들입니다.")
+                st.dataframe(pending_df, hide_index=True)
                 pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
                 st.download_button(
-                    "⚠️ 초록 미포함(수동검토 필요) 건만 CSV 다운로드",
+                    "⚠️ 수동 검토 필요(초록 미포함) 대상만 CSV 다운로드",
                     data=pending_csv,
-                    file_name=f"pico_pending_manual_review_{start_year}{start_month:02d}.csv",
+                    file_name=f"pico_manual_fulltext_review_needed_{start_year}{start_month:02d}.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    use_container_width=True,
+                    type="primary"
                 )
 
 # --------------------------------------------------
@@ -1646,15 +1706,13 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     doi_list.append(doi)
                     titles.append(title)
 
-                    # 1) RIS 파일 내 초록이 비어있는 경우
                     if not abstract_text:
                         abstracts.append("No Abstract Available")
-                        results.append("Pending (초록 미포함 - 전문 검토 필요)")
+                        results.append("Full-text Screening Needed (Abstract Missing)")
                         conclusions.append(
                             to_unicode_bold(f"Insufficient information: Abstract text is missing in the GIE RIS file. Manual full-text review is required.")
                         )
 
-                    # 2) 이전 중복 논문인 경우
                     elif identifier in st.session_state["screened_history"]:
                         prev_info = st.session_state["screened_history"][identifier]
                         prev_mod = prev_info["sub_model"]
@@ -1662,7 +1720,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         results.append(f"Duplicated (이전중복: {prev_mod})")
                         conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
 
-                    # 3) 정상 AI 분석 대상인 경우
                     else:
                         abstracts.append(abstract_text[:150] + "...")
 
@@ -1717,38 +1774,35 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
         st.success(f"[{due_category} - {sub_model}] GIE RIS 스크리닝 완료 결과")
 
         res_df = st.session_state["tab_gie_result"]
-        inc_cnt = len(res_df[res_df["AI 판정"] == "Include (포함)"])
-        exc_cnt = len(res_df[res_df["AI 판정"] == "Exclude (제외)"])
-        pending_cnt = len(res_df[res_df["AI 판정"].str.contains("Pending", na=False)])
-        dup_cnt = len(res_df[res_df["AI 판정"].str.contains("Duplicated", na=False)])
+        render_dashboard_metrics(res_df)
 
-        m1, m2, m3, m4, m5 = st.columns(5)
-        m1.metric("총 스크리닝 대상", f"{len(res_df)}건")
-        m2.metric("Include (포함)", f"{inc_cnt}건")
-        m3.metric("Exclude (제외)", f"{exc_cnt}건")
-        m4.metric("Pending (초록미포함)", f"{pending_cnt}건")
-        m5.metric("Duplicated (중복)", f"{dup_cnt}건")
+        pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
-        st.dataframe(res_df, hide_index=True)
-
-        col_dl1, col_dl2 = st.columns(2)
-        with col_dl1:
+        v_tab1, v_tab2 = st.tabs(["📋 전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
+        
+        with v_tab1:
+            st.dataframe(res_df, hide_index=True)
             csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
             st.download_button(
-                "GIE 스크리닝 결과 CSV 다운로드",
+                "GIE 스크리닝 전체 결과 CSV 다운로드",
                 data=csv_data,
                 file_name="gie_ris_screening_result.csv",
                 mime="text/csv",
                 use_container_width=True
             )
-        with col_dl2:
-            if pending_cnt > 0:
-                pending_df = res_df[res_df["AI 판정"].str.contains("Pending", na=False)]
+
+        with v_tab2:
+            if len(pending_df) == 0:
+                st.info("초록 미포함(수동 검토 대상) 논문이 없습니다! 모든 문헌이 정상 스크리닝되었습니다.")
+            else:
+                st.warning("아래 목록은 GIE RIS 파일 내 초록이 없어 담당 연구원의 Full-text 수동 검토가 필요한 문헌들입니다.")
+                st.dataframe(pending_df, hide_index=True)
                 pending_csv = pending_df.to_csv(index=False).encode("utf-8-sig")
                 st.download_button(
-                    "⚠️ 초록 미포함(수동검토 필요) 건만 CSV 다운로드",
+                    "⚠️ 수동 검토 필요(초록 미포함) 대상만 CSV 다운로드",
                     data=pending_csv,
-                    file_name="gie_pending_manual_review.csv",
+                    file_name="gie_manual_fulltext_review_needed.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    use_container_width=True,
+                    type="primary"
                 )
