@@ -1625,7 +1625,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
         pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
-        v_tab1, v_tab2 = st.tabs(["📋 전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
+        v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
         
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
@@ -1778,7 +1778,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 
         pending_df = res_df[res_df["AI 판정"].str.contains("Full-text Screening Needed", na=False)]
 
-        v_tab1, v_tab2 = st.tabs(["📋 전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
+        v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
         
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
