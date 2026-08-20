@@ -279,7 +279,7 @@ def clear_screening_results():
     st.session_state["tab_gie_result"] = None
 
 
-# 🔥 [수정완료] HOME 버튼 클릭 시 화면만 초기화하고, screened_history는 보존함!
+# HOME 버튼 클릭 시 화면만 초기화하고, screened_history는 보존함
 def reset_to_home():
     clear_screening_results()
     st.session_state["radio_category"] = None
@@ -442,6 +442,54 @@ with st.sidebar:
     st.markdown("---")
     history_cnt = len(st.session_state["screened_history"])
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
+
+    # --------------------------------------------------
+    # 📥 [신규 추가] 이전 스크리닝 CSV 업로드를 통한 히스토리 복원
+    # --------------------------------------------------
+    with st.expander("📥 이전 스크리닝 CSV 불러오기"):
+        history_files = st.file_uploader(
+            "과거 스크리닝 결과 CSV 선택 (복수 가능)",
+            type=["csv"],
+            accept_multiple_files=True,
+            key="history_csv_uploader",
+        )
+        if st.button("이력 메모리에 복원", use_container_width=True):
+            if history_files:
+                restored_count = 0
+                for h_file in history_files:
+                    try:
+                        try:
+                            h_df = pd.read_csv(h_file, encoding="utf-8")
+                        except UnicodeDecodeError:
+                            h_df = pd.read_csv(h_file, encoding="cp949")
+
+                        for _, row in h_df.iterrows():
+                            # Identifier 추출 (PMID -> DOI/URL -> 논문 제목 순)
+                            identifier = None
+                            if "PMID" in row and pd.notna(row["PMID"]):
+                                identifier = str(row["PMID"]).replace(".0", "").strip()
+                            elif "DOI / URL" in row and pd.notna(row["DOI / URL"]):
+                                identifier = str(row["DOI / URL"]).strip().lower()
+                            elif "논문 제목" in row and pd.notna(row["논문 제목"]):
+                                identifier = str(row["논문 제목"]).strip().lower()
+
+                            if identifier and identifier != "-":
+                                cat = str(row.get("카테고리", "기존 이력"))
+                                mod = str(row.get("세부 모델", "과거 CSV"))
+                                res = str(row.get("AI 판정", "Screened"))
+
+                                st.session_state["screened_history"][identifier] = {
+                                    "category": cat,
+                                    "sub_model": mod,
+                                    "result": res,
+                                }
+                                restored_count += 1
+                        st.success(f"총 {restored_count}건의 이력이 복원되었습니다!")
+                    except Exception as e:
+                        st.error(f"파일 읽기 오류 ({h_file.name}): {str(e)}")
+            else:
+                st.warning("복원할 CSV 파일을 선택하세요.")
+
     if st.button("이전 스크리닝 기록 초기화", help="이전 모델 스크리닝 이력을 비우고 다시 시작합니다."):
         clear_history()
 
@@ -1379,6 +1427,8 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
 
+                df["카테고리"] = due_category
+                df["세부 모델"] = sub_model
                 df["논문 제목"] = titles
                 df["초록 요약"] = abstracts
                 df["AI 판정"] = results
@@ -1607,6 +1657,8 @@ elif selected_mode == "PubMed PICO 자동 검색":
                     progress_bar.progress((idx + 1) / total)
                     time.sleep(1)
 
+                auto_df["카테고리"] = due_category
+                auto_df["세부 모델"] = sub_model
                 auto_df["논문 제목"] = titles
                 auto_df["초록 요약"] = abstracts
                 auto_df["AI 판정"] = results
@@ -1761,6 +1813,8 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 
                 res_df = pd.DataFrame({
                     "No": range(1, len(entries) + 1),
+                    "카테고리": due_category,
+                    "세부 모델": sub_model,
                     "DOI / URL": doi_list,
                     "논문 제목": titles,
                     "초록 요약": abstracts,
