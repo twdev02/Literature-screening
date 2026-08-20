@@ -502,7 +502,7 @@ with st.sidebar:
             else:
                 st.warning("복원할 CSV 파일을 선택하세요.")
 
-    if st.button("이전 스크리닝 기록 초기화", help="이전 모델 스크리닝 이력을 비우고 업로드 박스를 초기화합니다."):
+    if st.button("이전 스크리닝 기록 초기화"):
         clear_history()
 
     # HOME 버튼
@@ -511,7 +511,7 @@ with st.sidebar:
         "HOME",
         type="secondary",
         use_container_width=True,
-        help="홈 대시보드로 이동 (누적 이력은 보존됨)",
+        help="홈 대시보드로 이동",
         on_click=reset_to_home,
     )
 
