@@ -77,7 +77,7 @@ st.markdown(
         padding: 8px 12px !important;
     }
 
-/* 👈 여기 추가! (파일 업로더 라벨 한 줄 정렬) */
+    /* 👈 파일 업로더 라벨 한 줄 정렬 */
     div[data-testid="stFileUploader"] label p {
         letter-spacing: -0.8px !important;
         white-space: nowrap !important;
@@ -274,6 +274,10 @@ if "tab_gie_result" not in st.session_state:
 if "uploader_key" not in st.session_state:
     st.session_state["uploader_key"] = 0
 
+# 초기화 완료 알림 표시용 상태 변수
+if "show_reset_msg" not in st.session_state:
+    st.session_state["show_reset_msg"] = False
+
 # 누적 스크리닝 이력 저장용 메모리 (절대 함부로 삭제되지 않음)
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
@@ -300,7 +304,7 @@ def reset_to_home():
 def clear_history():
     st.session_state["screened_history"] = {}
     st.session_state["uploader_key"] += 1  # 키 값을 증가시켜 uploader 위젯을 완전히 새로 만듦
-    st.toast("이전 스크리닝 누적 기록 및 업로드 파일이 초기화되었습니다.")
+    st.session_state["show_reset_msg"] = True  # 버튼 직하단 메시지 출력을 위한 스위치 ON
 
 
 # 📊 스크리닝 결과 깔끔한 상단 도식화 렌더링 함수
@@ -504,6 +508,11 @@ with st.sidebar:
 
     if st.button("이전 스크리닝 기록 초기화"):
         clear_history()
+
+    # 👇 초기화 버튼 클릭 직후 사용자의 시선 위치(버튼 바로 아래)에 알림 박스 출력
+    if st.session_state.get("show_reset_msg", False):
+        st.success("✅ 누적 기록 및 업로드 파일이 초기화되었습니다.")
+        st.session_state["show_reset_msg"] = False
 
     # HOME 버튼
     st.markdown("---")
