@@ -288,7 +288,7 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 세부 모델 선택 (초기 미선택 상태)
+    # 세부 모델 선택 (index=None을 주어 초기 미선택 상태로 설정)
     sub_model = None
     if due_category == "1. Biliary Stent":
         sub_model = st.selectbox(
@@ -370,7 +370,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 품목과 세부 모델이 모두 선택되지 않았을 때 (홈 대시보드 화면 유지)
+# 🏠 품목이나 세부 모델이 모두 선택되지 않았을 때 (홈 대시보드 화면 유지)
 # --------------------------------------------------
 if not due_category or not sub_model:
     st.markdown(
@@ -1085,12 +1085,13 @@ def generate_prompt(
 
     [Conclusion 작성 가이드 - 매우 중요!]
     1. 한국어(한글) 설명이나 '판정:' 같은 단어는 Conclusion 항목 안에 절대 넣지 마라.
-    2. Include인 경우:
+    2. 마크다운 볼드 서식인 별표(**)를 절대로 쓰지 마라.
+    3. Include인 경우:
        - 'Conclusion:' 이라는 말머리조차 절대로 붙이지 말고, 완결된 영문 문장 자체만 적어라.
        - 'Included because', 'It is because' 같은 수식어를 절대 쓰지 마라.
        - 예시: The study evaluates clinical efficacy and safety of enteral colonic stenting in adult patients with malignant colorectal obstruction.
 
-    3. Exclude인 경우:
+    4. Exclude인 경우:
        - 아래 4가지 말머리 중 가장 적절한 하나를 반드시 골라 붙이고 문장을 적어라:
          * **Different indication:**
          * **Irrelevant article:**
