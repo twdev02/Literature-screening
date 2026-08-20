@@ -511,7 +511,7 @@ with st.sidebar:
 
     # 👇 초기화 버튼 클릭 직후 사용자의 시선 위치(버튼 바로 아래)에 알림 박스 출력
     if st.session_state.get("show_reset_msg", False):
-        st.success("✅ 누적 기록 및 업로드 파일이<br>성공적으로 초기화되었습니다.")
+        st.success("✅ 누적 기록 및 업로드 파일이\n성공적으로 초기화되었습니다.")
         st.session_state["show_reset_msg"] = False
 
     # HOME 버튼
