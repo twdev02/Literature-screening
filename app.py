@@ -14,6 +14,21 @@ st.set_page_config(
 )
 
 # --------------------------------------------------
+# 🛡️ 브라우저 새로고침(F5) 및 탭 닫기 이탈 방지 스크립트
+# --------------------------------------------------
+st.components.v1.html(
+    """
+    <script>
+    window.addEventListener('beforeunload', function (e) {
+        e.preventDefault();
+        e.returnValue = '';
+    });
+    </script>
+    """,
+    height=0,
+)
+
+# --------------------------------------------------
 # 🔤 마크다운 별표(**)를 유니코드 굵은 글씨로 변환하는 함수
 # --------------------------------------------------
 def to_unicode_bold(text):
@@ -30,7 +45,7 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (원래 원본 100% 동일 + 결과창 도식화 스타일 추가)
+# 🎨 고급 커스텀 CSS
 # --------------------------------------------------
 st.markdown(
     """
@@ -248,7 +263,7 @@ if "tab3_result" not in st.session_state:
 if "tab_gie_result" not in st.session_state:
     st.session_state["tab_gie_result"] = None
 
-# 누적 스크리닝 이력 저장용 메모리
+# 누적 스크리닝 이력 저장용 메모리 (절대 함부로 삭제되지 않음)
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 
@@ -264,13 +279,13 @@ def clear_screening_results():
     st.session_state["tab_gie_result"] = None
 
 
-# HOME 버튼 클릭 시 완전히 초기화
+# 🔥 [수정완료] HOME 버튼 클릭 시 화면만 초기화하고, screened_history는 보존함!
 def reset_to_home():
     clear_screening_results()
     st.session_state["radio_category"] = None
 
 
-# 이전 스크리닝 히스토리 삭제 함수
+# 이전 스크리닝 히스토리 전용 삭제 함수 (버튼을 누를 때만 실행)
 def clear_history():
     st.session_state["screened_history"] = {}
     st.toast("이전 스크리닝 누적 기록이 초기화되었습니다.")
@@ -314,7 +329,7 @@ def render_result_dashboard(df):
 
 
 # --------------------------------------------------
-# ⚙️ 사이드바 UI 구성 (순서: 설정 -> 품목 -> 세부모델 -> HOME)
+# ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
 with st.sidebar:
     st.header("시스템 설정")
@@ -436,7 +451,7 @@ with st.sidebar:
         "HOME",
         type="secondary",
         use_container_width=True,
-        help="홈 대시보드로 이동",
+        help="홈 대시보드로 이동 (누적 이력은 보존됨)",
         on_click=reset_to_home,
     )
 
@@ -1241,7 +1256,7 @@ if selected_mode == "단일 PMID 입력":
 
             if not abstract_text:
                 st.warning(f"**논문 제목:** {title if title else '제목 없음'}")
-                st.info(f"**원문 직접 링크:** [{pmid_url}]({pmid_url})")
+                st.info(f"📌 **원문 직접 링크:** [{pmid_url}]({pmid_url})")
                 st.error(f"판정: **Full-text Screening Needed (Abstract Missing)**")
                 st.caption(f"Reason: **Insufficient information:** Abstract is unavailable in PubMed database. Manual full-text review is required.")
             else:
