@@ -1288,9 +1288,9 @@ elif selected_mode == "ClinicalTrials 자동 검색":
 
     col_ct1, col_ct2 = st.columns(2)
     with col_ct1:
-        cond_val = st.text_input("Condition/disease (질환명)", value=ct_default_cond)
+        cond_val = st.text_input("Condition/disease", value=ct_default_cond)
     with col_ct2:
-        intr_val = st.text_input("Intervention/treatment (중재시술)", value=ct_default_intr)
+        intr_val = st.text_input("Intervention/treatment", value=ct_default_intr)
 
     st.markdown("##### Focus Your Search (필터 설정)")
     
