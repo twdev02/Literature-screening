@@ -247,14 +247,6 @@ with st.sidebar:
     sub_model = None
 
     if current_engine == "ClinicalTrials Engine":
-        st.markdown(
-            """
-            <div style="background-color: #f0f7ff; border-left: 4px solid #0284c7; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: #0f172a; line-height: 1.5; word-break: keep-all; margin-bottom: 15px;">
-                ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
         sub_model = "통합 품목 검색"
     else:
         if due_category == "1. Biliary Stent":
