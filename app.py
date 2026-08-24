@@ -1334,7 +1334,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
             max_limit = st.number_input("가져올 최대 임상시험 수", min_value=1, max_value=2000, value=20)
         else:
             max_limit = 0
-            st.info("조건에 부합하는 전체 임상시험을 페이지네이션으로 수집합니다.")
+            st.info("조건에 부합하는 전체 임상시험을 수집합니다.")
 
     if st.button("ClinicalTrials 검색 및 AI 스크리닝 실행"):
         if not api_key: st.error("Gemini API Key가 설정되지 않았습니다!")
