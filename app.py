@@ -136,6 +136,8 @@ if "show_reset_msg" not in st.session_state:
     st.session_state["show_reset_msg"] = False
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
+if "selected_category" not in st.session_state:
+    st.session_state["selected_category"] = "선택 안 함"
 
 
 def clear_screening_results():
@@ -147,7 +149,7 @@ def clear_screening_results():
 
 def reset_to_home():
     clear_screening_results()
-    st.session_state["radio_category"] = None
+    st.session_state["selected_category"] = "선택 안 함"
 
 def clear_history():
     st.session_state["screened_history"] = {}
@@ -195,7 +197,7 @@ def render_result_dashboard(df):
 with st.sidebar:
     st.header("시스템 설정")
 
-    # 1. Gemini API 키 불러오기 (클라우드 Secrets 우선)
+    # 1. Gemini API 키 불러오기
     try:
         default_api_key = st.secrets["GEMINI_API_KEY"]
     except Exception:
@@ -206,7 +208,7 @@ with st.sidebar:
     )
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
-    # 2. NCBI API 키 불러오기 (화면 입력창 숨김, 백그라운드에서만 로드)
+    # 2. NCBI API 키 불러오기
     try:
         ncbi_api_key = st.secrets["NCBI_API_KEY"]
     except Exception:
@@ -222,6 +224,7 @@ with st.sidebar:
     st.subheader("품목 선택")
 
     category_options = [
+        "선택 안 함",
         "1. Biliary Stent",
         "2. Esophageal Stent",
         "3. Pyloric/Duodenal Stent",
@@ -229,14 +232,15 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
-    # 💡 [핵심 해결 1]: 라디오 버튼 세션 상태 바인딩 단순화 (충돌 방지)
-    due_category = st.radio(
+    # 💡 [핵심 해결]: selectbox로 세션 루프 및 초기 렌더링 미출력 문제 완벽 해결
+    selected_cat_str = st.selectbox(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
-        index=None,
-        key="radio_category",
+        key="selected_category",
         on_change=clear_screening_results,
     )
+
+    due_category = None if selected_cat_str == "선택 안 함" else selected_cat_str
 
     current_engine = st.session_state.get("engine_mode_seg", "PubMed Engine")
     sub_model = None
@@ -424,7 +428,7 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑 정밀 추가)
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -1063,7 +1067,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
-    # 🚀 통합 세팅 구역: PICO 검색 조합 선택 + 퀵 버튼
     st.markdown("---")
     st.subheader("PICO 검색 조합 선택")
     st.caption("원하시는 퀵 세팅 버튼을 누르거나, 아래 체크박스를 통해 검색에 포함할 항목을 직접 조정하세요.")
@@ -1071,7 +1074,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     if "pico_preset" not in st.session_state:
         st.session_state["pico_preset"] = "P + I"
 
-    # ⚡ 자주 쓰는 조합 퀵 세팅 버튼 (한눈에 보이도록 통합)
     col_q1, col_q2, col_q3, col_q4, col_q5 = st.columns(5)
     with col_q1:
         if st.button("P + I", use_container_width=True):
@@ -1088,7 +1090,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     current_preset = st.session_state["pico_preset"]
 
-    # 프리셋 선택에 따른 기본 체크 상태 동적 지정
     default_chk_p = current_preset in ["P + I", "P + O", "P + C + O"]
     default_chk_i = current_preset in ["P + I"]
     default_chk_c = current_preset in ["P + C + O"]
@@ -1097,7 +1098,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 🚀 5개의 독립 체크박스 (P, I, C, O, Additional Search I)
     col_ck1, col_ck2, col_ck3, col_ck4, col_ck5 = st.columns(5)
     with col_ck1:
         use_p = st.checkbox("P (Patient / Population / Problem)", value=default_chk_p)
@@ -1110,7 +1110,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     with col_ck5:
         use_add_i = st.checkbox("Additional Search I", value=default_chk_add)
 
-    # 🚀 [드롭다운 변경 시 텍스트 상자 실시간 동기화 콜백 함수]
     def sync_query_input():
         st.session_state["custom_direct_query_input"] = st.session_state["sb_add_query_preset"]
 
@@ -1119,7 +1118,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
         st.markdown("<br>", unsafe_allow_html=True)
         st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 쿼리를 선택하거나 직접 수정하여 검색할 수 있습니다.")
         
-        # 기본 세션 값 초기 세팅
         if "custom_direct_query_input" not in st.session_state:
             st.session_state["custom_direct_query_input"] = add_search_queries[0]
 
@@ -1128,7 +1126,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             options=add_search_queries,
             index=0,
             key="sb_add_query_preset",
-            on_change=sync_query_input  # 👈 드롭다운 변경 시 텍스트 상자 즉시 갱신!
+            on_change=sync_query_input
         )
         
         selected_target_direct_query = st.text_input(
@@ -1155,7 +1153,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
         found_pmids = []
         used_query = ""
 
-        # 🚀 Additional Search I 가 체크된 경우 사용자가 직접 편집한 입력창 쿼리문 그대로 단독 실행
         if use_add_i and selected_target_direct_query:
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
             with st.spinner(f"PubMed에서 [{selected_target_direct_query}] 단독 쿼리 실행 중..."):
@@ -1165,7 +1162,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 )
 
         else:
-            # 일반 PICO 조합 검색 실행
             if not use_p and not use_i and not use_c and not use_o:
                 use_p, use_i = True, True
                 st.warning("선택된 요소가 없어 기본값 (P + I) 조합으로 자동 지정되었습니다.")
@@ -1306,7 +1302,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                # 💡 [핵심 해결 2]: pending_csv NameError 버그 수정
                 st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
@@ -1425,7 +1420,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                # 💡 [핵심 해결 2]: pending_csv NameError 버그 수정
                 st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
@@ -1435,7 +1429,6 @@ elif selected_mode == "ClinicalTrials 자동 검색":
     st.subheader("Clinical Trials Registry (NCT) 검색")
     st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다.")
 
-    # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑
     if due_category == "1. Biliary Stent":
         ct_default_cond = '("Biliary obstruction" OR "Biliary stricture")'
         ct_default_intr = '("Self-expandable metal stent" OR "SEMS" OR "Biliary stent")'
@@ -1461,7 +1454,6 @@ elif selected_mode == "ClinicalTrials 자동 검색":
     with col_ct2:
         intr_val = st.text_input("Intervention/treatment", value=ct_default_intr)
 
-    
     col_f1, col_f2 = st.columns(2)
     with col_f1:
         status_options = {
@@ -1621,5 +1613,4 @@ elif selected_mode == "ClinicalTrials 자동 검색":
             else:
                 st.warning("아래 목록은 Summary 데이터 부족으로 수동 검토가 필요한 임상시험들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                # 💡 [핵심 해결 2]: pending_csv NameError 버그 수정
                 st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="clinicaltrials_manual_review_needed.csv", mime="text/csv", use_container_width=True)
