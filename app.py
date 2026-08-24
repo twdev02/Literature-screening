@@ -455,12 +455,16 @@ if due_category == "1. Biliary Stent":
 
     if sub_model == "Niti-S Biliary Uncovered Stent":
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin"
+        add_search_i = "Niti-S Biliary S type\nNiti-S Biliary D type\nNiti-S Biliary M type\nNiti-S Biliary LCD type"
     elif sub_model == "Niti-S Biliary Covered Stent":
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nBenign biliary stricture\nBenign biliary obstruction\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign pancreatic duct stricture", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin\nRemoval"
+        add_search_i = "Niti-S Full Covered Biliary\nNiti-S Biliary Giobor\nNiti-S Biliary Flare\nNiti-S Biliary Kaffes\nNiti-S Biliary Bumpy"
     elif sub_model == "ComVi Biliary Stent":
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nComVi\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin"
+        add_search_i = "ComVi Biliary Stent\nComVi Biliary Full Covered\nComVi Biliary Both Bare\nComVi Biliary End Bare"
     else:
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign biliary obstruction\nBenign biliary stricture\nBenign pancreatic duct stricture", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin\nRemoval"
+        add_search_i = "Niti-S Biliary Stent\nComVi Biliary Stent"
 
 elif due_category == "2. Esophageal Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -477,6 +481,7 @@ elif due_category == "2. Esophageal Stent":
 5. Insufficient Information: Valid information relevant to performance and/or safety is limited.
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     default_p, default_i, default_c, default_o = "Esophageal stricture\nEsophageal obstruction\nMalignant esophageal stricture\nMalignant esophageal obstruction\nBenign esophageal stricture\nRefractory benign esophageal stricture\nBenign esophgeal obstruction\nTracheoesophageal fistula", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nUltraflex\nEvolution\nHanarostent\nAixstent\nEGIS\nBonastent\nMicro-tech", "Stent patency\nDysphagia improvement\nFistula closure\nRemoval"
+    add_search_i = "Niti-S Esophageal Full Covered\nNiti-S Esophageal Cervical\nNiti-S Esophageal Both Bare\nNiti-S Esophageal Conio\nNiti-S Esophageal Anti Reflux\nNiti-S Esophageal Beta-2"
 
 elif due_category == "3. Pyloric/Duodenal Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -494,12 +499,16 @@ elif due_category == "3. Pyloric/Duodenal Stent":
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     if sub_model == "Niti-S Pyloric/Duodenal Uncovered Stent":
         default_p, default_i, default_c, default_o = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
+        add_search_i = "Niti-S Pyloric D-type\nNiti-S Duodenal D-type\nNiti-S Pyloric Uncovered\nNiti-S Duodenal Uncovered"
     elif sub_model == "Niti-S Pyloric/Duodenal Covered Stent":
         default_p, default_i, default_c, default_o = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction\nBenign pyloric stricture\nBenign pyloric obstruction\nBenign duodenal stricture\nBenign duodenal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
+        add_search_i = "Niti-S Pyloric Full Covered\nNiti-S Duodenal Full Covered\nNiti-S Pyloric Both Bare\nNiti-S Duodenal Both Bare"
     elif sub_model == "ComVi Pyloric/Duodenal Stent":
         default_p, default_i, default_c, default_o = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nComVi\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
+        add_search_i = "ComVi Pyloric Stent\nComVi Duodenal Stent\nComVi Pyloric Flare\nComVi Duodenal Both Bare"
     else:
         default_p, default_i, default_c, default_o = "Pyloric stricture\nDuodenal stricture\nGastric outlet obstruction\nMalignant pyloric stricture\nBenign pyloric stricture", "SEMS\nTaewoong\nNiti-S\nComVi\nCovered stent\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSEMS\nWallFlex", "Stent patency\nObstruction relief\nRemoval"
+        add_search_i = "Niti-S Pyloric Stent\nComVi Duodenal Stent"
 
 elif due_category == "4. Colonic Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -517,12 +526,16 @@ elif due_category == "4. Colonic Stent":
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     if sub_model == "Niti-S Enteral Colonic Uncovered Stent":
         default_p, default_i, default_c, default_o = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-Tech\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
+        add_search_i = "Niti-S Enteral Colonic S-Type\nNiti-S Enteral Colonic D-Type\nNiti-S Enteral Colonic Uncovered"
     elif sub_model == "Niti-S Enteral Colonic Covered Stent":
         default_p, default_i, default_c, default_o = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction\nBenign colonic stricture\nBenign colonic obstruction\nBenign colorectal stricture\nBenign colorectal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-Tech\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
+        add_search_i = "Niti-S Enteral Colonic Full Covered\nNiti-S Enteral Colonic Both Bare\nNiti-S Enteral Colonic End Bare"
     elif sub_model == "ComVi Enteral Colonic Stent":
         default_p, default_i, default_c, default_o = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nComVi\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-Tech\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
+        add_search_i = "ComVi Enteral Colonic Stent\nComVi Enteral Colonic Both Bare"
     else:
         default_p, default_i, default_c, default_o = "Colonic stricture\nColorectal obstruction\nMalignant colonic stricture\nBenign colonic stricture", "SEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSEMS\nWallFlex", "Stent patency\nObstruction relief\nRemoval"
+        add_search_i = "Niti-S Colonic Stent\nComVi Colonic Stent"
 
 elif due_category == "5. Drainage Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -540,17 +553,22 @@ elif due_category == "5. Drainage Stent":
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     if sub_model == "Niti-S SPAXUS Stent":
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract", "Self-expandable metallic stent\nSEMS\nLumen apposing metal stent\nLAMS\nEUS gallbladder drainage\nEUS choledochoduodenostomy\nTaewoong\nNiti-S\nSPAXUS", "Surgery\nPercutaneous drainage\nSEMS\nLAMS\nAXIOS\nHot AXIOS", "Pancreatic pseudocyst drainage\nWalled off necrosis drainage\nGallbladder drainage\nBiliary tract drainage"
+        add_search_i = "Niti-S SPAXUS Stent\nSPAXUS LAMS\nSPAXUS stent"
     elif sub_model == "Niti-S Hot SPAXUS Stent":
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract", "SEMS\nLumen apposing metal stent\nLAMS\nEUS gallbladder\nEUS choledochoduodenostomy\nElectrocautery delivery system\nHot delivery\nTaewoong\nNiti-S\nHot SPAXUS", "Surgery\nPercutaneous drainage\nSEMS\nLAMS\nAXIOS\nHot AXIOS", "Pancreatic pseudocyst drainage\nWalled off necrosis drainage\nGallbladder drainage\nBiliary tract drainage"
+        add_search_i = "Niti-S Hot SPAXUS Stent\nHot SPAXUS LAMS\nHot SPAXUS stent"
     elif sub_model == "Niti-S Nagi Stent":
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst", "SEMS\nLumen apposing metal stent\nLAMS\nBiflanged metal stent\nBFMS\nTaewoong\nNiti-S\nNagi", "Surgery\nPercutaneous drainage\nSEMS\nLAMS\nBiflanged metal stent\nBFMS\nAXIOS\nHot AXIOS", "Pancreatic pseudocyst drainage"
+        add_search_i = "Niti-S Nagi Stent\nNagi LAMS\nNagi stent"
     else:
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder", "SEMS\nLAMS\nTaewoong\nNiti-S\nComVi", "Surgery\nPercutaneous drainage\nLAMS\nAXIOS", "Drainage"
+        add_search_i = "SPAXUS stent\nNagi stent"
 
 else:
     include_criteria = "Include All Relevant Clinical Papers"
     exclude_criteria = "Exclude Non-Clinical/Irrelevant Papers"
     default_p, default_i, default_c, default_o = "Obstructive Jaundice\nBiliary Stricture", "Biliary Stent\nSEMS", "Surgery\nPlastic stent", "Technical success\nClinical success"
+    add_search_i = "Taewoong Stent"
 
 # --------------------------------------------------
 # API 기능 및 파싱 함수들
@@ -1003,28 +1021,65 @@ elif selected_mode == "PubMed PICO 자동 검색":
     st.subheader(f"PubMed PICO 다중 키워드 입력")
     st.caption("선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다.")
 
+    # 🚀 1. 대표 자주 쓰는 조합 퀵 세팅 버튼 (원클릭)
+    st.markdown("##### ⚡ 자주 쓰는 조합 퀵 세팅")
+    
+    # 세션 스테이트 초기화
+    if "pico_preset" not in st.session_state:
+        st.session_state["pico_preset"] = "P + I"
+
+    col_q1, col_q2, col_q3, col_q4, col_q5 = st.columns(5)
+    with col_q1:
+        if st.button("P + I (기본 권장)", use_container_width=True):
+            st.session_state["pico_preset"] = "P + I"
+    with col_q2:
+        if st.button("P + O (유효성/안전성)", use_container_width=True):
+            st.session_state["pico_preset"] = "P + O"
+    with col_q3:
+        if st.button("P + C + O (대조군 정밀)", use_container_width=True):
+            st.session_state["pico_preset"] = "P + C + O"
+    with col_q4:
+        if st.button("I 단독 (Additional Search)", use_container_width=True):
+            st.session_state["pico_preset"] = "I 단독"
+    with col_q5:
+        if st.button("직접 조합 (Custom)", use_container_width=True):
+            st.session_state["pico_preset"] = "Custom"
+
+    current_preset = st.session_state["pico_preset"]
+
+    # 프리셋 선택에 따라 기본 체크 상태 동적 지정
+    default_chk_p = current_preset in ["P + I", "P + O", "P + C + O"]
+    default_chk_i = current_preset in ["P + I", "I 단독"]
+    default_chk_c = current_preset in ["P + C + O"]
+    default_chk_o = current_preset in ["P + O", "P + C + O"]
+
+    # 🚀 'I 단독' 버튼 선택 시 세부 제품 모델 라인업 키워드로 I 입력창 덮어씌움
+    active_i_value = add_search_i if current_preset == "I 단독" else default_i
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
         p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=140)
-        i_val = st.text_area("I (Intervention)", value=default_i, height=140)
+        i_val = st.text_area("I (Intervention)", value=active_i_value, height=140)
     with col_pico2:
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
-    # 🚀 [개선] 4대 자유 조합 체크박스 수평 배치
+    # 🚀 2. 개별 PICO 조합 체크박스 (자유로운 커스텀 세부 조절)
     st.markdown("---")
     st.subheader("PICO 검색 조합 선택")
-    st.caption("검색어 결합에 사용할 P, I, C, O 항목을 체크하세요. (체크해제 시 해당 키워드는 검색에서 제외됩니다)")
+    st.caption(f"현재 선택된 세팅 방식: **[{current_preset}]** (아래 체크박스로 조합을 자유롭게 추가/제거할 수 있습니다)")
 
     col_ck1, col_ck2, col_ck3, col_ck4 = st.columns(4)
     with col_ck1:
-        use_p = st.checkbox("P (Patient/Disease) 포함", value=True)
+        use_p = st.checkbox("P (Patient/Disease) 포함", value=default_chk_p)
     with col_ck2:
-        use_i = st.checkbox("I (Intervention) 포함", value=True)
+        use_i = st.checkbox("I (Intervention) 포함", value=default_chk_i)
     with col_ck3:
-        use_c = st.checkbox("C (Comparison) 포함", value=False)
+        use_c = st.checkbox("C (Comparison) 포함", value=default_chk_c)
     with col_ck4:
-        use_o = st.checkbox("O (Outcome) 포함", value=False)
+        use_o = st.checkbox("O (Outcome) 포함", value=default_chk_o)
 
     st.markdown("---")
     st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
@@ -1183,7 +1238,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
