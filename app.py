@@ -1095,9 +1095,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
         if st.button("P + C + O (대조군 정밀)", use_container_width=True):
             st.session_state["pico_preset"] = "P + C + O"
     with col_q4:
-        if st.button("I 단독 모드", use_container_width=True):
-            st.session_state["pico_preset"] = "I 단독"
-    with col_q5:
         if st.button("직접 조합 (Custom)", use_container_width=True):
             st.session_state["pico_preset"] = "Custom"
 
