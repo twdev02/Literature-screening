@@ -1125,21 +1125,29 @@ elif selected_mode == "PubMed PICO 자동 검색":
     with col_ck5:
         use_add_i = st.checkbox("Additional Search I", value=default_chk_add)
 
-    # 🚀 [방법 2 적용] 드롭다운에서 선택한 정밀 쿼리가 수정 가능한 입력창에 세팅됨
+    # 🚀 [드롭다운 변경 시 텍스트 상자 실시간 동기화 콜백 함수]
+    def sync_query_input():
+        st.session_state["custom_direct_query_input"] = st.session_state["sb_add_query_preset"]
+
     selected_target_direct_query = None
     if use_add_i:
         st.markdown("<br>", unsafe_allow_html=True)
         st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 쿼리를 선택하거나 직접 수정하여 검색할 수 있습니다.")
         
+        # 기본 세션 값 초기 세팅
+        if "custom_direct_query_input" not in st.session_state:
+            st.session_state["custom_direct_query_input"] = add_search_queries[0]
+
         selected_q_preset = st.selectbox(
             "개별 Additional Search 정밀 쿼리 프리셋 선택:",
             options=add_search_queries,
-            index=0
+            index=0,
+            key="sb_add_query_preset",
+            on_change=sync_query_input  # 👈 드롭다운 변경 시 텍스트 상자 즉시 갱신!
         )
-        # 🚀 선택된 프리셋을 기반으로 사용자가 글자를 자유롭게 추가/삭제 가능한 텍스트 입력창 제공
+        
         selected_target_direct_query = st.text_input(
             "실행될 쿼리문 (필요 시 직접 수정 가능):",
-            value=selected_q_preset,
             key="custom_direct_query_input"
         )
 
