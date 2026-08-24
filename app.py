@@ -192,6 +192,27 @@ def render_result_dashboard(df):
     )
 
 # --------------------------------------------------
+# 🖼️ 품목/모델별 스텐트 제품 이미지 파일 매핑 함수
+# --------------------------------------------------
+def get_product_image_filename(sub_model_name):
+    image_map = {
+        "Niti-S Biliary Uncovered Stent": "biliary_niti_bare.png",
+        "Niti-S Biliary Covered Stent": "biliary_niti_covered.png",
+        "ComVi Biliary Stent": "biliary_comvi_full.png",
+        "Niti-S Esophageal Covered Stent": "esophageal_niti_covered.png",
+        "Niti-S Pyloric/Duodenal Uncovered Stent": "pyloric_niti_bare.png",
+        "Niti-S Pyloric/Duodenal Covered Stent": "pyloric_niti_covered.png",
+        "ComVi Pyloric/Duodenal Stent": "pyloric_comvi.png",
+        "Niti-S Enteral Colonic Uncovered Stent": "colonic_niti_bare.png",
+        "Niti-S Enteral Colonic Covered Stent": "colonic_niti_covered.png",
+        "ComVi Enteral Colonic Stent": "colonic_comvi.png",
+        "Niti-S SPAXUS Stent": "drainage_spaxus.png",
+        "Niti-S Hot SPAXUS Stent": "drainage_hot_spaxus.png",
+        "Niti-S Nagi Stent": "drainage_nagi.png",
+    }
+    return image_map.get(sub_model_name, None)
+
+# --------------------------------------------------
 # ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
 with st.sidebar:
@@ -232,7 +253,6 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
-    # 💡 [핵심 해결]: selectbox로 세션 루프 및 초기 렌더링 미출력 문제 완벽 해결
     selected_cat_str = st.selectbox(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
@@ -606,7 +626,7 @@ else:
     add_search_queries = ['Taewoong AND Stent']
 
 # --------------------------------------------------
-# ✨ 2단계 세그먼티드 컨트롤 메뉴
+# ✨ 2단계 세그먼티드 컨트롤 및 상단 선택 정보 영역 (스텐트 이미지 포함)
 # --------------------------------------------------
 st.markdown(
     f"""
@@ -617,6 +637,13 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+
+# 💡 스텐트 세부 모델별 이미지 파일 출력 복원 (파일 유무 체크 포함)
+product_img_name = get_product_image_filename(sub_model)
+if product_img_name:
+    img_path = os.path.join("images", product_img_name)
+    if os.path.exists(img_path):
+        st.image(img_path, caption=f"Product Image: {sub_model}", width=320)
 
 target_engine = st.segmented_control(
     "", options=["PubMed Engine", "GIE Journal Engine", "ClinicalTrials Engine"], default="PubMed Engine", key="engine_mode_seg",
