@@ -436,7 +436,7 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑 정밀 추가)
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑)
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -1109,12 +1109,17 @@ elif selected_mode == "PubMed PICO 자동 검색":
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
-    # 🚀 'I 단독 (Additional Search)' 선택 시 정밀 AND 매핑 세트 안내
+    # 🚀 'I 단독 (Additional Search)' 선택 시: 쿼리 개별 선택 드롭다운 UI 제공
+    selected_direct_q = None
     if current_preset == "I 단독":
-        st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 조합식({len(add_search_queries)}개)이 자동으로 적용됩니다.")
-        with st.expander("적용되는 개별 제품 1:1 정밀 AND 쿼리 세트 확인", expanded=True):
-            for q_idx, q_str in enumerate(add_search_queries, 1):
-                st.code(f"쿼리 #{q_idx}: {q_str}", language="sql")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(f"##### 🎯 [{sub_model}] LSR Additional Search 개별 규격 선택")
+        selected_direct_q = st.selectbox(
+            "검색 및 AI 스크리닝을 실행할 단일 규격 정밀 쿼리를 선택하세요:",
+            options=add_search_queries,
+            index=0
+        )
+        st.info(f"💡 현재 선택된 쿼리: `{selected_direct_q}` (이 쿼리 1건에 대해서만 독립 스크리닝됩니다)")
 
     # 🚀 2. 개별 PICO 조합 체크박스 (자유로운 커스텀 세부 조절)
     st.markdown("---")
@@ -1150,24 +1155,14 @@ elif selected_mode == "PubMed PICO 자동 검색":
         found_pmids = []
         used_query = ""
 
-        # 🚀 [로직 분기] 'I 단독 (Additional Search)' 선택 시 제품별 정밀 쿼리셋 순회 실행
-        if current_preset == "I 단독":
+        # 🚀 [로직 분기] 'I 단독' 모드에서는 선택된 '단 1개의 정밀 쿼리'만 독립 실행
+        if current_preset == "I 단독" and selected_direct_q:
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
-            with st.spinner(f"PubMed에서 [{date_range_label}] 기간의 LSR Additional 정밀 조합(총 {len(add_search_queries)}개 쿼리) 실행 중..."):
-                all_found = []
-                query_logs = []
-                for single_q in add_search_queries:
-                    p_ids, q_used = search_pubmed_pmids_pico(
-                        start_year=start_year, start_month=start_month, end_year=end_year, end_month=end_month,
-                        fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key, direct_query=single_q
-                    )
-                    all_found.extend(p_ids)
-                    query_logs.append(q_used)
-                
-                # 중복 PMID 제거 (순서 보장)
-                found_pmids = list(dict.fromkeys(all_found))
-                used_query = "\n\n".join(query_logs)
-
+            with st.spinner(f"PubMed에서 [{selected_direct_q}] 단독 규격 조건으로 정밀 검색 중..."):
+                found_pmids, used_query = search_pubmed_pmids_pico(
+                    start_year=start_year, start_month=start_month, end_year=end_year, end_month=end_month,
+                    fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key, direct_query=selected_direct_q
+                )
         else:
             # 일반 PICO 조합 검색 실행
             if not use_p and not use_i and not use_c and not use_o:
@@ -1310,7 +1305,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1428,7 +1423,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
@@ -1624,4 +1619,4 @@ elif selected_mode == "ClinicalTrials 자동 검색":
             else:
                 st.warning("아래 목록은 Summary 데이터 부족으로 수동 검토가 필요한 임상시험들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="clinicaltrials_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="clinicaltrials_manual_review_needed.csv", mime="text/csv", use_container_width=True)
