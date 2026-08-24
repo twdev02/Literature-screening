@@ -231,14 +231,11 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
+    # 💡 [수정 구역 1]: index=None으로 설정하여 초기 선택 해제 및 radio_category 세션 상태 바인딩 안정화
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
-        index=(
-            category_options.index(st.session_state["radio_category"])
-            if st.session_state.get("radio_category") in category_options
-            else None
-        ),
+        index=None,
         key="radio_category",
         on_change=clear_screening_results,
     )
@@ -246,65 +243,67 @@ with st.sidebar:
     current_engine = st.session_state.get("engine_mode_seg", "PubMed Engine")
     sub_model = None
 
-    if current_engine == "ClinicalTrials Engine":
-        sub_model = "통합 품목 검색"
-    else:
-        if due_category == "1. Biliary Stent":
-            sub_model = st.selectbox(
-                "세부 모델/유형을 선택하세요",
-                options=[
-                    "Niti-S Biliary Uncovered Stent",
-                    "Niti-S Biliary Covered Stent",
-                    "ComVi Biliary Stent",
-                ],
-                index=0,
-                key="sb_biliary",
-                on_change=clear_screening_results,
-            )
-        elif due_category == "2. Esophageal Stent":
-            sub_model = st.selectbox(
-                "세부 모델/유형을 선택하세요",
-                options=["Niti-S Esophageal Covered Stent"],
-                index=0,
-                key="sb_esophageal",
-                on_change=clear_screening_results,
-            )
-        elif due_category == "3. Pyloric/Duodenal Stent":
-            sub_model = st.selectbox(
-                "세부 모델/유형을 선택하세요",
-                options=[
-                    "Niti-S Pyloric/Duodenal Uncovered Stent",
-                    "Niti-S Pyloric/Duodenal Covered Stent",
-                    "ComVi Pyloric/Duodenal Stent",
-                ],
-                index=0,
-                key="sb_pyloric",
-                on_change=clear_screening_results,
-            )
-        elif due_category == "4. Colonic Stent":
-            sub_model = st.selectbox(
-                "세부 모델/유형을 선택하세요",
-                options=[
-                    "Niti-S Enteral Colonic Uncovered Stent",
-                    "Niti-S Enteral Colonic Covered Stent",
-                    "ComVi Enteral Colonic Stent",
-                ],
-                index=0,
-                key="sb_colonic",
-                on_change=clear_screening_results,
-            )
-        elif due_category == "5. Drainage Stent":
-            sub_model = st.selectbox(
-                "세부 모델/유형을 선택하세요",
-                options=[
-                    "Niti-S SPAXUS Stent",
-                    "Niti-S Hot SPAXUS Stent",
-                    "Niti-S Nagi Stent",
-                ],
-                index=0,
-                key="sb_drainage",
-                on_change=clear_screening_results,
-            )
+    # 💡 [수정 구역 2]: 카테고리가 선택되었을 때만 하위 모델 드롭다운을 호출하도록 예외 처리
+    if due_category:
+        if current_engine == "ClinicalTrials Engine":
+            sub_model = "통합 품목 검색"
+        else:
+            if due_category == "1. Biliary Stent":
+                sub_model = st.selectbox(
+                    "세부 모델/유형을 선택하세요",
+                    options=[
+                        "Niti-S Biliary Uncovered Stent",
+                        "Niti-S Biliary Covered Stent",
+                        "ComVi Biliary Stent",
+                    ],
+                    index=0,
+                    key="sb_biliary",
+                    on_change=clear_screening_results,
+                )
+            elif due_category == "2. Esophageal Stent":
+                sub_model = st.selectbox(
+                    "세부 모델/유형을 선택하세요",
+                    options=["Niti-S Esophageal Covered Stent"],
+                    index=0,
+                    key="sb_esophageal",
+                    on_change=clear_screening_results,
+                )
+            elif due_category == "3. Pyloric/Duodenal Stent":
+                sub_model = st.selectbox(
+                    "세부 모델/유형을 선택하세요",
+                    options=[
+                        "Niti-S Pyloric/Duodenal Uncovered Stent",
+                        "Niti-S Pyloric/Duodenal Covered Stent",
+                        "ComVi Pyloric/Duodenal Stent",
+                    ],
+                    index=0,
+                    key="sb_pyloric",
+                    on_change=clear_screening_results,
+                )
+            elif due_category == "4. Colonic Stent":
+                sub_model = st.selectbox(
+                    "세부 모델/유형을 선택하세요",
+                    options=[
+                        "Niti-S Enteral Colonic Uncovered Stent",
+                        "Niti-S Enteral Colonic Covered Stent",
+                        "ComVi Enteral Colonic Stent",
+                    ],
+                    index=0,
+                    key="sb_colonic",
+                    on_change=clear_screening_results,
+                )
+            elif due_category == "5. Drainage Stent":
+                sub_model = st.selectbox(
+                    "세부 모델/유형을 선택하세요",
+                    options=[
+                        "Niti-S SPAXUS Stent",
+                        "Niti-S Hot SPAXUS Stent",
+                        "Niti-S Nagi Stent",
+                    ],
+                    index=0,
+                    key="sb_drainage",
+                    on_change=clear_screening_results,
+                )
 
     st.markdown("---")
     history_cnt = len(st.session_state.get("screened_history", {}))
@@ -1463,7 +1462,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
     with col_ct2:
         intr_val = st.text_input("Intervention/treatment", value=ct_default_intr)
 
-  
+    
     col_f1, col_f2 = st.columns(2)
     with col_f1:
         status_options = {
