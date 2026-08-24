@@ -243,12 +243,11 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
-    # 🚀 [방법 1 적용]: 선택된 엔진 모드 확인 후 동적 UI 제어
     current_engine = st.session_state.get("engine_mode_seg", "PubMed Engine")
     sub_model = None
 
     if current_engine == "ClinicalTrials Engine":
-        st.info("ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.")
+        st.info("💡 ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.")
         sub_model = "통합 품목 검색"
     else:
         if due_category == "1. Biliary Stent":
@@ -635,12 +634,17 @@ def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
     except Exception:
         return None
 
-# 🚀 [추가/수정] ClinicalTrials.gov (NCT) API 수집 함수 (필터 기능 추가)
-def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, max_results=20):
+# 🚀 [추가/수정] ClinicalTrials.gov (NCT) API 전체/개수제한 수집 함수 (페이지네이션 적용)
+def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, fetch_all=False, max_results=20):
     url = "https://clinicaltrials.gov/api/v2/studies"
+    
+    # 1회 요청 시 최대 1000개까지 요청 가능
+    page_size = 1000 if fetch_all else min(max_results, 1000)
+    
     params = {
-        "pageSize": max_results,
-        "format": "json"
+        "pageSize": page_size,
+        "format": "json",
+        "countTotal": "true"
     }
     if condition: params["query.cond"] = condition
     if intervention: params["query.intr"] = intervention
@@ -651,27 +655,54 @@ def search_clinicaltrials(condition, intervention, status_filters=None, type_fil
     if type_filters:
         params["filter.studyType"] = ",".join(type_filters)
     
+    results = []
+    page_token = None
+    first_url = None
+
     try:
-        response = requests.get(url, params=params, timeout=15)
-        if response.status_code != 200: return [], "API 통신 에러"
-        data = response.json()
-        studies = data.get("studies", [])
-        
-        results = []
-        for study in studies:
-            protocol = study.get("protocolSection", {})
-            ident = protocol.get("identificationModule", {})
-            desc = protocol.get("descriptionModule", {})
-            status_mod = protocol.get("statusModule", {})
+        while True:
+            current_params = params.copy()
+            if page_token:
+                current_params["pageToken"] = page_token
             
-            nct_id = ident.get("nctId", "Unknown")
-            title = desc.get("briefTitle", "제목 없음")
-            summary = desc.get("briefSummary", "")
-            status = status_mod.get("overallStatus", "Unknown")
+            response = requests.get(url, params=current_params, timeout=15)
+            if response.status_code != 200: 
+                return [], "API 통신 에러"
             
-            results.append((nct_id, title, summary, status))
+            if first_url is None:
+                first_url = response.url
+                
+            data = response.json()
+            studies = data.get("studies", [])
             
-        return results, response.url
+            for study in studies:
+                protocol = study.get("protocolSection", {})
+                ident = protocol.get("identificationModule", {})
+                desc = protocol.get("descriptionModule", {})
+                status_mod = protocol.get("statusModule", {})
+                
+                nct_id = ident.get("nctId", "Unknown")
+                title = desc.get("briefTitle", "제목 없음")
+                summary = desc.get("briefSummary", "")
+                status = status_mod.get("overallStatus", "Unknown")
+                
+                results.append((nct_id, title, summary, status))
+                
+                # 전체 수집이 아니고 요청한 개수에 도달했으면 중단
+                if not fetch_all and len(results) >= max_results:
+                    break
+            
+            # 전체 수집이 아니거나 요청 개수 달성 시 종료
+            if not fetch_all and len(results) >= max_results:
+                results = results[:max_results]
+                break
+                
+            # 다음 페이지 토큰 확인
+            page_token = data.get("nextPageToken")
+            if not page_token:
+                break
+                
+        return results, first_url
     except Exception as e:
         return [], str(e)
 
@@ -1240,7 +1271,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
     st.subheader("ClinicalTrials.gov (NCT) 품목별 통합 자동 검색")
     st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다. (API Key 불필요)")
 
-    # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑 (대문자 OR 및 구문 큰따옴표 처리)
+    # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑
     if due_category == "1. Biliary Stent":
         ct_default_cond = '("Biliary obstruction" OR "Biliary stricture")'
         ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Biliary stent")'
@@ -1267,7 +1298,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         intr_val = st.text_input("Intervention/treatment (중재시술)", value=ct_default_intr)
 
     st.markdown("##### Focus Your Search (필터 설정)")
-    col_f1, col_f2, col_f3 = st.columns(3)
+    col_f1, col_f2, col_f3, col_f4 = st.columns([1.5, 1.5, 1, 1])
     with col_f1:
         status_options = {
             "Recruiting (모집 중)": "RECRUITING",
@@ -1279,7 +1310,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         selected_statuses = st.multiselect(
             "임상 진행 상태 (Status)", 
             options=list(status_options.keys()), 
-            default=[],  # 👈 미선택 시 전체 검색 (Select All)
+            default=[],
             placeholder="미선택 시 전체 상태(All) 검색"
         )
         api_status_filters = [status_options[k] for k in selected_statuses]
@@ -1292,23 +1323,32 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         selected_types = st.multiselect(
             "연구 유형 (Study Type)", 
             options=list(type_options.keys()),
-            default=[],  # 👈 미선택 시 전체 검색 (Select All)
+            default=[],
             placeholder="미선택 시 전체 유형(All) 검색"
         )
         api_type_filters = [type_options[k] for k in selected_types]
         
     with col_f3:
-        max_limit = st.number_input("가져올 최대 임상시험 수", min_value=1, max_value=1000, value=20)
+        # 🚀 [추가] 전체 수집 토글 버튼
+        fetch_all_ct_toggle = st.checkbox("검색된 전체 임상시험 수집 (개수 제한 없음)", value=False)
+
+    with col_f4:
+        if not fetch_all_ct_toggle:
+            max_limit = st.number_input("가져올 최대 임상시험 수", min_value=1, max_value=2000, value=20)
+        else:
+            max_limit = 0
+            st.info("조건에 부합하는 전체 임상시험을 페이지네이션으로 수집합니다.")
 
     if st.button("ClinicalTrials 검색 및 AI 스크리닝 실행"):
         if not api_key: st.error("Gemini API Key가 설정되지 않았습니다!")
         elif not cond_val.strip() and not intr_val.strip(): st.error("질환명이나 중재시술 중 하나는 반드시 입력해야 합니다!")
         else:
-            with st.spinner("ClinicalTrials.gov 공식 API에서 조건에 맞는 데이터를 필터링 중..."):
+            with st.spinner("ClinicalTrials.gov 공식 API에서 조건에 맞는 데이터를 수집 중..."):
                 studies, used_query = search_clinicaltrials(
                     cond_val, intr_val, 
                     status_filters=api_status_filters, 
                     type_filters=api_type_filters, 
+                    fetch_all=fetch_all_ct_toggle,
                     max_results=max_limit
                 )
 
