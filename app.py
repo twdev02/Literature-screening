@@ -1436,7 +1436,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     selected_target_direct_query = None
     if use_add_i:
         st.markdown("<br>", unsafe_allow_html=True)
-        st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 쿼리를 선택하거나 직접 수정하여 검색할 수 있습니다.")
         
         # 기본 세션 값 초기 세팅
         if "custom_direct_query_input" not in st.session_state:
