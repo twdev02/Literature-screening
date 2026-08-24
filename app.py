@@ -1298,7 +1298,9 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         intr_val = st.text_input("Intervention/treatment (중재시술)", value=ct_default_intr)
 
     st.markdown("##### Focus Your Search (필터 설정)")
-    col_f1, col_f2, col_f3, col_f4 = st.columns([1.5, 1.5, 1, 1])
+    
+    # [1행] 상태 및 연구 유형 드롭박스 (2열 배치)
+    col_f1, col_f2 = st.columns(2)
     with col_f1:
         status_options = {
             "Recruiting (모집 중)": "RECRUITING",
@@ -1327,12 +1329,13 @@ elif selected_mode == "ClinicalTrials 자동 검색":
             placeholder="미선택 시 전체 유형(All) 검색"
         )
         api_type_filters = [type_options[k] for k in selected_types]
-        
-    with col_f3:
-        # 🚀 [추가] 전체 수집 토글 버튼
-        fetch_all_ct_toggle = st.checkbox("검색된 전체 임상시험 수집 (개수 제한 없음)", value=False)
 
-    with col_f4:
+    # [2행] 수집 옵션 및 개수 설정 (아래쪽에 깔끔하게 정렬)
+    col_opt1, col_opt2 = st.columns([1.2, 1])
+    with col_opt1:
+        st.markdown("<div style='padding-top: 25px;'></div>", unsafe_allow_html=True) # 수평 맞춤용 여백
+        fetch_all_ct_toggle = st.checkbox("검색된 전체 임상시험 수집 (개수 제한 없음)", value=False)
+    with col_opt2:
         if not fetch_all_ct_toggle:
             max_limit = st.number_input("가져올 최대 임상시험 수", min_value=1, max_value=2000, value=20)
         else:
