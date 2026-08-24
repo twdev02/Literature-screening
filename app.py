@@ -136,8 +136,8 @@ if "show_reset_msg" not in st.session_state:
     st.session_state["show_reset_msg"] = False
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
-if "selected_category" not in st.session_state:
-    st.session_state["selected_category"] = "선택 안 함"
+if "radio_category" not in st.session_state:
+    st.session_state["radio_category"] = None
 
 
 def clear_screening_results():
@@ -149,7 +149,7 @@ def clear_screening_results():
 
 def reset_to_home():
     clear_screening_results()
-    st.session_state["selected_category"] = "선택 안 함"
+    st.session_state["radio_category"] = None
 
 def clear_history():
     st.session_state["screened_history"] = {}
@@ -192,33 +192,12 @@ def render_result_dashboard(df):
     )
 
 # --------------------------------------------------
-# 🖼️ 품목/모델별 스텐트 제품 이미지 파일 매핑 함수
-# --------------------------------------------------
-def get_product_image_filename(sub_model_name):
-    image_map = {
-        "Niti-S Biliary Uncovered Stent": "biliary_niti_bare.png",
-        "Niti-S Biliary Covered Stent": "biliary_niti_covered.png",
-        "ComVi Biliary Stent": "biliary_comvi_full.png",
-        "Niti-S Esophageal Covered Stent": "esophageal_niti_covered.png",
-        "Niti-S Pyloric/Duodenal Uncovered Stent": "pyloric_niti_bare.png",
-        "Niti-S Pyloric/Duodenal Covered Stent": "pyloric_niti_covered.png",
-        "ComVi Pyloric/Duodenal Stent": "pyloric_comvi.png",
-        "Niti-S Enteral Colonic Uncovered Stent": "colonic_niti_bare.png",
-        "Niti-S Enteral Colonic Covered Stent": "colonic_niti_covered.png",
-        "ComVi Enteral Colonic Stent": "colonic_comvi.png",
-        "Niti-S SPAXUS Stent": "drainage_spaxus.png",
-        "Niti-S Hot SPAXUS Stent": "drainage_hot_spaxus.png",
-        "Niti-S Nagi Stent": "drainage_nagi.png",
-    }
-    return image_map.get(sub_model_name, None)
-
-# --------------------------------------------------
 # ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
 with st.sidebar:
     st.header("시스템 설정")
 
-    # 1. Gemini API 키 불러오기
+    # 1. Gemini API 키 불러오기 (클라우드 Secrets 우선)
     try:
         default_api_key = st.secrets["GEMINI_API_KEY"]
     except Exception:
@@ -229,7 +208,7 @@ with st.sidebar:
     )
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
-    # 2. NCBI API 키 불러오기
+    # 2. NCBI API 키 불러오기 (화면 입력창 숨김, 백그라운드에서만 로드)
     try:
         ncbi_api_key = st.secrets["NCBI_API_KEY"]
     except Exception:
@@ -245,7 +224,6 @@ with st.sidebar:
     st.subheader("품목 선택")
 
     category_options = [
-        "선택 안 함",
         "1. Biliary Stent",
         "2. Esophageal Stent",
         "3. Pyloric/Duodenal Stent",
@@ -253,78 +231,80 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
-    selected_cat_str = st.selectbox(
+    due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
-        key="selected_category",
+        index=(
+            category_options.index(st.session_state["radio_category"])
+            if st.session_state.get("radio_category") in category_options
+            else None
+        ),
+        key="radio_category",
         on_change=clear_screening_results,
     )
-
-    due_category = None if selected_cat_str == "선택 안 함" else selected_cat_str
 
     current_engine = st.session_state.get("engine_mode_seg", "PubMed Engine")
     sub_model = None
 
-    if due_category:
-        if current_engine == "ClinicalTrials Engine":
-            sub_model = "통합 품목 검색"
-        else:
-            if due_category == "1. Biliary Stent":
-                sub_model = st.selectbox(
-                    "세부 모델/유형을 선택하세요",
-                    options=[
-                        "Niti-S Biliary Uncovered Stent",
-                        "Niti-S Biliary Covered Stent",
-                        "ComVi Biliary Stent",
-                    ],
-                    index=0,
-                    key="sb_biliary",
-                    on_change=clear_screening_results,
-                )
-            elif due_category == "2. Esophageal Stent":
-                sub_model = st.selectbox(
-                    "세부 모델/유형을 선택하세요",
-                    options=["Niti-S Esophageal Covered Stent"],
-                    index=0,
-                    key="sb_esophageal",
-                    on_change=clear_screening_results,
-                )
-            elif due_category == "3. Pyloric/Duodenal Stent":
-                sub_model = st.selectbox(
-                    "세부 모델/유형을 선택하세요",
-                    options=[
-                        "Niti-S Pyloric/Duodenal Uncovered Stent",
-                        "Niti-S Pyloric/Duodenal Covered Stent",
-                        "ComVi Pyloric/Duodenal Stent",
-                    ],
-                    index=0,
-                    key="sb_pyloric",
-                    on_change=clear_screening_results,
-                )
-            elif due_category == "4. Colonic Stent":
-                sub_model = st.selectbox(
-                    "세부 모델/유형을 선택하세요",
-                    options=[
-                        "Niti-S Enteral Colonic Uncovered Stent",
-                        "Niti-S Enteral Colonic Covered Stent",
-                        "ComVi Enteral Colonic Stent",
-                    ],
-                    index=0,
-                    key="sb_colonic",
-                    on_change=clear_screening_results,
-                )
-            elif due_category == "5. Drainage Stent":
-                sub_model = st.selectbox(
-                    "세부 모델/유형을 선택하세요",
-                    options=[
-                        "Niti-S SPAXUS Stent",
-                        "Niti-S Hot SPAXUS Stent",
-                        "Niti-S Nagi Stent",
-                    ],
-                    index=0,
-                    key="sb_drainage",
-                    on_change=clear_screening_results,
-                )
+    if current_engine == "ClinicalTrials Engine":
+        sub_model = "통합 품목 검색"
+    else:
+        if due_category == "1. Biliary Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S Biliary Uncovered Stent",
+                    "Niti-S Biliary Covered Stent",
+                    "ComVi Biliary Stent",
+                ],
+                index=0,
+                key="sb_biliary",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "2. Esophageal Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=["Niti-S Esophageal Covered Stent"],
+                index=0,
+                key="sb_esophageal",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "3. Pyloric/Duodenal Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S Pyloric/Duodenal Uncovered Stent",
+                    "Niti-S Pyloric/Duodenal Covered Stent",
+                    "ComVi Pyloric/Duodenal Stent",
+                ],
+                index=0,
+                key="sb_pyloric",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "4. Colonic Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S Enteral Colonic Uncovered Stent",
+                    "Niti-S Enteral Colonic Covered Stent",
+                    "ComVi Enteral Colonic Stent",
+                ],
+                index=0,
+                key="sb_colonic",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "5. Drainage Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S SPAXUS Stent",
+                    "Niti-S Hot SPAXUS Stent",
+                    "Niti-S Nagi Stent",
+                ],
+                index=0,
+                key="sb_drainage",
+                on_change=clear_screening_results,
+            )
 
     st.markdown("---")
     history_cnt = len(st.session_state.get("screened_history", {}))
@@ -398,7 +378,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 1. 카테고리가 선택되지 않았을 때 나타나는 홈 대시보드
+# 🏠 1. 카테고리가 아예 선택되지 않았을 때 홈 대시보드
 # --------------------------------------------------
 if not due_category:
     st.markdown(
@@ -423,6 +403,18 @@ if not due_category:
                 """,
                 unsafe_allow_html=True,
             )
+            # 💡 [카탈로그 이미지/PDF 첨부 기능 기능 정밀 추가]
+            catalog_file = st.file_uploader(
+                "제품 카탈로그 이미지 또는 PDF 추가",
+                type=["png", "jpg", "jpeg", "pdf"],
+                key="catalog_uploader",
+            )
+            if catalog_file is not None:
+                if catalog_file.type in ["image/png", "image/jpeg", "image/jpg"]:
+                    st.image(catalog_file, use_container_width=True, caption="제품 카탈로그 이미지")
+                elif catalog_file.type == "application/pdf":
+                    st.success("PDF 카탈로그가 정상적으로 업로드되었습니다.")
+
     with col_ov2:
         with st.container(border=True):
             st.markdown(
@@ -448,7 +440,7 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑 정밀 추가)
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -626,7 +618,7 @@ else:
     add_search_queries = ['Taewoong AND Stent']
 
 # --------------------------------------------------
-# ✨ 2단계 세그먼티드 컨트롤 및 상단 선택 정보 영역 (스텐트 이미지 포함)
+# ✨ 2단계 세그먼티드 컨트롤 메뉴
 # --------------------------------------------------
 st.markdown(
     f"""
@@ -637,13 +629,6 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-
-# 💡 스텐트 세부 모델별 이미지 파일 출력 복원 (파일 유무 체크 포함)
-product_img_name = get_product_image_filename(sub_model)
-if product_img_name:
-    img_path = os.path.join("images", product_img_name)
-    if os.path.exists(img_path):
-        st.image(img_path, caption=f"Product Image: {sub_model}", width=320)
 
 target_engine = st.segmented_control(
     "", options=["PubMed Engine", "GIE Journal Engine", "ClinicalTrials Engine"], default="PubMed Engine", key="engine_mode_seg",
@@ -1094,6 +1079,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
+    # 🚀 통합 세팅 구역: PICO 검색 조합 선택 + 퀵 버튼
     st.markdown("---")
     st.subheader("PICO 검색 조합 선택")
     st.caption("원하시는 퀵 세팅 버튼을 누르거나, 아래 체크박스를 통해 검색에 포함할 항목을 직접 조정하세요.")
@@ -1101,6 +1087,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
     if "pico_preset" not in st.session_state:
         st.session_state["pico_preset"] = "P + I"
 
+    # ⚡ 자주 쓰는 조합 퀵 세팅 버튼 (한눈에 보이도록 통합)
     col_q1, col_q2, col_q3, col_q4, col_q5 = st.columns(5)
     with col_q1:
         if st.button("P + I", use_container_width=True):
@@ -1117,6 +1104,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     current_preset = st.session_state["pico_preset"]
 
+    # 프리셋 선택에 따른 기본 체크 상태 동적 지정
     default_chk_p = current_preset in ["P + I", "P + O", "P + C + O"]
     default_chk_i = current_preset in ["P + I"]
     default_chk_c = current_preset in ["P + C + O"]
@@ -1125,6 +1113,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # 🚀 5개의 독립 체크박스 (P, I, C, O, Additional Search I)
     col_ck1, col_ck2, col_ck3, col_ck4, col_ck5 = st.columns(5)
     with col_ck1:
         use_p = st.checkbox("P (Patient / Population / Problem)", value=default_chk_p)
@@ -1137,6 +1126,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
     with col_ck5:
         use_add_i = st.checkbox("Additional Search I", value=default_chk_add)
 
+    # 🚀 [드롭다운 변경 시 텍스트 상자 실시간 동기화 콜백 함수]
     def sync_query_input():
         st.session_state["custom_direct_query_input"] = st.session_state["sb_add_query_preset"]
 
@@ -1145,6 +1135,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         st.markdown("<br>", unsafe_allow_html=True)
         st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 쿼리를 선택하거나 직접 수정하여 검색할 수 있습니다.")
         
+        # 기본 세션 값 초기 세팅
         if "custom_direct_query_input" not in st.session_state:
             st.session_state["custom_direct_query_input"] = add_search_queries[0]
 
@@ -1153,7 +1144,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             options=add_search_queries,
             index=0,
             key="sb_add_query_preset",
-            on_change=sync_query_input
+            on_change=sync_query_input  # 👈 드롭다운 변경 시 텍스트 상자 즉시 갱신!
         )
         
         selected_target_direct_query = st.text_input(
@@ -1180,6 +1171,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         found_pmids = []
         used_query = ""
 
+        # 🚀 Additional Search I 가 체크된 경우 사용자가 직접 편집한 입력창 쿼리문 그대로 단독 실행
         if use_add_i and selected_target_direct_query:
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
             with st.spinner(f"PubMed에서 [{selected_target_direct_query}] 단독 쿼리 실행 중..."):
@@ -1189,6 +1181,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 )
 
         else:
+            # 일반 PICO 조합 검색 실행
             if not use_p and not use_i and not use_c and not use_o:
                 use_p, use_i = True, True
                 st.warning("선택된 요소가 없어 기본값 (P + I) 조합으로 자동 지정되었습니다.")
