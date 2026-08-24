@@ -1443,7 +1443,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 # --------------------------------------------------
 elif selected_mode == "ClinicalTrials 자동 검색":
     st.subheader("ClinicalTrials.gov (NCT) 품목별 통합 자동 검색")
-    st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다. (API Key 불필요)")
+    st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다.")
 
     # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑
     if due_category == "1. Biliary Stent":
@@ -1467,12 +1467,11 @@ elif selected_mode == "ClinicalTrials 자동 검색":
 
     col_ct1, col_ct2 = st.columns(2)
     with col_ct1:
-        cond_val = st.text_input("Condition/disease (질환명)", value=ct_default_cond)
+        cond_val = st.text_input("Condition/disease", value=ct_default_cond)
     with col_ct2:
-        intr_val = st.text_input("Intervention/treatment (중재시술)", value=ct_default_intr)
+        intr_val = st.text_input("Intervention/treatment", value=ct_default_intr)
 
-    st.markdown("##### Focus Your Search (필터 설정)")
-    
+  
     col_f1, col_f2 = st.columns(2)
     with col_f1:
         status_options = {
