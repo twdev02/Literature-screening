@@ -1434,7 +1434,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
 # --------------------------------------------------
 elif selected_mode == "ClinicalTrials 자동 검색":
-    st.subheader("ClinicalTrials.gov (NCT) 품목별 통합 자동 검색")
+    st.subheader("Clinical Trials Registry (NCT) 검색")
     st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다.")
 
     # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑
