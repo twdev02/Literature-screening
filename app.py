@@ -243,63 +243,70 @@ with st.sidebar:
         on_change=clear_screening_results,
     )
 
+    # 🚀 [방법 1 적용]: 선택된 엔진 모드 확인 후 동적 UI 제어
+    current_engine = st.session_state.get("engine_mode_seg", "PubMed Engine")
     sub_model = None
-    if due_category == "1. Biliary Stent":
-        sub_model = st.selectbox(
-            "세부 모델/유형을 선택하세요",
-            options=[
-                "Niti-S Biliary Uncovered Stent",
-                "Niti-S Biliary Covered Stent",
-                "ComVi Biliary Stent",
-            ],
-            index=0,
-            key="sb_biliary",
-            on_change=clear_screening_results,
-        )
-    elif due_category == "2. Esophageal Stent":
-        sub_model = st.selectbox(
-            "세부 모델/유형을 선택하세요",
-            options=["Niti-S Esophageal Covered Stent"],
-            index=0,
-            key="sb_esophageal",
-            on_change=clear_screening_results,
-        )
-    elif due_category == "3. Pyloric/Duodenal Stent":
-        sub_model = st.selectbox(
-            "세부 모델/유형을 선택하세요",
-            options=[
-                "Niti-S Pyloric/Duodenal Uncovered Stent",
-                "Niti-S Pyloric/Duodenal Covered Stent",
-                "ComVi Pyloric/Duodenal Stent",
-            ],
-            index=0,
-            key="sb_pyloric",
-            on_change=clear_screening_results,
-        )
-    elif due_category == "4. Colonic Stent":
-        sub_model = st.selectbox(
-            "세부 모델/유형을 선택하세요",
-            options=[
-                "Niti-S Enteral Colonic Uncovered Stent",
-                "Niti-S Enteral Colonic Covered Stent",
-                "ComVi Enteral Colonic Stent",
-            ],
-            index=0,
-            key="sb_colonic",
-            on_change=clear_screening_results,
-        )
-    elif due_category == "5. Drainage Stent":
-        sub_model = st.selectbox(
-            "세부 모델/유형을 선택하세요",
-            options=[
-                "Niti-S SPAXUS Stent",
-                "Niti-S Hot SPAXUS Stent",
-                "Niti-S Nagi Stent",
-            ],
-            index=0,
-            key="sb_drainage",
-            on_change=clear_screening_results,
-        )
+
+    if current_engine == "ClinicalTrials Engine":
+        st.info("💡 ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.")
+        sub_model = "통합 품목 검색"
+    else:
+        if due_category == "1. Biliary Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S Biliary Uncovered Stent",
+                    "Niti-S Biliary Covered Stent",
+                    "ComVi Biliary Stent",
+                ],
+                index=0,
+                key="sb_biliary",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "2. Esophageal Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=["Niti-S Esophageal Covered Stent"],
+                index=0,
+                key="sb_esophageal",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "3. Pyloric/Duodenal Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S Pyloric/Duodenal Uncovered Stent",
+                    "Niti-S Pyloric/Duodenal Covered Stent",
+                    "ComVi Pyloric/Duodenal Stent",
+                ],
+                index=0,
+                key="sb_pyloric",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "4. Colonic Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S Enteral Colonic Uncovered Stent",
+                    "Niti-S Enteral Colonic Covered Stent",
+                    "ComVi Enteral Colonic Stent",
+                ],
+                index=0,
+                key="sb_colonic",
+                on_change=clear_screening_results,
+            )
+        elif due_category == "5. Drainage Stent":
+            sub_model = st.selectbox(
+                "세부 모델/유형을 선택하세요",
+                options=[
+                    "Niti-S SPAXUS Stent",
+                    "Niti-S Hot SPAXUS Stent",
+                    "Niti-S Nagi Stent",
+                ],
+                index=0,
+                key="sb_drainage",
+                on_change=clear_screening_results,
+            )
 
     st.markdown("---")
     history_cnt = len(st.session_state["screened_history"])
@@ -1224,33 +1231,40 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
 # --------------------------------------------------
 elif selected_mode == "ClinicalTrials 자동 검색":
-    st.subheader("ClinicalTrials.gov (NCT) 자동 검색 및 스크리닝")
-    st.caption("선택하신 품목 및 세부 모델에 맞춰 키워드가 자동으로 세팅되었습니다.")
+    st.subheader("ClinicalTrials.gov (NCT) 품목별 통합 자동 검색")
+    st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다. (API Key 불필요)")
 
-    # 🚀 multi-line default_p/default_i 키워드를 "(A OR B OR C)" 형태의 쿼리로 자동 조합
-    if default_p:
-        p_lines = [f'"{line.strip()}"' if ' ' in line.strip() else line.strip() for line in default_p.split('\n') if line.strip()]
-        ct_default_cond = f"({' OR '.join(p_lines)})" if len(p_lines) > 1 else (p_lines[0] if p_lines else "")
+    # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑 (대문자 OR 및 구문 큰따옴표 처리)
+    if due_category == "1. Biliary Stent":
+        ct_default_cond = '("Biliary obstruction" OR "Biliary stricture" OR "Malignant biliary stricture")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Biliary stent")'
+    elif due_category == "2. Esophageal Stent":
+        ct_default_cond = '("Esophageal stricture" OR "Esophageal obstruction" OR "Tracheoesophageal fistula")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Esophageal stent")'
+    elif due_category == "3. Pyloric/Duodenal Stent":
+        ct_default_cond = '("Gastric outlet obstruction" OR "Pyloric stricture" OR "Duodenal stricture")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Duodenal stent")'
+    elif due_category == "4. Colonic Stent":
+        ct_default_cond = '("Colonic stricture" OR "Colonic obstruction" OR "Colorectal obstruction")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Colonic stent")'
+    elif due_category == "5. Drainage Stent":
+        ct_default_cond = '("Pancreatic pseudocyst" OR "Walled off necrosis" OR "Gallbladder drainage" OR "Biliary tract")'
+        ct_default_intr = '("LAMS" OR "Lumen apposing metal stent" OR "Drainage stent" OR "SPAXUS")'
     else:
-        ct_default_cond = ""
-
-    if default_i:
-        i_lines = [f'"{line.strip()}"' if ' ' in line.strip() else line.strip() for line in default_i.split('\n') if line.strip()]
-        ct_default_intr = f"({' OR '.join(i_lines)})" if len(i_lines) > 1 else (i_lines[0] if i_lines else "")
-    else:
-        ct_default_intr = ""
+        ct_default_cond = '"Biliary stricture"'
+        ct_default_intr = '"Stent"'
 
     col_ct1, col_ct2 = st.columns(2)
     with col_ct1:
-        cond_val = st.text_input("Condition/disease", value=ct_default_cond)
+        cond_val = st.text_input("Condition/disease (질환명)", value=ct_default_cond)
     with col_ct2:
-        intr_val = st.text_input("Intervention/treatment", value=ct_default_intr)
+        intr_val = st.text_input("Intervention/treatment (중재시술)", value=ct_default_intr)
 
     st.markdown("##### Focus Your Search (필터 설정)")
     col_f1, col_f2, col_f3 = st.columns(3)
