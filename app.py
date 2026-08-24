@@ -247,7 +247,14 @@ with st.sidebar:
     sub_model = None
 
     if current_engine == "ClinicalTrials Engine":
-        st.caption("ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.")
+        st.markdown(
+            """
+            <div style="background-color: #f0f7ff; border-left: 4px solid #0284c7; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: #0f172a; line-height: 1.5; word-break: keep-all; margin-bottom: 15px;">
+                ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         sub_model = "통합 품목 검색"
     else:
         if due_category == "1. Biliary Stent":
@@ -308,7 +315,7 @@ with st.sidebar:
             )
 
     st.markdown("---")
-    history_cnt = len(st.session_state["screened_history"])
+    history_cnt = len(st.session_state.get("screened_history", {}))
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
 
     with st.expander("이전 스크리닝 CSV 불러오기"):
@@ -345,6 +352,9 @@ with st.sidebar:
                                 cat = str(row.get("카테고리", "기존 이력"))
                                 mod = str(row.get("세부 모델", "과거 CSV"))
                                 res = str(row.get("AI 판정", "Screened"))
+
+                                if "screened_history" not in st.session_state:
+                                    st.session_state["screened_history"] = {}
 
                                 st.session_state["screened_history"][identifier] = {
                                     "category": cat,
@@ -553,7 +563,7 @@ def parse_pico_input(text):
     formatted = [kw if '"' in kw or "[" in kw else f"({kw})" for kw in keywords]
     return formatted[0] if len(formatted) == 1 else f"({' OR '.join(formatted)})"
 
-def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key=""):
+def search_pubmed_pmids_pico(p_text, i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key=""):
     query_parts = []
     for q in [parse_pico_input(t) for t in [p_text, i_text, c_text, o_text]]:
         if q: query_parts.append(q)
@@ -634,7 +644,7 @@ def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
     except Exception:
         return None
 
-# 🚀 [추가/수정] ClinicalTrials.gov (NCT) API 전체/개수제한 수집 함수 (페이지네이션 적용)
+# 🚀 ClinicalTrials.gov (NCT) API 전체/개수제한 수집 함수 (페이지네이션 적용)
 def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, fetch_all=False, max_results=20):
     url = "https://clinicaltrials.gov/api/v2/studies"
     page_size = 1000 if fetch_all else min(max_results, 1000)
@@ -916,7 +926,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                         eval_sources.append(eval_source)
                     else:
                         identifier = pmid
-                        if identifier in st.session_state["screened_history"]:
+                        if identifier in st.session_state.get("screened_history", {}):
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
                             titles.append(title)
@@ -939,6 +949,9 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                                 else:
                                     raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
                                 conclusions.append(to_unicode_bold(raw_conclusion))
+                                
+                                if "screened_history" not in st.session_state:
+                                    st.session_state["screened_history"] = {}
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category, "sub_model": sub_model, "result": res_label
                                 }
@@ -998,6 +1011,21 @@ elif selected_mode == "PubMed PICO 자동 검색":
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
+    # 🚀 [업데이트] 실무용 4대 PICO 검색 조합 옵션 버튼
+    st.markdown("---")
+    st.subheader("PICO 검색 조합 전략 선택")
+    pico_strategy = st.radio(
+        "문헌 검색에 적용할 PICO 조합을 선택하세요:",
+        options=[
+            "P + I (권장: 핵심 대상 및 중재시술 중심 넓은 검색)",
+            "P + O (특정 질환 내 유효성/안전성 중심 검색)",
+            "P + C + O (대조군 및 성과 포함 정밀 검색)",
+            "I 단독 (중재시술/스텐트 자체 전체 임상데이터 검색)"
+        ],
+        index=0,
+        horizontal=True
+    )
+
     st.markdown("---")
     st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
 
@@ -1017,10 +1045,16 @@ elif selected_mode == "PubMed PICO 자동 검색":
         if not api_key: st.error("API Key가 설정되지 않았습니다!")
         elif not (p_val.strip() or i_val.strip() or c_val.strip() or o_val.strip()): st.error("최소한 하나 이상의 PICO 키워드를 입력해 주세요!")
         else:
+            # 🚀 선택한 조합 전략에 맞는 키워드 할당
+            target_p = p_val if "P" in pico_strategy else ""
+            target_i = i_val if "I" in pico_strategy else ""
+            target_c = c_val if "C" in pico_strategy else ""
+            target_o = o_val if "O" in pico_strategy else ""
+
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
             with st.spinner(f"PubMed에서 [{date_range_label}] 기간의 PICO 조합 조건으로 검색 중..."):
                 found_pmids, used_query = search_pubmed_pmids_pico(
-                    p_text=p_val, i_text=i_val, c_text=c_val, o_text=o_val,
+                    p_text=target_p, i_text=target_i, c_text=target_c, o_text=target_o,
                     start_year=start_year, start_month=start_month, end_year=end_year, end_month=end_month,
                     fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key
                 )
@@ -1079,7 +1113,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                         eval_sources.append(eval_source)
                     else:
                         identifier = pmid
-                        if identifier in st.session_state["screened_history"]:
+                        if identifier in st.session_state.get("screened_history", {}):
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
                             titles.append(title)
@@ -1102,6 +1136,9 @@ elif selected_mode == "PubMed PICO 자동 검색":
                                 else:
                                     raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
                                 conclusions.append(to_unicode_bold(raw_conclusion))
+                                
+                                if "screened_history" not in st.session_state:
+                                    st.session_state["screened_history"] = {}
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category, "sub_model": sub_model, "result": res_label
                                 }
@@ -1192,7 +1229,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         conclusions.append(to_unicode_bold(f"Insufficient information: Abstract text is missing in the GIE RIS file. Manual full-text review is required."))
                         eval_sources.append(eval_source)
                     else:
-                        if identifier in st.session_state["screened_history"]:
+                        if identifier in st.session_state.get("screened_history", {}):
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
                             titles.append(title)
@@ -1215,6 +1252,9 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                                 else:
                                     raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
                                 conclusions.append(to_unicode_bold(raw_conclusion))
+                                
+                                if "screened_history" not in st.session_state:
+                                    st.session_state["screened_history"] = {}
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category, "sub_model": sub_model, "result": res_label
                                 }
@@ -1264,37 +1304,36 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 # --------------------------------------------------
 elif selected_mode == "ClinicalTrials 자동 검색":
     st.subheader("ClinicalTrials.gov (NCT) 품목별 통합 자동 검색")
-    st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다.")
+    st.caption("세부 모델 구분 없이 선택하신 품목 카테고리 전체의 임상시험 데이터를 통합 검색합니다. (API Key 불필요)")
 
     # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑
     if due_category == "1. Biliary Stent":
-        ct_default_cond = '("Biliary obstruction" OR "Biliary stricture")'
-        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Biliary stent")'
+        ct_default_cond = '("Biliary obstruction" OR "Biliary stricture" OR "Malignant biliary stricture")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Biliary stent")'
     elif due_category == "2. Esophageal Stent":
         ct_default_cond = '("Esophageal stricture" OR "Esophageal obstruction" OR "Tracheoesophageal fistula")'
-        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Esophageal stent")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Esophageal stent")'
     elif due_category == "3. Pyloric/Duodenal Stent":
-        ct_default_cond = '("Pyloric stricture" OR "Pyloric obstruction" OR "Duodenal stricture" OR "Duodenal obstruction")'
-        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Pyloric stent" OR "Duodenal stent")'
+        ct_default_cond = '("Gastric outlet obstruction" OR "Pyloric stricture" OR "Duodenal stricture")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Duodenal stent")'
     elif due_category == "4. Colonic Stent":
-        ct_default_cond = '("Colonic stricture" OR "Colonic obstruction")'
-        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Colonic stent")'
+        ct_default_cond = '("Colonic stricture" OR "Colonic obstruction" OR "Colorectal obstruction")'
+        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Colonic stent")'
     elif due_category == "5. Drainage Stent":
-        ct_default_cond = '("Pancreatic pseudocyst" OR "Walled off necrosis" OR "Gallbladder" OR "Biliary tract")'
-        ct_default_intr = '("Lumen apposing metal stent" OR "LAMS" OR "Drainage stent")'
+        ct_default_cond = '("Pancreatic pseudocyst" OR "Walled off necrosis" OR "Gallbladder drainage" OR "Biliary tract")'
+        ct_default_intr = '("LAMS" OR "Lumen apposing metal stent" OR "Drainage stent" OR "SPAXUS")'
     else:
         ct_default_cond = '"Biliary stricture"'
         ct_default_intr = '"Stent"'
 
     col_ct1, col_ct2 = st.columns(2)
     with col_ct1:
-        cond_val = st.text_input("Condition/disease", value=ct_default_cond)
+        cond_val = st.text_input("Condition/disease (질환명)", value=ct_default_cond)
     with col_ct2:
-        intr_val = st.text_input("Intervention/treatment", value=ct_default_intr)
+        intr_val = st.text_input("Intervention/treatment (중재시술)", value=ct_default_intr)
 
     st.markdown("##### Focus Your Search (필터 설정)")
     
-    # 🚀 [1행] 필터 드롭다운 수평 깔끔 정돈
     col_f1, col_f2 = st.columns(2)
     with col_f1:
         status_options = {
@@ -1325,7 +1364,6 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         )
         api_type_filters = [type_options[k] for k in selected_types]
 
-    # 🚀 [2행] 수집 방식 옵션 수평 배치
     col_opt1, col_opt2 = st.columns([1, 1])
     with col_opt1:
         fetch_all_ct_toggle = st.checkbox("검색된 전체 임상시험 수집 (개수 제한 없음)", value=False)
@@ -1334,7 +1372,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
             max_limit = st.number_input("가져올 최대 임상시험 수", min_value=1, max_value=2000, value=20)
         else:
             max_limit = 0
-            st.info("조건에 부합하는 전체 임상시험을 수집합니다.")
+            st.info("조건에 부합하는 전체 임상시험을 페이지네이션으로 수집합니다.")
 
     if st.button("ClinicalTrials 검색 및 AI 스크리닝 실행"):
         if not api_key: st.error("Gemini API Key가 설정되지 않았습니다!")
@@ -1383,7 +1421,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
                         conclusions.append(to_unicode_bold(f"Insufficient information: No brief summary available for {nct_id}."))
                         eval_sources.append(eval_source)
                     else:
-                        if identifier in st.session_state["screened_history"]:
+                        if identifier in st.session_state.get("screened_history", {}):
                             prev_info = st.session_state["screened_history"][identifier]
                             prev_mod = prev_info["sub_model"]
                             titles.append(title)
@@ -1408,6 +1446,9 @@ elif selected_mode == "ClinicalTrials 자동 검색":
                                 else:
                                     raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
                                 conclusions.append(to_unicode_bold(raw_conclusion))
+                                
+                                if "screened_history" not in st.session_state:
+                                    st.session_state["screened_history"] = {}
                                 st.session_state["screened_history"][identifier] = {
                                     "category": due_category, "sub_model": sub_model, "result": res_label
                                 }
