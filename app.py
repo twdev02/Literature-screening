@@ -628,7 +628,7 @@ def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
     except Exception:
         return None
 
-# 🚀 [추가] ClinicalTrials.gov (NCT) API 수집 함수 (필터 기능 추가)
+# 🚀 [추가/수정] ClinicalTrials.gov (NCT) API 수집 함수 (필터 기능 추가)
 def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, max_results=20):
     url = "https://clinicaltrials.gov/api/v2/studies"
     params = {
@@ -1109,7 +1109,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1255,7 +1255,8 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         selected_statuses = st.multiselect(
             "임상 진행 상태 (Status)", 
             options=list(status_options.keys()), 
-            default=["Completed (완료됨)"]
+            default=[],  # 👈 미선택 시 전체 검색 (Select All)
+            placeholder="미선택 시 전체 상태(All) 검색"
         )
         api_status_filters = [status_options[k] for k in selected_statuses]
         
@@ -1267,7 +1268,8 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         selected_types = st.multiselect(
             "연구 유형 (Study Type)", 
             options=list(type_options.keys()),
-            default=["Interventional (중재적 연구)", "Observational (관찰 연구)"]
+            default=[],  # 👈 미선택 시 전체 검색 (Select All)
+            placeholder="미선택 시 전체 유형(All) 검색"
         )
         api_type_filters = [type_options[k] for k in selected_types]
         
