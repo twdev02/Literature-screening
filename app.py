@@ -213,7 +213,7 @@ with st.sidebar:
 
     # 연결 상태 표시
     if api_key:
-        st.success("Gemini API Key 등록 완료.")
+        st.success("Gemini API Key 등록 완료")
     else:
         st.error("Gemini API Key가 필요합니다.")
         
