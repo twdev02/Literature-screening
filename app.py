@@ -231,7 +231,6 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
-    # 💡 [핵심 보정 구역]: radio_category 세션 상태와 index 연동 구조 정밀 수정
     selected_idx = (
         category_options.index(st.session_state["radio_category"])
         if st.session_state.get("radio_category") in category_options
@@ -382,7 +381,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 1. 카테고리가 아예 선택되지 않았을 때 홈 대시보드
+# 🏠 1. 카테고리가 아예 선택되지 않았을 때 홈 대시보드 (위치 조정 구역)
 # --------------------------------------------------
 if not due_category:
     st.markdown(
@@ -608,6 +607,39 @@ else:
     exclude_criteria = "Exclude Non-Clinical/Irrelevant Papers"
     default_p, default_i, default_c, default_o = "Obstructive Jaundice\nBiliary Stricture", "Biliary Stent\nSEMS", "Surgery\nPlastic stent", "Technical success\nClinical success"
     add_search_queries = ['Taewoong AND Stent']
+
+# --------------------------------------------------
+# ✨ 2단계 세그먼티드 컨트롤 메뉴
+# --------------------------------------------------
+st.markdown(
+    f"""
+<div class="selected-category-box">
+    <div class="selected-category-label">SELECTED CATEGORY & MODEL</div>
+    <div class="selected-category-title">{due_category} - {sub_model}</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+target_engine = st.segmented_control(
+    "", options=["PubMed Engine", "GIE Journal Engine", "ClinicalTrials Engine"], default="PubMed Engine", key="engine_mode_seg",
+)
+st.markdown("<br>", unsafe_allow_html=True)
+
+if target_engine == "PubMed Engine":
+    selected_mode = st.segmented_control(
+        "", options=["PubMed PICO 자동 검색", "PMID 리스트 CSV 업로드", "단일 PMID 입력"], default="PubMed PICO 자동 검색", key="pubmed_sub_mode_seg",
+    )
+elif target_engine == "GIE Journal Engine":
+    selected_mode = st.segmented_control(
+        "", options=["GIE RIS 파일 일괄 스크리닝"], default="GIE RIS 파일 일괄 스크리닝", key="gie_sub_mode_seg",
+    )
+else:
+    selected_mode = st.segmented_control(
+        "", options=["ClinicalTrials 자동 검색"], default="ClinicalTrials 자동 검색", key="ct_sub_mode_seg",
+    )
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # API 기능 및 파싱 함수들
@@ -838,39 +870,6 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, art
     2. Include인 경우: 'Conclusion:' 이라는 말머리나 수식어('Included because' 등)를 일체 붙이지 말고 완결된 1개 영문 문장 자체만 적어라.
     3. Exclude인 경우: 반드시 위에서 지정한 1~5순위 사유 중 가장 먼저 해당하는 정확한 사유의 말머리(예: 'Irrelevant article:', 'Different indication:')를 맨 앞에 붙이고 사유를 적어라.
     """
-
-# --------------------------------------------------
-# ✨ 2단계 세그먼티드 컨트롤 메뉴
-# --------------------------------------------------
-st.markdown(
-    f"""
-<div class="selected-category-box">
-    <div class="selected-category-label">SELECTED CATEGORY & MODEL</div>
-    <div class="selected-category-title">{due_category} - {sub_model}</div>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-target_engine = st.segmented_control(
-    "", options=["PubMed Engine", "GIE Journal Engine", "ClinicalTrials Engine"], default="PubMed Engine", key="engine_mode_seg",
-)
-st.markdown("<br>", unsafe_allow_html=True)
-
-if target_engine == "PubMed Engine":
-    selected_mode = st.segmented_control(
-        "", options=["PubMed PICO 자동 검색", "PMID 리스트 CSV 업로드", "단일 PMID 입력"], default="PubMed PICO 자동 검색", key="pubmed_sub_mode_seg",
-    )
-elif target_engine == "GIE Journal Engine":
-    selected_mode = st.segmented_control(
-        "", options=["GIE RIS 파일 일괄 스크리닝"], default="GIE RIS 파일 일괄 스크리닝", key="gie_sub_mode_seg",
-    )
-else:
-    selected_mode = st.segmented_control(
-        "", options=["ClinicalTrials 자동 검색"], default="ClinicalTrials 자동 검색", key="ct_sub_mode_seg",
-    )
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # MODE 1: 단일 PMID 테스트
