@@ -1109,7 +1109,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1224,7 +1224,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
@@ -1233,8 +1233,18 @@ elif selected_mode == "ClinicalTrials 자동 검색":
     st.subheader("ClinicalTrials.gov (NCT) 자동 검색 및 스크리닝")
     st.caption("선택하신 품목 및 세부 모델에 맞춰 키워드가 자동으로 세팅되었습니다.")
 
-    ct_default_cond = default_p.split('\n')[0] if default_p else ""
-    ct_default_intr = default_i.split('\n')[0] if default_i else ""
+    # 🚀 multi-line default_p/default_i 키워드를 "(A OR B OR C)" 형태의 쿼리로 자동 조합
+    if default_p:
+        p_lines = [f'"{line.strip()}"' if ' ' in line.strip() else line.strip() for line in default_p.split('\n') if line.strip()]
+        ct_default_cond = f"({' OR '.join(p_lines)})" if len(p_lines) > 1 else (p_lines[0] if p_lines else "")
+    else:
+        ct_default_cond = ""
+
+    if default_i:
+        i_lines = [f'"{line.strip()}"' if ' ' in line.strip() else line.strip() for line in default_i.split('\n') if line.strip()]
+        ct_default_intr = f"({' OR '.join(i_lines)})" if len(i_lines) > 1 else (i_lines[0] if i_lines else "")
+    else:
+        ct_default_intr = ""
 
     col_ct1, col_ct2 = st.columns(2)
     with col_ct1:
