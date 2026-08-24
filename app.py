@@ -436,7 +436,7 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑 정밀 추가)
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -455,16 +455,32 @@ if due_category == "1. Biliary Stent":
 
     if sub_model == "Niti-S Biliary Uncovered Stent":
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin"
-        add_search_i = "Niti-S Biliary S type\nNiti-S Biliary D type\nNiti-S Biliary M type\nNiti-S Biliary LCD type"
+        add_search_queries = [
+            'Taewoong AND Niti-S AND Biliary AND "S type"',
+            'Taewoong AND Niti-S AND Biliary AND "D type"',
+            'Taewoong AND Niti-S AND Biliary AND "M type"',
+            'Taewoong AND Niti-S AND Biliary AND "LCD type"'
+        ]
     elif sub_model == "Niti-S Biliary Covered Stent":
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nBenign biliary stricture\nBenign biliary obstruction\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign pancreatic duct stricture", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin\nRemoval"
-        add_search_i = "Niti-S Full Covered Biliary\nNiti-S Biliary Giobor\nNiti-S Biliary Flare\nNiti-S Biliary Kaffes\nNiti-S Biliary Bumpy"
+        add_search_queries = [
+            'Taewoong AND Niti-S AND Biliary AND "Full covered type"',
+            'Taewoong AND Niti-S AND Biliary AND "Both bare type"',
+            'Taewoong AND Niti-S AND Biliary AND Giobor',
+            'Taewoong AND Niti-S AND Biliary AND "Flare type"',
+            'Taewoong AND Niti-S AND Biliary AND Kaffes',
+            'Taewoong AND Niti-S AND Biliary AND Bumpy'
+        ]
     elif sub_model == "ComVi Biliary Stent":
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nComVi\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin"
-        add_search_i = "ComVi Biliary Stent\nComVi Biliary Full Covered\nComVi Biliary Both Bare\nComVi Biliary End Bare"
+        add_search_queries = [
+            'Taewoong AND ComVi AND Biliary AND "Full covered type"',
+            'Taewoong AND ComVi AND Biliary AND "Both bare type"',
+            'Taewoong AND ComVi AND Biliary AND "End bare type"'
+        ]
     else:
         default_p, default_i, default_c, default_o = "Biliary obstruction\nBiliary stricture\nMalignant biliary stricture\nMalignant biliary obstruction\nBenign biliary obstruction\nBenign biliary stricture\nBenign pancreatic duct stricture", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nUncovered stent\nEvolution\nWallFlex\nEGIS\nBonastent\nHanarostent", "Stent patency\nDecreased bilirubin\nRemoval"
-        add_search_i = "Niti-S Biliary Stent\nComVi Biliary Stent"
+        add_search_queries = ['Taewoong AND Biliary AND Stent']
 
 elif due_category == "2. Esophageal Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -481,7 +497,16 @@ elif due_category == "2. Esophageal Stent":
 5. Insufficient Information: Valid information relevant to performance and/or safety is limited.
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     default_p, default_i, default_c, default_o = "Esophageal stricture\nEsophageal obstruction\nMalignant esophageal stricture\nMalignant esophageal obstruction\nBenign esophageal stricture\nRefractory benign esophageal stricture\nBenign esophgeal obstruction\nTracheoesophageal fistula", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nUltraflex\nEvolution\nHanarostent\nAixstent\nEGIS\nBonastent\nMicro-tech", "Stent patency\nDysphagia improvement\nFistula closure\nRemoval"
-    add_search_i = "Niti-S Esophageal Full Covered\nNiti-S Esophageal Cervical\nNiti-S Esophageal Both Bare\nNiti-S Esophageal Conio\nNiti-S Esophageal Anti Reflux\nNiti-S Esophageal Beta-2"
+    add_search_queries = [
+        'Taewoong AND Niti-S AND Esophageal AND "Full covered type"',
+        'Taewoong AND Niti-S AND Esophageal AND Cervical',
+        'Taewoong AND Niti-S AND Esophageal AND "Both bare type"',
+        'Taewoong AND Niti-S AND Esophageal AND Conio',
+        'Taewoong AND Niti-S AND Esophageal AND "Anti reflux"',
+        'Taewoong AND Niti-S AND Esophageal AND "Double anti reflux"',
+        'Taewoong AND Niti-S AND Esophageal AND "Double type"',
+        'Taewoong AND Niti-S AND Esophageal AND Beta-2'
+    ]
 
 elif due_category == "3. Pyloric/Duodenal Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -499,16 +524,25 @@ elif due_category == "3. Pyloric/Duodenal Stent":
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     if sub_model == "Niti-S Pyloric/Duodenal Uncovered Stent":
         default_p, default_i, default_c, default_o = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
-        add_search_i = "Niti-S Pyloric D-type\nNiti-S Duodenal D-type\nNiti-S Pyloric Uncovered\nNiti-S Duodenal Uncovered"
+        add_search_queries = [
+            'Taewoong AND Niti-S AND (Pyloric OR Duodenal) AND "D type"'
+        ]
     elif sub_model == "Niti-S Pyloric/Duodenal Covered Stent":
         default_p, default_i, default_c, default_o = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction\nBenign pyloric stricture\nBenign pyloric obstruction\nBenign duodenal stricture\nBenign duodenal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
-        add_search_i = "Niti-S Pyloric Full Covered\nNiti-S Duodenal Full Covered\nNiti-S Pyloric Both Bare\nNiti-S Duodenal Both Bare"
+        add_search_queries = [
+            'Taewoong AND Niti-S AND (Pyloric OR Duodenal) AND "Full covered type"',
+            'Taewoong AND Niti-S AND (Pyloric OR Duodenal) AND "Both bare type"',
+            'Taewoong AND Niti-S AND (Pyloric OR Duodenal) AND "End bare type"'
+        ]
     elif sub_model == "ComVi Pyloric/Duodenal Stent":
         default_p, default_i, default_c, default_o = "Pyloric stricture\nPyloric obstruction\nDuodenal stricture\nDuodenal obstruction\nGastric outlet obstruction\nMalignant pyloric stricture\nMalignant pyloric obstruction\nMalignant duodenal stricture\nMalignant duodenal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nComVi\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nEvolution\nEGIS\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
-        add_search_i = "ComVi Pyloric Stent\nComVi Duodenal Stent\nComVi Pyloric Flare\nComVi Duodenal Both Bare"
+        add_search_queries = [
+            'Taewoong AND ComVi AND (Pyloric OR Duodenal) AND "Flare type"',
+            'Taewoong AND ComVi AND (Pyloric OR Duodenal) AND "Both bare type"'
+        ]
     else:
         default_p, default_i, default_c, default_o = "Pyloric stricture\nDuodenal stricture\nGastric outlet obstruction\nMalignant pyloric stricture\nBenign pyloric stricture", "SEMS\nTaewoong\nNiti-S\nComVi\nCovered stent\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSEMS\nWallFlex", "Stent patency\nObstruction relief\nRemoval"
-        add_search_i = "Niti-S Pyloric Stent\nComVi Duodenal Stent"
+        add_search_queries = ['Taewoong AND (Pyloric OR Duodenal) AND Stent']
 
 elif due_category == "4. Colonic Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -526,16 +560,25 @@ elif due_category == "4. Colonic Stent":
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     if sub_model == "Niti-S Enteral Colonic Uncovered Stent":
         default_p, default_i, default_c, default_o = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nUncovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nUncovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-Tech\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
-        add_search_i = "Niti-S Enteral Colonic S-Type\nNiti-S Enteral Colonic D-Type\nNiti-S Enteral Colonic Uncovered"
+        add_search_queries = [
+            'Taewoong AND Niti-S AND Colonic AND "S type"',
+            'Taewoong AND Niti-S AND Colonic AND "D type"'
+        ]
     elif sub_model == "Niti-S Enteral Colonic Covered Stent":
         default_p, default_i, default_c, default_o = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction\nBenign colonic stricture\nBenign colonic obstruction\nBenign colorectal stricture\nBenign colorectal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nNiti-S\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-Tech\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement\nRemoval"
-        add_search_i = "Niti-S Enteral Colonic Full Covered\nNiti-S Enteral Colonic Both Bare\nNiti-S Enteral Colonic End Bare"
+        add_search_queries = [
+            'Taewoong AND Niti-S AND Colonic AND "Full covered type"',
+            'Taewoong AND Niti-S AND Colonic AND "Both bare type"',
+            'Taewoong AND Niti-S AND Colonic AND "End bare type"'
+        ]
     elif sub_model == "ComVi Enteral Colonic Stent":
         default_p, default_i, default_c, default_o = "Colonic stricture\nColonic obstruction\nColorectal stricture\nColorectal obstruction\nMalignant colonic stricture\nMalignant colonic obstruction\nMalignant colorectal stricture\nMalignant colorectal obstruction", "Self-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nTaewoong\nComVi\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSelf-expandable metallic stent\nSelf-expandable metal stent\nSEMS\nCovered stent\nWallFlex\nWallFlex Soft\nHanarostent\nMicro-Tech\nBonastent", "Stent patency\nObstruction relief\nObstruction resolution\nObstruction improvement"
-        add_search_i = "ComVi Enteral Colonic Stent\nComVi Enteral Colonic Both Bare"
+        add_search_queries = [
+            'Taewoong AND ComVi AND Colonic AND "Both bare type"'
+        ]
     else:
         default_p, default_i, default_c, default_o = "Colonic stricture\nColorectal obstruction\nMalignant colonic stricture\nBenign colonic stricture", "SEMS\nTaewoong\nNiti-S\nComVi\nUncovered stent\nCovered stent", "Surgery\nPlastic stent\nBalloon dilation\nSEMS\nWallFlex", "Stent patency\nObstruction relief\nRemoval"
-        add_search_i = "Niti-S Colonic Stent\nComVi Colonic Stent"
+        add_search_queries = ['Taewoong AND Colonic AND Stent']
 
 elif due_category == "5. Drainage Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -553,22 +596,22 @@ elif due_category == "5. Drainage Stent":
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
     if sub_model == "Niti-S SPAXUS Stent":
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract", "Self-expandable metallic stent\nSEMS\nLumen apposing metal stent\nLAMS\nEUS gallbladder drainage\nEUS choledochoduodenostomy\nTaewoong\nNiti-S\nSPAXUS", "Surgery\nPercutaneous drainage\nSEMS\nLAMS\nAXIOS\nHot AXIOS", "Pancreatic pseudocyst drainage\nWalled off necrosis drainage\nGallbladder drainage\nBiliary tract drainage"
-        add_search_i = "Niti-S SPAXUS Stent\nSPAXUS LAMS\nSPAXUS stent"
+        add_search_queries = ['Taewoong AND Niti-S AND SPAXUS']
     elif sub_model == "Niti-S Hot SPAXUS Stent":
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder\nBiliary tract", "SEMS\nLumen apposing metal stent\nLAMS\nEUS gallbladder\nEUS choledochoduodenostomy\nElectrocautery delivery system\nHot delivery\nTaewoong\nNiti-S\nHot SPAXUS", "Surgery\nPercutaneous drainage\nSEMS\nLAMS\nAXIOS\nHot AXIOS", "Pancreatic pseudocyst drainage\nWalled off necrosis drainage\nGallbladder drainage\nBiliary tract drainage"
-        add_search_i = "Niti-S Hot SPAXUS Stent\nHot SPAXUS LAMS\nHot SPAXUS stent"
+        add_search_queries = ['Taewoong AND Niti-S AND "Hot SPAXUS"']
     elif sub_model == "Niti-S Nagi Stent":
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst", "SEMS\nLumen apposing metal stent\nLAMS\nBiflanged metal stent\nBFMS\nTaewoong\nNiti-S\nNagi", "Surgery\nPercutaneous drainage\nSEMS\nLAMS\nBiflanged metal stent\nBFMS\nAXIOS\nHot AXIOS", "Pancreatic pseudocyst drainage"
-        add_search_i = "Niti-S Nagi Stent\nNagi LAMS\nNagi stent"
+        add_search_queries = ['Taewoong AND Niti-S AND Nagi']
     else:
         default_p, default_i, default_c, default_o = "Pancreatic pseudocyst\nWalled off necrosis\nGallbladder", "SEMS\nLAMS\nTaewoong\nNiti-S\nComVi", "Surgery\nPercutaneous drainage\nLAMS\nAXIOS", "Drainage"
-        add_search_i = "SPAXUS stent\nNagi stent"
+        add_search_queries = ['Taewoong AND Niti-S AND Drainage']
 
 else:
     include_criteria = "Include All Relevant Clinical Papers"
     exclude_criteria = "Exclude Non-Clinical/Irrelevant Papers"
     default_p, default_i, default_c, default_o = "Obstructive Jaundice\nBiliary Stricture", "Biliary Stent\nSEMS", "Surgery\nPlastic stent", "Technical success\nClinical success"
-    add_search_i = "Taewoong Stent"
+    add_search_queries = ['Taewoong AND Stent']
 
 # --------------------------------------------------
 # API 기능 및 파싱 함수들
@@ -581,12 +624,16 @@ def parse_pico_input(text):
     formatted = [kw if '"' in kw or "[" in kw else f"({kw})" for kw in keywords]
     return formatted[0] if len(formatted) == 1 else f"({' OR '.join(formatted)})"
 
-def search_pubmed_pmids_pico(p_text="", i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key=""):
-    query_parts = []
-    for q in [parse_pico_input(t) for t in [p_text, i_text, c_text, o_text]]:
-        if q: query_parts.append(q)
-    
-    full_query = " AND ".join(query_parts)
+def search_pubmed_pmids_pico(p_text="", i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key="", direct_query=""):
+    # direct_query가 들어오면 PICO 조합 대신 단일 정밀 쿼리(Additional Search용) 바로 집행
+    if direct_query:
+        full_query = direct_query
+    else:
+        query_parts = []
+        for q in [parse_pico_input(t) for t in [p_text, i_text, c_text, o_text]]:
+            if q: query_parts.append(q)
+        full_query = " AND ".join(query_parts)
+        
     if not full_query: return [], ""
 
     min_date_str = f"{start_year}/{int(start_month):02d}/01"
@@ -1024,7 +1071,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     # 🚀 1. 대표 자주 쓰는 조합 퀵 세팅 버튼 (원클릭)
     st.markdown("##### ⚡ 자주 쓰는 조합 퀵 세팅")
     
-    # 세션 스테이트 초기화
     if "pico_preset" not in st.session_state:
         st.session_state["pico_preset"] = "P + I"
 
@@ -1053,18 +1099,22 @@ elif selected_mode == "PubMed PICO 자동 검색":
     default_chk_c = current_preset in ["P + C + O"]
     default_chk_o = current_preset in ["P + O", "P + C + O"]
 
-    # 🚀 'I 단독' 버튼 선택 시 세부 제품 모델 라인업 키워드로 I 입력창 덮어씌움
-    active_i_value = add_search_i if current_preset == "I 단독" else default_i
-
     st.markdown("<br>", unsafe_allow_html=True)
     
     col_pico1, col_pico2 = st.columns(2)
     with col_pico1:
         p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=140)
-        i_val = st.text_area("I (Intervention)", value=active_i_value, height=140)
+        i_val = st.text_area("I (Intervention)", value=default_i, height=140)
     with col_pico2:
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
+
+    # 🚀 'I 단독 (Additional Search)' 선택 시 정밀 AND 매핑 세트 안내
+    if current_preset == "I 단독":
+        st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 조합식({len(add_search_queries)}개)이 자동으로 적용됩니다.")
+        with st.expander("적용되는 개별 제품 1:1 정밀 AND 쿼리 세트 확인", expanded=True):
+            for q_idx, q_str in enumerate(add_search_queries, 1):
+                st.code(f"쿼리 #{q_idx}: {q_str}", language="sql")
 
     # 🚀 2. 개별 PICO 조합 체크박스 (자유로운 커스텀 세부 조절)
     st.markdown("---")
@@ -1097,130 +1147,152 @@ elif selected_mode == "PubMed PICO 자동 검색":
         else: max_limit = 0; st.info("조건에 맞는 PubMed의 전체 PMID를 가져옵니다.")
 
     if st.button("PICO 다중 조합 검색 및 AI 스크리닝 실행"):
-        # 미선택 시 방어 로직 (기본 P + I 자동 부여)
-        if not use_p and not use_i and not use_c and not use_o:
-            use_p, use_i = True, True
-            st.warning("선택된 요소가 없어 기본값 (P + I) 조합으로 자동 지정되었습니다.")
+        found_pmids = []
+        used_query = ""
 
-        target_p = p_val if use_p else ""
-        target_i = i_val if use_i else ""
-        target_c = c_val if use_c else ""
-        target_o = o_val if use_o else ""
-
-        if not (target_p.strip() or target_i.strip() or target_c.strip() or target_o.strip()):
-            st.error("최소한 하나 이상의 유효한 키워드가 선택되어 있어야 합니다!")
-        else:
+        # 🚀 [로직 분기] 'I 단독 (Additional Search)' 선택 시 제품별 정밀 쿼리셋 순회 실행
+        if current_preset == "I 단독":
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
-            with st.spinner(f"PubMed에서 [{date_range_label}] 기간의 PICO 조합 조건으로 검색 중..."):
-                found_pmids, used_query = search_pubmed_pmids_pico(
-                    p_text=target_p, i_text=target_i, c_text=target_c, o_text=target_o,
-                    start_year=start_year, start_month=start_month, end_year=end_year, end_month=end_month,
-                    fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key
-                )
+            with st.spinner(f"PubMed에서 [{date_range_label}] 기간의 LSR Additional 정밀 조합(총 {len(add_search_queries)}개 쿼리) 실행 중..."):
+                all_found = []
+                query_logs = []
+                for single_q in add_search_queries:
+                    p_ids, q_used = search_pubmed_pmids_pico(
+                        start_year=start_year, start_month=start_month, end_year=end_year, end_month=end_month,
+                        fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key, direct_query=single_q
+                    )
+                    all_found.extend(p_ids)
+                    query_logs.append(q_used)
+                
+                # 중복 PMID 제거 (순서 보장)
+                found_pmids = list(dict.fromkeys(all_found))
+                used_query = "\n\n".join(query_logs)
 
-            if not found_pmids:
-                st.warning(f"[{date_range_label}] 기간 및 선택하신 PICO 조합에 부합하는 PubMed 논문이 없습니다.")
-                st.info(f"생성된 조합 쿼리:\n`{used_query}`")
+        else:
+            # 일반 PICO 조합 검색 실행
+            if not use_p and not use_i and not use_c and not use_o:
+                use_p, use_i = True, True
+                st.warning("선택된 요소가 없어 기본값 (P + I) 조합으로 자동 지정되었습니다.")
+
+            target_p = p_val if use_p else ""
+            target_i = i_val if use_i else ""
+            target_c = c_val if use_c else ""
+            target_o = o_val if use_o else ""
+
+            if not (target_p.strip() or target_i.strip() or target_c.strip() or target_o.strip()):
+                st.error("최소한 하나 이상의 유효한 키워드가 선택되어 있어야 합니다!")
             else:
-                st.success(f"**[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의 PMID가 추출되었습니다!")
-                with st.expander("자동 생성된 PubMed 조합 쿼리식 확인", expanded=True): st.code(used_query, language="sql")
+                date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
+                with st.spinner(f"PubMed에서 [{date_range_label}] 기간의 PICO 조합 조건으로 검색 중..."):
+                    found_pmids, used_query = search_pubmed_pmids_pico(
+                        p_text=target_p, i_text=target_i, c_text=target_c, o_text=target_o,
+                        start_year=start_year, start_month=start_month, end_year=end_year, end_month=end_month,
+                        fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key
+                    )
 
-                pmid_summary = ", ".join(found_pmids[:10])
-                st.write(f"**추출된 PMID 목록 (상위 10개):** {pmid_summary}" + (" ... (이하 생략)" if len(found_pmids) > 10 else ""))
-                st.markdown("---")
+        if not found_pmids and used_query:
+            st.warning(f"[{date_range_label}] 기간 및 선택하신 조건에 부합하는 PubMed 논문이 없습니다.")
+            st.info(f"생성된 조합 쿼리:\n`{used_query}`")
+        elif found_pmids:
+            st.success(f"**[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의 PMID가 추출되었습니다!")
+            with st.expander("자동 생성된 PubMed 조합 쿼리식 확인", expanded=True): st.code(used_query, language="sql")
 
-                genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-3.6-flash")
+            pmid_summary = ", ".join(found_pmids[:10])
+            st.write(f"**추출된 PMID 목록 (상위 10개):** {pmid_summary}" + (" ... (이하 생략)" if len(found_pmids) > 10 else ""))
+            st.markdown("---")
 
-                auto_df = pd.DataFrame({"PMID": found_pmids})
-                titles, abstracts, results, conclusions, pubmed_urls, eval_sources = [], [], [], [], [], []
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-                total = len(auto_df)
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-3.6-flash")
 
-                for idx, row in auto_df.iterrows():
-                    pmid = str(row["PMID"])
-                    title, abs_text, pmcid, status = fetch_pubmed_by_pmid(pmid, ncbi_api_key)
-                    pmid_url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
-                    pubmed_urls.append(pmid_url)
+            auto_df = pd.DataFrame({"PMID": found_pmids})
+            titles, abstracts, results, conclusions, pubmed_urls, eval_sources = [], [], [], [], [], []
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            total = len(auto_df)
 
-                    content_for_ai = ""
-                    eval_source = ""
+            for idx, row in auto_df.iterrows():
+                pmid = str(row["PMID"])
+                title, abs_text, pmcid, status = fetch_pubmed_by_pmid(pmid, ncbi_api_key)
+                pmid_url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+                pubmed_urls.append(pmid_url)
 
-                    if pmcid:
-                        status_text.markdown(f"⏳ **[{idx+1}/{total}] PMC 원문 수집 & 정밀 분석 중...** (PMID: {pmid})")
-                        full_text = fetch_pmc_fulltext(pmcid, ncbi_api_key)
-                        if full_text:
-                            eval_source = "Full-text (Open Access)"
-                            content_for_ai = f"[Title]\n{title}\n\n[Full-text Body]\n{full_text}" 
-                        else:
-                            eval_source = "Abstract Only"
-                            content_for_ai = f"[Title]\n{title}\n\n[Abstract]\n{abs_text}"
-                    elif abs_text:
-                        status_text.markdown(f"⏳ **[{idx+1}/{total}] 초록(Abstract) 분석 중...** (PMID: {pmid})")
+                content_for_ai = ""
+                eval_source = ""
+
+                if pmcid:
+                    status_text.markdown(f"⏳ **[{idx+1}/{total}] PMC 원문 수집 & 정밀 분석 중...** (PMID: {pmid})")
+                    full_text = fetch_pmc_fulltext(pmcid, ncbi_api_key)
+                    if full_text:
+                        eval_source = "Full-text (Open Access)"
+                        content_for_ai = f"[Title]\n{title}\n\n[Full-text Body]\n{full_text}" 
+                    else:
                         eval_source = "Abstract Only"
                         content_for_ai = f"[Title]\n{title}\n\n[Abstract]\n{abs_text}"
-                    else:
-                        status_text.markdown(f"⏳ **[{idx+1}/{total}] 데이터 확보 불가, 예외 처리 중...** (PMID: {pmid})")
-                        eval_source = "No Data"
+                elif abs_text:
+                    status_text.markdown(f"⏳ **[{idx+1}/{total}] 초록(Abstract) 분석 중...** (PMID: {pmid})")
+                    eval_source = "Abstract Only"
+                    content_for_ai = f"[Title]\n{title}\n\n[Abstract]\n{abs_text}"
+                else:
+                    status_text.markdown(f"⏳ **[{idx+1}/{total}] 데이터 확보 불가, 예외 처리 중...** (PMID: {pmid})")
+                    eval_source = "No Data"
 
-                    if eval_source == "No Data":
-                        titles.append(title if title else "조회 실패")
-                        abstracts.append("No Abstract or Full-text Available")
-                        results.append("Manual Review Needed")
-                        conclusions.append(to_unicode_bold(f"Insufficient information: No abstract or open-access full-text available. Manual retrieval and review required."))
+                if eval_source == "No Data":
+                    titles.append(title if title else "조회 실패")
+                    abstracts.append("No Abstract or Full-text Available")
+                    results.append("Manual Review Needed")
+                    conclusions.append(to_unicode_bold(f"Insufficient information: No abstract or open-access full-text available. Manual retrieval and review required."))
+                    eval_sources.append(eval_source)
+                else:
+                    identifier = pmid
+                    if identifier in st.session_state.get("screened_history", {}):
+                        prev_info = st.session_state["screened_history"][identifier]
+                        prev_mod = prev_info["sub_model"]
+                        titles.append(title)
+                        abstracts.append(abs_text[:150] + "..." if abs_text else "원문 확인 (요약 생략)")
+                        results.append(f"Duplicated (이전중복: {prev_mod})")
+                        conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
                         eval_sources.append(eval_source)
                     else:
-                        identifier = pmid
-                        if identifier in st.session_state.get("screened_history", {}):
-                            prev_info = st.session_state["screened_history"][identifier]
-                            prev_mod = prev_info["sub_model"]
-                            titles.append(title)
-                            abstracts.append(abs_text[:150] + "..." if abs_text else "원문 확인 (요약 생략)")
-                            results.append(f"Duplicated (이전중복: {prev_mod})")
-                            conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
-                            eval_sources.append(eval_source)
-                        else:
-                            titles.append(title)
-                            abstracts.append(abs_text[:150] + "..." if abs_text else "원문 확인 (요약 생략)")
+                        titles.append(title)
+                        abstracts.append(abs_text[:150] + "..." if abs_text else "원문 확인 (요약 생략)")
 
-                            prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, content_for_ai)
-                            ans, err = call_gemini_with_retry(model, prompt)
+                        prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, content_for_ai)
+                        ans, err = call_gemini_with_retry(model, prompt)
 
-                            if ans:
-                                res_label = "Include (포함)" if "Include" in ans and "Exclude" not in ans.split("판정:")[1] else "Exclude (제외)"
-                                results.append(res_label)
-                                if "Conclusion:" in ans:
-                                    raw_conclusion = ans.split("Conclusion:")[-1].strip()
-                                else:
-                                    raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
-                                conclusions.append(to_unicode_bold(raw_conclusion))
-                                
-                                if "screened_history" not in st.session_state:
-                                    st.session_state["screened_history"] = {}
-                                st.session_state["screened_history"][identifier] = {
-                                    "category": due_category, "sub_model": sub_model, "result": res_label
-                                }
+                        if ans:
+                            res_label = "Include (포함)" if "Include" in ans and "Exclude" not in ans.split("판정:")[1] else "Exclude (제외)"
+                            results.append(res_label)
+                            if "Conclusion:" in ans:
+                                raw_conclusion = ans.split("Conclusion:")[-1].strip()
                             else:
-                                results.append("Error")
-                                conclusions.append(f"AI 에러: {err}")
-                            eval_sources.append(eval_source)
+                                raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
+                            conclusions.append(to_unicode_bold(raw_conclusion))
+                            
+                            if "screened_history" not in st.session_state:
+                                st.session_state["screened_history"] = {}
+                            st.session_state["screened_history"][identifier] = {
+                                "category": due_category, "sub_model": sub_model, "result": res_label
+                            }
+                        else:
+                            results.append("Error")
+                            conclusions.append(f"AI 에러: {err}")
+                        eval_sources.append(eval_source)
 
-                    progress_bar.progress((idx + 1) / total)
-                    time.sleep(0.12 if ncbi_api_key else 0.35)
+                progress_bar.progress((idx + 1) / total)
+                time.sleep(0.12 if ncbi_api_key else 0.35)
 
-                status_text.empty(); progress_bar.empty()
+            status_text.empty(); progress_bar.empty()
 
-                auto_df["카테고리"] = due_category
-                auto_df["세부 모델"] = sub_model
-                auto_df["논문 제목"] = titles
-                auto_df["평가 기준"] = eval_sources
-                auto_df["초록 요약"] = abstracts
-                auto_df["AI 판정"] = results
-                auto_df["Conclusion"] = conclusions
-                auto_df["PubMed Link"] = pubmed_urls
-                auto_df.insert(0, "No", range(1, len(auto_df) + 1))
-                st.session_state["tab3_result"] = auto_df
+            auto_df["카테고리"] = due_category
+            auto_df["세부 모델"] = sub_model
+            auto_df["논문 제목"] = titles
+            auto_df["평가 기준"] = eval_sources
+            auto_df["초록 요약"] = abstracts
+            auto_df["AI 판정"] = results
+            auto_df["Conclusion"] = conclusions
+            auto_df["PubMed Link"] = pubmed_urls
+            auto_df.insert(0, "No", range(1, len(auto_df) + 1))
+            st.session_state["tab3_result"] = auto_df
 
     if st.session_state["tab3_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
@@ -1238,7 +1310,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1356,7 +1428,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
