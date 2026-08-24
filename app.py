@@ -1103,12 +1103,12 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     current_preset = st.session_state["pico_preset"]
 
-    # 프리셋 선택에 따른 기본 체크 상태 동적 지정
+    # 🚀 프리셋 선택에 따른 기본 체크 상태 동적 지정 (I Primary와 Additional I 분리)
     default_chk_p = current_preset in ["P + I", "P + O", "P + C + O"]
-    default_chk_i = current_preset in ["P + I", "I 단독"]
+    default_chk_i = current_preset in ["P + I"]           # 👈 I 단독 모드 시 I (Primary)는 켜지지 않도록 수정
     default_chk_c = current_preset in ["P + C + O"]
     default_chk_o = current_preset in ["P + O", "P + C + O"]
-    default_chk_add = current_preset == "I 단독"
+    default_chk_add = current_preset == "I 단독"          # 👈 Additional Search I만 독점 켜짐
 
     st.markdown("<br>", unsafe_allow_html=True)
 
