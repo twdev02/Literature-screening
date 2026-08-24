@@ -563,7 +563,7 @@ def parse_pico_input(text):
     formatted = [kw if '"' in kw or "[" in kw else f"({kw})" for kw in keywords]
     return formatted[0] if len(formatted) == 1 else f"({' OR '.join(formatted)})"
 
-def search_pubmed_pmids_pico(p_text, i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key=""):
+def search_pubmed_pmids_pico(p_text="", i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key=""):
     query_parts = []
     for q in [parse_pico_input(t) for t in [p_text, i_text, c_text, o_text]]:
         if q: query_parts.append(q)
@@ -1011,20 +1011,20 @@ elif selected_mode == "PubMed PICO 자동 검색":
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
-    # 🚀 [업데이트] 실무용 4대 PICO 검색 조합 옵션 버튼
+    # 🚀 [개선] 4대 자유 조합 체크박스 수평 배치
     st.markdown("---")
-    st.subheader("PICO 검색 조합 전략 선택")
-    pico_strategy = st.radio(
-        "문헌 검색에 적용할 PICO 조합을 선택하세요:",
-        options=[
-            "P + I (권장: 핵심 대상 및 중재시술 중심 넓은 검색)",
-            "P + O (특정 질환 내 유효성/안전성 중심 검색)",
-            "P + C + O (대조군 및 성과 포함 정밀 검색)",
-            "I 단독 (중재시술/스텐트 자체 전체 임상데이터 검색)"
-        ],
-        index=0,
-        horizontal=True
-    )
+    st.subheader("PICO 검색 조합 선택")
+    st.caption("검색어 결합에 사용할 P, I, C, O 항목을 체크하세요. (체크해제 시 해당 키워드는 검색에서 제외됩니다)")
+
+    col_ck1, col_ck2, col_ck3, col_ck4 = st.columns(4)
+    with col_ck1:
+        use_p = st.checkbox("P (Patient/Disease) 포함", value=True)
+    with col_ck2:
+        use_i = st.checkbox("I (Intervention) 포함", value=True)
+    with col_ck3:
+        use_c = st.checkbox("C (Comparison) 포함", value=False)
+    with col_ck4:
+        use_o = st.checkbox("O (Outcome) 포함", value=False)
 
     st.markdown("---")
     st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
@@ -1042,15 +1042,19 @@ elif selected_mode == "PubMed PICO 자동 검색":
         else: max_limit = 0; st.info("조건에 맞는 PubMed의 전체 PMID를 가져옵니다.")
 
     if st.button("PICO 다중 조합 검색 및 AI 스크리닝 실행"):
-        if not api_key: st.error("API Key가 설정되지 않았습니다!")
-        elif not (p_val.strip() or i_val.strip() or c_val.strip() or o_val.strip()): st.error("최소한 하나 이상의 PICO 키워드를 입력해 주세요!")
-        else:
-            # 🚀 선택한 조합 전략에 맞는 키워드 할당
-            target_p = p_val if "P" in pico_strategy else ""
-            target_i = i_val if "I" in pico_strategy else ""
-            target_c = c_val if "C" in pico_strategy else ""
-            target_o = o_val if "O" in pico_strategy else ""
+        # 미선택 시 방어 로직 (기본 P + I 자동 부여)
+        if not use_p and not use_i and not use_c and not use_o:
+            use_p, use_i = True, True
+            st.warning("선택된 요소가 없어 기본값 (P + I) 조합으로 자동 지정되었습니다.")
 
+        target_p = p_val if use_p else ""
+        target_i = i_val if use_i else ""
+        target_c = c_val if use_c else ""
+        target_o = o_val if use_o else ""
+
+        if not (target_p.strip() or target_i.strip() or target_c.strip() or target_o.strip()):
+            st.error("최소한 하나 이상의 유효한 키워드가 선택되어 있어야 합니다!")
+        else:
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
             with st.spinner(f"PubMed에서 [{date_range_label}] 기간의 PICO 조합 조건으로 검색 중..."):
                 found_pmids, used_query = search_pubmed_pmids_pico(
@@ -1060,7 +1064,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 )
 
             if not found_pmids:
-                st.warning(f"[{date_range_label}] 기간 및 입력하신 PICO 조건에 부합하는 PubMed 논문이 없습니다.")
+                st.warning(f"[{date_range_label}] 기간 및 선택하신 PICO 조합에 부합하는 PubMed 논문이 없습니다.")
                 st.info(f"생성된 조합 쿼리:\n`{used_query}`")
             else:
                 st.success(f"**[{date_range_label}]** 검색 결과, 총 **{len(found_pmids)}건**의 PMID가 추출되었습니다!")
@@ -1297,7 +1301,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
