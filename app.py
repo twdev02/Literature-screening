@@ -637,8 +637,6 @@ def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
 # 🚀 [추가/수정] ClinicalTrials.gov (NCT) API 전체/개수제한 수집 함수 (페이지네이션 적용)
 def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, fetch_all=False, max_results=20):
     url = "https://clinicaltrials.gov/api/v2/studies"
-    
-    # 1회 요청 시 최대 1000개까지 요청 가능
     page_size = 1000 if fetch_all else min(max_results, 1000)
     
     params = {
@@ -688,16 +686,13 @@ def search_clinicaltrials(condition, intervention, status_filters=None, type_fil
                 
                 results.append((nct_id, title, summary, status))
                 
-                # 전체 수집이 아니고 요청한 개수에 도달했으면 중단
                 if not fetch_all and len(results) >= max_results:
                     break
             
-            # 전체 수집이 아니거나 요청 개수 달성 시 종료
             if not fetch_all and len(results) >= max_results:
                 results = results[:max_results]
                 break
                 
-            # 다음 페이지 토큰 확인
             page_token = data.get("nextPageToken")
             if not page_token:
                 break
@@ -1299,7 +1294,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
 
     st.markdown("##### Focus Your Search (필터 설정)")
     
-    # [1행] 상태 및 연구 유형 드롭박스 (2열 배치)
+    # 🚀 [1행] 필터 드롭다운 수평 깔끔 정돈
     col_f1, col_f2 = st.columns(2)
     with col_f1:
         status_options = {
@@ -1330,10 +1325,9 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         )
         api_type_filters = [type_options[k] for k in selected_types]
 
-    # [2행] 수집 옵션 및 개수 설정 (아래쪽에 깔끔하게 정렬)
-    col_opt1, col_opt2 = st.columns([1.2, 1])
+    # 🚀 [2행] 수집 방식 옵션 수평 배치
+    col_opt1, col_opt2 = st.columns([1, 1])
     with col_opt1:
-        st.markdown("<div style='padding-top: 25px;'></div>", unsafe_allow_html=True) # 수평 맞춤용 여백
         fetch_all_ct_toggle = st.checkbox("검색된 전체 임상시험 수집 (개수 제한 없음)", value=False)
     with col_opt2:
         if not fetch_all_ct_toggle:
