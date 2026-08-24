@@ -248,7 +248,7 @@ with st.sidebar:
     sub_model = None
 
     if current_engine == "ClinicalTrials Engine":
-        st.info("💡 ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.")
+        st.info("ClinicalTrials.gov는 세부 모델 구분 없이 선택하신 [품목 전체] 통합 검색이 적용됩니다.")
         sub_model = "통합 품목 검색"
     else:
         if due_category == "1. Biliary Stent":
