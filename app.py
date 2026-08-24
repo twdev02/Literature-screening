@@ -1103,12 +1103,12 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     current_preset = st.session_state["pico_preset"]
 
-    # 🚀 프리셋 선택에 따른 기본 체크 상태 동적 지정 (I Primary와 Additional I 분리)
+    # 프리셋 선택에 따른 기본 체크 상태 동적 지정
     default_chk_p = current_preset in ["P + I", "P + O", "P + C + O"]
-    default_chk_i = current_preset in ["P + I"]           # 👈 I 단독 모드 시 I (Primary)는 켜지지 않도록 수정
+    default_chk_i = current_preset in ["P + I"]
     default_chk_c = current_preset in ["P + C + O"]
     default_chk_o = current_preset in ["P + O", "P + C + O"]
-    default_chk_add = current_preset == "I 단독"          # 👈 Additional Search I만 독점 켜짐
+    default_chk_add = current_preset == "I 단독"
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1125,17 +1125,23 @@ elif selected_mode == "PubMed PICO 자동 검색":
     with col_ck5:
         use_add_i = st.checkbox("Additional Search I", value=default_chk_add)
 
-    # 'Additional Search I' 체크박스 선택 시 드롭다운으로 개별 쿼리 단독 선택 기능 활성화
+    # 🚀 [방법 2 적용] 드롭다운에서 선택한 정밀 쿼리가 수정 가능한 입력창에 세팅됨
     selected_target_direct_query = None
     if use_add_i:
         st.markdown("<br>", unsafe_allow_html=True)
-        st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 쿼리가 활성화되었습니다.")
-        selected_target_direct_query = st.selectbox(
-            "실행할 개별 Additional Search 정밀 쿼리를 선택하세요:",
+        st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 쿼리를 선택하거나 직접 수정하여 검색할 수 있습니다.")
+        
+        selected_q_preset = st.selectbox(
+            "개별 Additional Search 정밀 쿼리 프리셋 선택:",
             options=add_search_queries,
             index=0
         )
-        st.code(f"선택된 쿼리: {selected_target_direct_query}", language="sql")
+        # 🚀 선택된 프리셋을 기반으로 사용자가 글자를 자유롭게 추가/삭제 가능한 텍스트 입력창 제공
+        selected_target_direct_query = st.text_input(
+            "실행될 쿼리문 (필요 시 직접 수정 가능):",
+            value=selected_q_preset,
+            key="custom_direct_query_input"
+        )
 
     st.markdown("---")
     st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
@@ -1156,7 +1162,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         found_pmids = []
         used_query = ""
 
-        # 🚀 Additional Search I 가 체크된 경우 단독 쿼리 실행
+        # 🚀 Additional Search I 가 체크된 경우 사용자가 직접 편집한 입력창 쿼리문 그대로 단독 실행
         if use_add_i and selected_target_direct_query:
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
             with st.spinner(f"PubMed에서 [{selected_target_direct_query}] 단독 쿼리 실행 중..."):
@@ -1307,7 +1313,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
