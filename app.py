@@ -1231,18 +1231,18 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 # --------------------------------------------------
 elif selected_mode == "ClinicalTrials 자동 검색":
     st.subheader("ClinicalTrials.gov (NCT) 자동 검색 및 스크리닝")
-    st.caption("질환명과 중재시술 키워드로 전 세계 임상시험 등록 데이터를 검색합니다. (API Key 불필요)")
+    st.caption("선택하신 품목 및 세부 모델에 맞춰 키워드가 자동으로 세팅되었습니다.")
 
     ct_default_cond = default_p.split('\n')[0] if default_p else ""
     ct_default_intr = default_i.split('\n')[0] if default_i else ""
 
     col_ct1, col_ct2 = st.columns(2)
     with col_ct1:
-        cond_val = st.text_input("질환명 (Condition) 예: Biliary stricture", value=ct_default_cond)
+        cond_val = st.text_input("Condition/disease", value=ct_default_cond)
     with col_ct2:
-        intr_val = st.text_input("중재시술 (Intervention) 예: Stent", value=ct_default_intr)
+        intr_val = st.text_input("Intervention/treatment", value=ct_default_intr)
 
-    st.markdown("##### 🔍 Focus Your Search (필터 설정)")
+    st.markdown("##### Focus Your Search (필터 설정)")
     col_f1, col_f2, col_f3 = st.columns(3)
     with col_f1:
         status_options = {
