@@ -1064,7 +1064,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
 # MODE 3: PubMed PICO 키워드 자동 검색 & 스크리닝
 # --------------------------------------------------
 elif selected_mode == "PubMed PICO 자동 검색":
-    st.subheader(f"PubMed PICO 다중 키워드 입력")
+    st.subheader(f"PubMed PICO 키워드")
     st.caption("선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다.")
 
     col_pico1, col_pico2 = st.columns(2)
