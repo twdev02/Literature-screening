@@ -201,22 +201,15 @@ with st.sidebar:
         default_api_key = ""
 
     user_api_key = st.text_input(
-        "Gemini API Key (미입력 시 클라우드 기본키 적용)", type="password"
+        "Gemini API Key (미입력 시 서버 기본키 적용)", type="password"
     )
-    # 사용자가 직접 입력한 값이 있으면 그걸 쓰고, 없으면 클라우드 키 사용
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
-    # 2. NCBI API 키 불러오기 (클라우드 Secrets 우선)
+    # 2. NCBI API 키 불러오기 (화면 입력창 숨김, 백그라운드에서만 로드)
     try:
-        default_ncbi_key = st.secrets["NCBI_API_KEY"]
+        ncbi_api_key = st.secrets["NCBI_API_KEY"]
     except Exception:
-        default_ncbi_key = ""
-
-    user_ncbi_key = st.text_input(
-        "NCBI(PubMed) API Key (선택: 속도 향상용)", type="password"
-    )
-    # 사용자가 직접 입력한 값이 있으면 그걸 쓰고, 없으면 클라우드 키 사용
-    ncbi_api_key = user_ncbi_key.strip() if user_ncbi_key.strip() else default_ncbi_key
+        ncbi_api_key = ""
 
     # 연결 상태 표시
     if api_key:
@@ -224,9 +217,6 @@ with st.sidebar:
     else:
         st.error("Gemini API Key가 필요합니다.")
         
-    if ncbi_api_key:
-        st.info("NCBI API Key 연동 완료 (고속 스크리닝 모드)")
-
     st.markdown("---")
     st.subheader("품목 선택")
 
