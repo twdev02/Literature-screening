@@ -1086,13 +1086,13 @@ elif selected_mode == "PubMed PICO 자동 검색":
     # ⚡ 자주 쓰는 조합 퀵 세팅 버튼 (한눈에 보이도록 통합)
     col_q1, col_q2, col_q3, col_q4, col_q5 = st.columns(5)
     with col_q1:
-        if st.button("P + I (기본 권장)", use_container_width=True):
+        if st.button("P + I", use_container_width=True):
             st.session_state["pico_preset"] = "P + I"
     with col_q2:
-        if st.button("P + O (유효성/안전성)", use_container_width=True):
+        if st.button("P + O", use_container_width=True):
             st.session_state["pico_preset"] = "P + O"
     with col_q3:
-        if st.button("P + C + O (대조군 정밀)", use_container_width=True):
+        if st.button("P + C + O", use_container_width=True):
             st.session_state["pico_preset"] = "P + C + O"
     with col_q4:
         if st.button("직접 조합 (Custom)", use_container_width=True):
@@ -1112,9 +1112,9 @@ elif selected_mode == "PubMed PICO 자동 검색":
     # 🚀 5개의 독립 체크박스 (P, I, C, O, Additional Search I)
     col_ck1, col_ck2, col_ck3, col_ck4, col_ck5 = st.columns(5)
     with col_ck1:
-        use_p = st.checkbox("P (Patient/Disease)", value=default_chk_p)
+        use_p = st.checkbox("P (Patient / Population / Problem)", value=default_chk_p)
     with col_ck2:
-        use_i = st.checkbox("I (Primary)", value=default_chk_i)
+        use_i = st.checkbox("I (Intervention)", value=default_chk_i)
     with col_ck3:
         use_c = st.checkbox("C (Comparison)", value=default_chk_c)
     with col_ck4:
