@@ -231,19 +231,24 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
-    # 💡 [수정 구역 1]: index=None으로 설정하여 초기 선택 해제 및 radio_category 세션 상태 바인딩 안정화
+    # 💡 [핵심 보정 구역]: radio_category 세션 상태와 index 연동 구조 정밀 수정
+    selected_idx = (
+        category_options.index(st.session_state["radio_category"])
+        if st.session_state.get("radio_category") in category_options
+        else None
+    )
+
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
-        index=None,
-        key="radio_category",
+        index=selected_idx,
         on_change=clear_screening_results,
     )
+    st.session_state["radio_category"] = due_category
 
     current_engine = st.session_state.get("engine_mode_seg", "PubMed Engine")
     sub_model = None
 
-    # 💡 [수정 구역 2]: 카테고리가 선택되었을 때만 하위 모델 드롭다운을 호출하도록 예외 처리
     if due_category:
         if current_engine == "ClinicalTrials Engine":
             sub_model = "통합 품목 검색"
