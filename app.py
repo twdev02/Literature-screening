@@ -127,6 +127,8 @@ if "tab3_result" not in st.session_state:
     st.session_state["tab3_result"] = None
 if "tab_gie_result" not in st.session_state:
     st.session_state["tab_gie_result"] = None
+if "tab_ct_result" not in st.session_state:
+    st.session_state["tab_ct_result"] = None
 
 if "uploader_key" not in st.session_state:
     st.session_state["uploader_key"] = 0
@@ -143,6 +145,7 @@ def clear_screening_results():
     st.session_state["tab2_result"] = None
     st.session_state["tab3_result"] = None
     st.session_state["tab_gie_result"] = None
+    st.session_state["tab_ct_result"] = None
 
 def reset_to_home():
     clear_screening_results()
@@ -201,7 +204,7 @@ with st.sidebar:
         default_api_key = ""
 
     user_api_key = st.text_input(
-        "Gemini API Key (미입력 시 서버 기본키 적용)", type="password"
+        "Gemini API Key (미입력 시 클라우드 기본키 적용)", type="password"
     )
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
@@ -323,10 +326,14 @@ with st.sidebar:
                             identifier = None
                             if "PMID" in row and pd.notna(row["PMID"]):
                                 identifier = str(row["PMID"]).replace(".0", "").strip()
+                            elif "NCT 번호 (URL)" in row and pd.notna(row["NCT 번호 (URL)"]):
+                                identifier = str(row["NCT 번호 (URL)"]).split('/')[-1].strip().lower()
                             elif "DOI / URL" in row and pd.notna(row["DOI / URL"]):
                                 identifier = str(row["DOI / URL"]).strip().lower()
                             elif "논문 제목" in row and pd.notna(row["논문 제목"]):
                                 identifier = str(row["논문 제목"]).strip().lower()
+                            elif "임상시험 제목" in row and pd.notna(row["임상시험 제목"]):
+                                identifier = str(row["임상시험 제목"]).strip().lower()
 
                             if identifier and identifier != "-":
                                 cat = str(row.get("카테고리", "기존 이력"))
@@ -393,7 +400,7 @@ if not due_category:
             st.markdown(
                 """
                 <div class="card-title">AI PIPELINE</div>
-                <div class="card-value">Gemini 3.6 Flash + PubMed & GIE Engine</div>
+                <div class="card-value">Gemini 3.6 Flash + PubMed / GIE / ClinicalTrials</div>
                 <div class="card-desc">AI 기반 문헌 스크리닝 (Open Access 지원)</div>
                 <br>
                 """,
@@ -427,7 +434,7 @@ if due_category == "1. Biliary Stent":
 2. Different indication: Non-biliary/pancreatic target areas only (e.g., vascular, esophageal, colonic, tracheal)
 3. Irrelevant articles: Articles not related to biliary/pancreatic luminal stenting or stricture management (e.g., EUS-CDS, EUS-HGS primary LAMS procedures, RFA combined therapies, vascular reconstructions)
 4. Non-study publications: Editorials, letters, comments, study protocols (단, Review 및 Case report는 제외하지 않음)
-5. Insufficient Information: Valid information relevant to performance and/or safety is limited (e.g., Non-free/paywall articles or limited full-text availability).
+5. Insufficient Information: Valid information relevant to performance and/or safety is limited.
 6. Held by Taewoong: This article is already held by Taewoong Medical."""
 
     if sub_model == "Niti-S Biliary Uncovered Stent":
@@ -464,7 +471,7 @@ elif due_category == "3. Pyloric/Duodenal Stent":
 6. Comparators: Surgery, Plastic stent, Balloon dilation, or competitor SEMS (WallFlex, WallFlex Soft, Hanarostent, Evolution, EGIS, Bonastent)
 7. Outcomes: Stent patency, Obstruction relief/resolution/improvement, GOOSS score / Oral intake, Technical/Clinical success, Complications, Stent removal"""
     exclude_criteria = """1. Species: Not human beings (animal test, artificial simulation, in vitro test)
-2. Different indication: Non-pyloric/duodenal target areas only (e.g., pure biliary, EUS-CDS/LAMS, PTGBD->EUS-HGS conversion, EUS-GE/SGJ exclusive reviews)
+2. Different indication: Non-pyloric/duodenal target areas only
 3. Irrelevant articles: Articles not related to pyloric/duodenal stenting or GOO management
 4. Non-study publications: Editorials, letters, comments, study protocols
 5. Insufficient Information: Valid information relevant to performance and/or safety is limited.
@@ -530,7 +537,7 @@ else:
     default_p, default_i, default_c, default_o = "Obstructive Jaundice\nBiliary Stricture", "Biliary Stent\nSEMS", "Surgery\nPlastic stent", "Technical success\nClinical success"
 
 # --------------------------------------------------
-# PubMed API 기능 및 XML 파싱 함수
+# API 기능 및 파싱 함수들
 # --------------------------------------------------
 def parse_pico_input(text):
     if not text or not text.strip(): return ""
@@ -540,9 +547,7 @@ def parse_pico_input(text):
     formatted = [kw if '"' in kw or "[" in kw else f"({kw})" for kw in keywords]
     return formatted[0] if len(formatted) == 1 else f"({' OR '.join(formatted)})"
 
-def search_pubmed_pmids_pico(
-    p_text, i_text, c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key=""
-):
+def search_pubmed_pmids_pico(p_text, i_text, c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key=""):
     query_parts = []
     for q in [parse_pico_input(t) for t in [p_text, i_text, c_text, o_text]]:
         if q: query_parts.append(q)
@@ -594,7 +599,6 @@ def fetch_pubmed_by_pmid(pmid, ncbi_api_key=""):
         title_elem = article.find(".//ArticleTitle")
         title = "".join(title_elem.itertext()).strip() if title_elem is not None else "제목 없음"
 
-        # 🚀 [추가] PMCID (Open Access) 식별자 찾기
         pmcid = None
         pmcid_elem = root.find(".//ArticleIdList/ArticleId[@IdType='pmc']")
         if pmcid_elem is not None:
@@ -610,7 +614,6 @@ def fetch_pubmed_by_pmid(pmid, ncbi_api_key=""):
     except Exception as e:
         return None, None, None, f"데이터 파싱 에러: {str(e)}"
 
-# 🚀 [추가] PMC 원문(Full-text) 텍스트 자동 수집 함수
 def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id={pmcid}&retmode=xml"
     if ncbi_api_key: url += f"&api_key={ncbi_api_key}"
@@ -625,6 +628,46 @@ def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
     except Exception:
         return None
 
+# 🚀 [추가] ClinicalTrials.gov (NCT) API 수집 함수 (필터 기능 추가)
+def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, max_results=20):
+    url = "https://clinicaltrials.gov/api/v2/studies"
+    params = {
+        "pageSize": max_results,
+        "format": "json"
+    }
+    if condition: params["query.cond"] = condition
+    if intervention: params["query.intr"] = intervention
+    
+    if status_filters:
+        params["filter.overallStatus"] = ",".join(status_filters)
+        
+    if type_filters:
+        params["filter.studyType"] = ",".join(type_filters)
+    
+    try:
+        response = requests.get(url, params=params, timeout=15)
+        if response.status_code != 200: return [], "API 통신 에러"
+        data = response.json()
+        studies = data.get("studies", [])
+        
+        results = []
+        for study in studies:
+            protocol = study.get("protocolSection", {})
+            ident = protocol.get("identificationModule", {})
+            desc = protocol.get("descriptionModule", {})
+            status_mod = protocol.get("statusModule", {})
+            
+            nct_id = ident.get("nctId", "Unknown")
+            title = desc.get("briefTitle", "제목 없음")
+            summary = desc.get("briefSummary", "")
+            status = status_mod.get("overallStatus", "Unknown")
+            
+            results.append((nct_id, title, summary, status))
+            
+        return results, response.url
+    except Exception as e:
+        return [], str(e)
+
 def call_gemini_with_retry(model, prompt, max_retries=3):
     for attempt in range(max_retries):
         try:
@@ -637,7 +680,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
             return None, str(e)
 
 # --------------------------------------------------
-# 🤖 공통 AI 프롬프트 (초록 & 전문 커버형 업데이트)
+# 🤖 공통 AI 프롬프트 (판정 우선순위 및 Case Report 방어 적용)
 # --------------------------------------------------
 def generate_prompt(due_category, include_criteria, exclude_criteria, title, article_content):
     return f"""
@@ -648,27 +691,24 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, art
 
     [엄격한 판정 가이드라인]:
     1. Include 조건: [포함기준]을 완벽히 만족하고, 컴포넌트나 적응증이 임상적으로 타당한 경우 'Include'로 판정한다. 원문(Full-text) 전체가 제공된 경우, 서론보다는 연구 방법(Methods)과 결과(Results) 섹션을 중점적으로 확인하여 평가 대상 기구가 실제 사용되었는지 엄격히 검증하라.
+    
     2. CER 통합 보고서 연속성 및 Benign(양성) 처리 핵심 지침 (중요!):
        - 현재 선택된 모델이 Uncovered 라 하더라도, 논문에 Benign(양성) 적응증 관련 내용이 포함되어 있다는 이유만으로 선제적 배제(Exclude)를 하지 말 것!
        - 이유: 본 스크리닝은 하나의 통합 CER 보고서 섹션으로 취급되므로, Uncovered 단계에서 Benign 논문이 불필요하게 Exclude 되면 차후 Covered 단계 검토 시 'Duplicated(중복)' 처리되어 영구 누락되는 사고가 발생함. 양성/악성 모두 유연하게 포용하여 판단할 것.
-    3. Exclude 판단 핵심 규칙:
-       - **Insufficient information: Valid information relevant to performance and/or safety is limited.**
-         : 제공된 텍스트(초록 또는 전문) 상 유효 데이터가 부족하여 스텐트의 실제 성능 및 안전성을 확인할 수 없는 경우 (또는 리뷰용 Full-text를 구할 수 없는 단순 인용구인 경우).
-       - **Insufficient information: Letter / Protocol**
-         : 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우.
-       - **This article is already held by Taewoong Medical.**
-         : 태웅메디칼 내부 보유 또는 이전에 검토 완료된 문헌인 경우.
-       - **Irrelevant article**
-         : 평가 대상 스텐트 기구(I)가 아닌 타 장기 기구(예: 식도 스텐트 심사 시 기도/기관지 스텐트 사용)를 사용했거나, 스텐트 성과/안전성과 무관한 타 시술/수술(RFA, EIs, 진단 기술 등)이 주목적인 경우.
-       - **Different indication**
-         : 평가 대상 스텐트 기구(I)를 사용했으나, 전혀 무관한 질환/목적으로 사용된 경우.
-       - **Literature without human clinical data**
-         : Preclinical proof-of-concept, In-vitro, 동물실험 연구.
+       
+    3. Exclude 판단 핵심 규칙 및 적용 순서 (★반드시 아래 1순위부터 순서대로 검토하여 가장 먼저 해당하는 사유를 적용할 것):
+       - 1순위. **Literature without human clinical data**: Preclinical proof-of-concept, In-vitro, 동물실험 연구 등 인간 대상 임상 데이터가 없는 경우.
+       - 2순위. **Irrelevant article**: 평가 대상 스텐트 기구(I)가 아닌 타 장기 기구(예: 식도 스텐트 심사 시 기도/기관지 스텐트 사용)를 사용했거나, 스텐트 성과/안전성과 무관한 타 시술/수술(RFA, EIs, 진단 기술 등)이 주목적인 경우.
+       - 3순위. **Different indication**: 평가 대상 스텐트 기구(I)를 사용했으나, Target 적응증이 아닌 전혀 무관한 질환/목적으로 사용된 경우.
+       - 4순위. **Insufficient information**: 위 1~3순위에 모두 해당하지 않으면서(즉, 올바른 기구와 적응증을 사용했음에도) 아래의 이유로 평가가 불가한 경우에만 최후의 수단으로 적용할 것.
+         * Valid information relevant to performance and/or safety is limited: 제공된 텍스트 상 유효 데이터가 부족하여 스텐트의 실제 성능 및 안전성을 확인할 수 없는 경우.
+         * Letter / Protocol: 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우. (🚨강력 주의: 서론에서 타 연구를 인용 및 논평하는 문장이 있더라도, 실제 환자의 임상 경과를 다룬 'Case Report'나 'Case Series'라면 절대 이 사유로 배제하지 말고 최우선적으로 Include 할 것!)
+       - 5순위. **This article is already held by Taewoong Medical.**: 태웅메디칼 내부 보유 또는 이전에 검토 완료된 문헌인 경우.
 
     [품목별 인간 평가자 주요 판정 학습 예시 (Few-shot Examples)]:
     - Biliary: Covered SEMS vs Uncovered SEMS 유효성/안전성 Meta-analysis 및 RCT -> Include
     - Esophageal: FC-SEMS 마이그레이션 방지(Suturing 등) 비교 연구 -> Include | 기도/기관지 스텐트(Airway stent) 사용 연구 -> Exclude (Irrelevant article: The study focuses on airway/tracheal stenting rather than esophageal stent placement.)
-    - Pyloric/Duodenal: EUS-GJ vs Duodenal SEMS vs SGJ 삼자 비교 Review -> Include | Balloon dilation vs SEMS 비교 -> Include | 2차 Duodenal SEMS 재시술 성과 -> Include
+    - Pyloric/Duodenal: EUS-GJ vs Duodenal SEMS vs SGJ 삼자 비교 Review -> Include | Balloon dilation vs SEMS 비교 -> Include | 2차 Duodenal SEMS 재시술 성과 -> Include | Case Report -> Include
     - Colonic: Emergency Surgery 대비 Bridge 단기 목적 SEMS 성과/생존율 -> Include | CReST2 Trial(완화 목적 Covered vs Uncovered) -> Include | Stent Patency 예측 모델 개발 -> Include
     - Drainage: Percutaneous cystogastrostomy / EUS-GBD / EUS-BD 임상 성과 -> Include | High-surgical-risk 환자 배액술 가이드라인 -> Include | EUS-BD 안전성 실무 임상 -> Include
 
@@ -693,12 +733,7 @@ def generate_prompt(due_category, include_criteria, exclude_criteria, title, art
     [Conclusion 작성 규칙]:
     1. 마크다운 별표(**)를 절대로 사용하지 마라.
     2. Include인 경우: 'Conclusion:' 이라는 말머리나 수식어('Included because' 등)를 일체 붙이지 말고 완결된 1개 영문 문장 자체만 적어라.
-    3. Exclude인 경우: 반드시 아래 지정된 말머리 중 가장 정확한 하나를 맨 앞에 붙이고 사유를 적어라:
-       * Irrelevant article: [기구(I) 불일치 및 주제 불일치] 평가 대상 스텐트가 아닌 타 장기 기구(기도/기관지 스텐트 등)를 사용했거나, 스텐트 단독 평가가 아닌 다른 시술/수술이 주목적인 경우.
-       * Different indication: [적응증(P) 불일치] 평가 대상 스텐트(I)를 사용했으나 Target 적응증이 아닌 전혀 다른 질환에 사용된 경우.
-       * Insufficient information: Valid information relevant to performance and/or safety is limited. (또는 Letter / Protocol)
-       * This article is already held by Taewoong Medical.
-       * Literature without human clinical data:
+    3. Exclude인 경우: 반드시 위에서 지정한 1~5순위 사유 중 가장 먼저 해당하는 정확한 사유의 말머리(예: 'Irrelevant article:', 'Different indication:')를 맨 앞에 붙이고 사유를 적어라.
     """
 
 # --------------------------------------------------
@@ -715,7 +750,7 @@ st.markdown(
 )
 
 target_engine = st.segmented_control(
-    "", options=["PubMed Engine", "GIE Journal Engine"], default="PubMed Engine", key="engine_mode_seg",
+    "", options=["PubMed Engine", "GIE Journal Engine", "ClinicalTrials Engine"], default="PubMed Engine", key="engine_mode_seg",
 )
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -723,9 +758,13 @@ if target_engine == "PubMed Engine":
     selected_mode = st.segmented_control(
         "", options=["PubMed PICO 자동 검색", "PMID 리스트 CSV 업로드", "단일 PMID 입력"], default="PubMed PICO 자동 검색", key="pubmed_sub_mode_seg",
     )
-else:
+elif target_engine == "GIE Journal Engine":
     selected_mode = st.segmented_control(
         "", options=["GIE RIS 파일 일괄 스크리닝"], default="GIE RIS 파일 일괄 스크리닝", key="gie_sub_mode_seg",
+    )
+else:
+    selected_mode = st.segmented_control(
+        "", options=["ClinicalTrials 자동 검색"], default="ClinicalTrials 자동 검색", key="ct_sub_mode_seg",
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -775,9 +814,7 @@ if selected_mode == "단일 PMID 입력":
                 
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel("gemini-3.6-flash")
-                prompt = generate_prompt(
-                    due_category, include_criteria, exclude_criteria, title, article_content
-                )
+                prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, article_content)
 
                 ans_text, err = call_gemini_with_retry(model, prompt)
                 if ans_text:
@@ -1134,7 +1171,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                             titles.append(title)
                             abstracts.append(abstract_text[:150] + "...")
 
-                            # GIE RIS는 PMC를 타지 않으므로 초록을 article_content 로 넘김
                             prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, abstract_text)
                             ans, err = call_gemini_with_retry(model, prompt)
 
@@ -1189,3 +1225,168 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+
+# --------------------------------------------------
+# MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
+# --------------------------------------------------
+elif selected_mode == "ClinicalTrials 자동 검색":
+    st.subheader("ClinicalTrials.gov (NCT) 자동 검색 및 스크리닝")
+    st.caption("질환명과 중재시술 키워드로 전 세계 임상시험 등록 데이터를 검색합니다. (API Key 불필요)")
+
+    ct_default_cond = default_p.split('\n')[0] if default_p else ""
+    ct_default_intr = default_i.split('\n')[0] if default_i else ""
+
+    col_ct1, col_ct2 = st.columns(2)
+    with col_ct1:
+        cond_val = st.text_input("질환명 (Condition) 예: Biliary stricture", value=ct_default_cond)
+    with col_ct2:
+        intr_val = st.text_input("중재시술 (Intervention) 예: Stent", value=ct_default_intr)
+
+    st.markdown("##### 🔍 Focus Your Search (필터 설정)")
+    col_f1, col_f2, col_f3 = st.columns(3)
+    with col_f1:
+        status_options = {
+            "Recruiting (모집 중)": "RECRUITING",
+            "Completed (완료됨)": "COMPLETED",
+            "Active, not recruiting (활성, 모집안함)": "ACTIVE_NOT_RECRUITING",
+            "Not yet recruiting (모집 예정)": "NOT_YET_RECRUITING",
+            "Terminated (조기 종료)": "TERMINATED"
+        }
+        selected_statuses = st.multiselect(
+            "임상 진행 상태 (Status)", 
+            options=list(status_options.keys()), 
+            default=["Completed (완료됨)"]
+        )
+        api_status_filters = [status_options[k] for k in selected_statuses]
+        
+    with col_f2:
+        type_options = {
+            "Interventional (중재적 연구)": "INTERVENTIONAL",
+            "Observational (관찰 연구)": "OBSERVATIONAL"
+        }
+        selected_types = st.multiselect(
+            "연구 유형 (Study Type)", 
+            options=list(type_options.keys()),
+            default=["Interventional (중재적 연구)", "Observational (관찰 연구)"]
+        )
+        api_type_filters = [type_options[k] for k in selected_types]
+        
+    with col_f3:
+        max_limit = st.number_input("가져올 최대 임상시험 수", min_value=1, max_value=1000, value=20)
+
+    if st.button("ClinicalTrials 검색 및 AI 스크리닝 실행"):
+        if not api_key: st.error("Gemini API Key가 설정되지 않았습니다!")
+        elif not cond_val.strip() and not intr_val.strip(): st.error("질환명이나 중재시술 중 하나는 반드시 입력해야 합니다!")
+        else:
+            with st.spinner("ClinicalTrials.gov 공식 API에서 조건에 맞는 데이터를 필터링 중..."):
+                studies, used_query = search_clinicaltrials(
+                    cond_val, intr_val, 
+                    status_filters=api_status_filters, 
+                    type_filters=api_type_filters, 
+                    max_results=max_limit
+                )
+
+            if not studies:
+                st.warning("검색 조건에 일치하는 임상시험을 찾을 수 없습니다.")
+                st.info(f"생성된 API 요청 URL:\n{used_query}")
+            else:
+                st.success(f"총 **{len(studies)}건**의 진행/완료된 임상시험 데이터가 추출되었습니다!")
+                with st.expander("자동 생성된 API 쿼리 URL 확인", expanded=True):
+                    st.code(used_query, language="http")
+
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel("gemini-3.6-flash")
+
+                titles, abstracts, results, conclusions, urls, eval_sources, statuses = [], [], [], [], [], [], []
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                total = len(studies)
+
+                for idx, (nct_id, title, summary, status) in enumerate(studies):
+                    status_text.markdown(f"⏳ **[{idx+1}/{total}] 임상시험 브리핑(Summary) AI 분석 중...** ({nct_id})")
+                    
+                    nct_url = f"https://clinicaltrials.gov/study/{nct_id}"
+                    identifier = nct_id.lower()
+                    
+                    urls.append(nct_url)
+                    statuses.append(status)
+                    
+                    eval_source = "Abstract Only" if summary.strip() else "No Data"
+
+                    if eval_source == "No Data":
+                        titles.append(title)
+                        abstracts.append("No Summary Available")
+                        results.append("Manual Review Needed")
+                        conclusions.append(to_unicode_bold(f"Insufficient information: No brief summary available for {nct_id}."))
+                        eval_sources.append(eval_source)
+                    else:
+                        if identifier in st.session_state["screened_history"]:
+                            prev_info = st.session_state["screened_history"][identifier]
+                            prev_mod = prev_info["sub_model"]
+                            titles.append(title)
+                            abstracts.append(summary[:150] + "...")
+                            results.append(f"Duplicated (이전중복: {prev_mod})")
+                            conclusions.append(f"Duplicate literature previously screened in [{prev_mod}] step.")
+                            eval_sources.append(eval_source)
+                        else:
+                            titles.append(title)
+                            abstracts.append(summary[:150] + "...")
+
+                            article_content = f"[NCT ID]: {nct_id}\n[Status]: {status}\n[Title]\n{title}\n\n[Brief Summary]\n{summary}"
+                            prompt = generate_prompt(due_category, include_criteria, exclude_criteria, title, article_content)
+                            
+                            ans, err = call_gemini_with_retry(model, prompt)
+
+                            if ans:
+                                res_label = "Include (포함)" if "Include" in ans and "Exclude" not in ans.split("판정:")[1] else "Exclude (제외)"
+                                results.append(res_label)
+                                if "Conclusion:" in ans:
+                                    raw_conclusion = ans.split("Conclusion:")[-1].strip()
+                                else:
+                                    raw_conclusion = ans.split("\n\n")[-1].replace("Conclusion:", "").strip()
+                                conclusions.append(to_unicode_bold(raw_conclusion))
+                                st.session_state["screened_history"][identifier] = {
+                                    "category": due_category, "sub_model": sub_model, "result": res_label
+                                }
+                            else:
+                                results.append("Error")
+                                conclusions.append(f"AI 에러: {err}")
+                            eval_sources.append(eval_source)
+
+                    progress_bar.progress((idx + 1) / total)
+                    time.sleep(0.35) 
+
+                status_text.empty()
+                progress_bar.empty()
+
+                res_df = pd.DataFrame({
+                    "No": range(1, len(studies) + 1),
+                    "카테고리": due_category,
+                    "세부 모델": sub_model,
+                    "NCT 번호 (URL)": urls,
+                    "임상 진행 상태": statuses,
+                    "임상시험 제목": titles,
+                    "평가 기준": eval_sources,
+                    "요약 (Summary)": abstracts,
+                    "AI 판정": results,
+                    "Conclusion": conclusions
+                })
+                st.session_state["tab_ct_result"] = res_df
+
+    if st.session_state.get("tab_ct_result") is not None and selected_mode == "ClinicalTrials 자동 검색":
+        st.success(f"[{due_category} - {sub_model}] ClinicalTrials.gov 스크리닝 완료 결과")
+        res_df = st.session_state["tab_ct_result"]
+        render_result_dashboard(res_df)
+
+        pending_df = res_df[res_df["AI 판정"].str.contains("Manual Review Needed|Full-text Screening Needed", na=False)]
+        v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
+        with v_tab1:
+            st.dataframe(res_df, hide_index=True)
+            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
+            st.download_button("ClinicalTrials 전체 결과 CSV 다운로드", data=csv_data, file_name="clinicaltrials_screening_result.csv", mime="text/csv", use_container_width=True)
+        with v_tab2:
+            if len(pending_df) == 0: st.info("수동 검토 대상 임상이 없습니다.")
+            else:
+                st.warning("아래 목록은 Summary 데이터 부족으로 수동 검토가 필요한 임상시험들입니다.")
+                st.dataframe(pending_df, hide_index=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="clinicaltrials_manual_review_needed.csv", mime="text/csv", use_container_width=True)
