@@ -136,8 +136,6 @@ if "show_reset_msg" not in st.session_state:
     st.session_state["show_reset_msg"] = False
 if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
-if "radio_category" not in st.session_state:
-    st.session_state["radio_category"] = None
 
 
 def clear_screening_results():
@@ -231,19 +229,14 @@ with st.sidebar:
         "5. Drainage Stent",
     ]
 
-    selected_idx = (
-        category_options.index(st.session_state["radio_category"])
-        if st.session_state.get("radio_category") in category_options
-        else None
-    )
-
+    # 💡 [핵심 해결 1]: 라디오 버튼 세션 상태 바인딩 단순화 (충돌 방지)
     due_category = st.radio(
         "스크리닝할 카테고리를 선택하세요",
         options=category_options,
-        index=selected_idx,
+        index=None,
+        key="radio_category",
         on_change=clear_screening_results,
     )
-    st.session_state["radio_category"] = due_category
 
     current_engine = st.session_state.get("engine_mode_seg", "PubMed Engine")
     sub_model = None
@@ -381,7 +374,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 1. 카테고리가 아예 선택되지 않았을 때 홈 대시보드 (위치 조정 구역)
+# 🏠 1. 카테고리가 선택되지 않았을 때 나타나는 홈 대시보드
 # --------------------------------------------------
 if not due_category:
     st.markdown(
@@ -1313,7 +1306,8 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                # 💡 [핵심 해결 2]: pending_csv NameError 버그 수정
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1431,7 +1425,8 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                # 💡 [핵심 해결 2]: pending_csv NameError 버그 수정
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
@@ -1626,4 +1621,5 @@ elif selected_mode == "ClinicalTrials 자동 검색":
             else:
                 st.warning("아래 목록은 Summary 데이터 부족으로 수동 검토가 필요한 임상시험들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name="clinicaltrials_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                # 💡 [핵심 해결 2]: pending_csv NameError 버그 수정
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="clinicaltrials_manual_review_needed.csv", mime="text/csv", use_container_width=True)
