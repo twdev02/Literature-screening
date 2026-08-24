@@ -1242,20 +1242,20 @@ elif selected_mode == "ClinicalTrials 자동 검색":
 
     # 🚀 품목 카테고리별 상위 통합 키워드 자동 매핑 (대문자 OR 및 구문 큰따옴표 처리)
     if due_category == "1. Biliary Stent":
-        ct_default_cond = '("Biliary obstruction" OR "Biliary stricture" OR "Malignant biliary stricture")'
-        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Biliary stent")'
+        ct_default_cond = '("Biliary obstruction" OR "Biliary stricture")'
+        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Biliary stent")'
     elif due_category == "2. Esophageal Stent":
         ct_default_cond = '("Esophageal stricture" OR "Esophageal obstruction" OR "Tracheoesophageal fistula")'
-        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Esophageal stent")'
+        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Esophageal stent")'
     elif due_category == "3. Pyloric/Duodenal Stent":
-        ct_default_cond = '("Gastric outlet obstruction" OR "Pyloric stricture" OR "Duodenal stricture")'
-        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Duodenal stent")'
+        ct_default_cond = '("Pyloric stricture" OR "Pyloric obstruction" OR "Duodenal stricture" OR "Duodenal obstruction")'
+        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Pyloric stent" OR "Duodenal stent")'
     elif due_category == "4. Colonic Stent":
-        ct_default_cond = '("Colonic stricture" OR "Colonic obstruction" OR "Colorectal obstruction")'
-        ct_default_intr = '("Metallic stent" OR "Metal stent" OR "SEMS" OR "Colonic stent")'
+        ct_default_cond = '("Colonic stricture" OR "Colonic obstruction")'
+        ct_default_intr = '("Self expandable metal stent" OR "SEMS" OR "Colonic stent")'
     elif due_category == "5. Drainage Stent":
-        ct_default_cond = '("Pancreatic pseudocyst" OR "Walled off necrosis" OR "Gallbladder drainage" OR "Biliary tract")'
-        ct_default_intr = '("LAMS" OR "Lumen apposing metal stent" OR "Drainage stent" OR "SPAXUS")'
+        ct_default_cond = '("Pancreatic pseudocyst" OR "Walled off necrosis" OR "Gallbladder" OR "Biliary tract")'
+        ct_default_intr = '("Lumen apposing metal stent" OR "LAMS" OR "Drainage stent")'
     else:
         ct_default_cond = '"Biliary stricture"'
         ct_default_intr = '"Stent"'
