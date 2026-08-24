@@ -436,7 +436,7 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑)
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑 정밀 추가)
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -625,7 +625,6 @@ def parse_pico_input(text):
     return formatted[0] if len(formatted) == 1 else f"({' OR '.join(formatted)})"
 
 def search_pubmed_pmids_pico(p_text="", i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key="", direct_query=""):
-    # direct_query가 들어오면 PICO 조합 대신 단일 정밀 쿼리(Additional Search용) 바로 집행
     if direct_query:
         full_query = direct_query
     else:
@@ -1068,12 +1067,23 @@ elif selected_mode == "PubMed PICO 자동 검색":
     st.subheader(f"PubMed PICO 다중 키워드 입력")
     st.caption("선택하신 품목 및 세부 모델에 맞춰 P, I, C, O 키워드가 자동으로 세팅되었습니다.")
 
-    # 🚀 1. 대표 자주 쓰는 조합 퀵 세팅 버튼 (원클릭)
-    st.markdown("##### ⚡ 자주 쓰는 조합 퀵 세팅")
-    
+    col_pico1, col_pico2 = st.columns(2)
+    with col_pico1:
+        p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=140)
+        i_val = st.text_area("I (Intervention)", value=default_i, height=140)
+    with col_pico2:
+        c_val = st.text_area("C (Comparison)", value=default_c, height=140)
+        o_val = st.text_area("O (Outcome)", value=default_o, height=140)
+
+    # 🚀 통합 세팅 구역: PICO 검색 조합 선택 + 퀵 버튼
+    st.markdown("---")
+    st.subheader("PICO 검색 조합 선택")
+    st.caption("원하시는 퀵 세팅 버튼을 누르거나, 아래 체크박스를 통해 검색에 포함할 항목을 직접 조정하세요.")
+
     if "pico_preset" not in st.session_state:
         st.session_state["pico_preset"] = "P + I"
 
+    # ⚡ 자주 쓰는 조합 퀵 세팅 버튼 (한눈에 보이도록 통합)
     col_q1, col_q2, col_q3, col_q4, col_q5 = st.columns(5)
     with col_q1:
         if st.button("P + I (기본 권장)", use_container_width=True):
@@ -1085,7 +1095,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         if st.button("P + C + O (대조군 정밀)", use_container_width=True):
             st.session_state["pico_preset"] = "P + C + O"
     with col_q4:
-        if st.button("I 단독 (Additional Search)", use_container_width=True):
+        if st.button("I 단독 모드", use_container_width=True):
             st.session_state["pico_preset"] = "I 단독"
     with col_q5:
         if st.button("직접 조합 (Custom)", use_container_width=True):
@@ -1093,48 +1103,39 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     current_preset = st.session_state["pico_preset"]
 
-    # 프리셋 선택에 따라 기본 체크 상태 동적 지정
+    # 프리셋 선택에 따른 기본 체크 상태 동적 지정
     default_chk_p = current_preset in ["P + I", "P + O", "P + C + O"]
     default_chk_i = current_preset in ["P + I", "I 단독"]
     default_chk_c = current_preset in ["P + C + O"]
     default_chk_o = current_preset in ["P + O", "P + C + O"]
+    default_chk_add = current_preset == "I 단독"
 
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    col_pico1, col_pico2 = st.columns(2)
-    with col_pico1:
-        p_val = st.text_area("P (Patient / Population / Problem)", value=default_p, height=140)
-        i_val = st.text_area("I (Intervention)", value=default_i, height=140)
-    with col_pico2:
-        c_val = st.text_area("C (Comparison)", value=default_c, height=140)
-        o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
-    # 🚀 'I 단독 (Additional Search)' 선택 시: 쿼리 개별 선택 드롭다운 UI 제공
-    selected_direct_q = None
-    if current_preset == "I 단독":
+    # 🚀 5개의 독립 체크박스 (P, I, C, O, Additional Search I)
+    col_ck1, col_ck2, col_ck3, col_ck4, col_ck5 = st.columns(5)
+    with col_ck1:
+        use_p = st.checkbox("P (Patient/Disease)", value=default_chk_p)
+    with col_ck2:
+        use_i = st.checkbox("I (Primary)", value=default_chk_i)
+    with col_ck3:
+        use_c = st.checkbox("C (Comparison)", value=default_chk_c)
+    with col_ck4:
+        use_o = st.checkbox("O (Outcome)", value=default_chk_o)
+    with col_ck5:
+        use_add_i = st.checkbox("Additional Search I", value=default_chk_add)
+
+    # 'Additional Search I' 체크박스 선택 시 드롭다운으로 개별 쿼리 단독 선택 기능 활성화
+    selected_target_direct_query = None
+    if use_add_i:
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown(f"##### 🎯 [{sub_model}] LSR Additional Search 개별 규격 선택")
-        selected_direct_q = st.selectbox(
-            "검색 및 AI 스크리닝을 실행할 단일 규격 정밀 쿼리를 선택하세요:",
+        st.info(f"💡 **[{sub_model}]** 품목의 LSR Additional Search용 정밀 `AND` 쿼리가 활성화되었습니다.")
+        selected_target_direct_query = st.selectbox(
+            "실행할 개별 Additional Search 정밀 쿼리를 선택하세요:",
             options=add_search_queries,
             index=0
         )
-        st.info(f"💡 현재 선택된 쿼리: `{selected_direct_q}` (이 쿼리 1건에 대해서만 독립 스크리닝됩니다)")
-
-    # 🚀 2. 개별 PICO 조합 체크박스 (자유로운 커스텀 세부 조절)
-    st.markdown("---")
-    st.subheader("PICO 검색 조합 선택")
-    st.caption(f"현재 선택된 세팅 방식: **[{current_preset}]** (아래 체크박스로 조합을 자유롭게 추가/제거할 수 있습니다)")
-
-    col_ck1, col_ck2, col_ck3, col_ck4 = st.columns(4)
-    with col_ck1:
-        use_p = st.checkbox("P (Patient/Disease) 포함", value=default_chk_p)
-    with col_ck2:
-        use_i = st.checkbox("I (Intervention) 포함", value=default_chk_i)
-    with col_ck3:
-        use_c = st.checkbox("C (Comparison) 포함", value=default_chk_c)
-    with col_ck4:
-        use_o = st.checkbox("O (Outcome) 포함", value=default_chk_o)
+        st.code(f"선택된 쿼리: {selected_target_direct_query}", language="sql")
 
     st.markdown("---")
     st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
@@ -1155,14 +1156,15 @@ elif selected_mode == "PubMed PICO 자동 검색":
         found_pmids = []
         used_query = ""
 
-        # 🚀 [로직 분기] 'I 단독' 모드에서는 선택된 '단 1개의 정밀 쿼리'만 독립 실행
-        if current_preset == "I 단독" and selected_direct_q:
+        # 🚀 Additional Search I 가 체크된 경우 단독 쿼리 실행
+        if use_add_i and selected_target_direct_query:
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
-            with st.spinner(f"PubMed에서 [{selected_direct_q}] 단독 규격 조건으로 정밀 검색 중..."):
+            with st.spinner(f"PubMed에서 [{selected_target_direct_query}] 단독 쿼리 실행 중..."):
                 found_pmids, used_query = search_pubmed_pmids_pico(
                     start_year=start_year, start_month=start_month, end_year=end_year, end_month=end_month,
-                    fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key, direct_query=selected_direct_q
+                    fetch_all=fetch_all_toggle, max_results=max_limit, ncbi_api_key=ncbi_api_key, direct_query=selected_target_direct_query
                 )
+
         else:
             # 일반 PICO 조합 검색 실행
             if not use_p and not use_i and not use_c and not use_o:
@@ -1273,21 +1275,21 @@ elif selected_mode == "PubMed PICO 자동 검색":
                             conclusions.append(f"AI 에러: {err}")
                         eval_sources.append(eval_source)
 
-                progress_bar.progress((idx + 1) / total)
-                time.sleep(0.12 if ncbi_api_key else 0.35)
+            progress_bar.progress((idx + 1) / total)
+            time.sleep(0.12 if ncbi_api_key else 0.35)
 
-            status_text.empty(); progress_bar.empty()
+        status_text.empty(); progress_bar.empty()
 
-            auto_df["카테고리"] = due_category
-            auto_df["세부 모델"] = sub_model
-            auto_df["논문 제목"] = titles
-            auto_df["평가 기준"] = eval_sources
-            auto_df["초록 요약"] = abstracts
-            auto_df["AI 판정"] = results
-            auto_df["Conclusion"] = conclusions
-            auto_df["PubMed Link"] = pubmed_urls
-            auto_df.insert(0, "No", range(1, len(auto_df) + 1))
-            st.session_state["tab3_result"] = auto_df
+        auto_df["카테고리"] = due_category
+        auto_df["세부 모델"] = sub_model
+        auto_df["논문 제목"] = titles
+        auto_df["평가 기준"] = eval_sources
+        auto_df["초록 요약"] = abstracts
+        auto_df["AI 판정"] = results
+        auto_df["Conclusion"] = conclusions
+        auto_df["PubMed Link"] = pubmed_urls
+        auto_df.insert(0, "No", range(1, len(auto_df) + 1))
+        st.session_state["tab3_result"] = auto_df
 
     if st.session_state["tab3_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
@@ -1305,7 +1307,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
-                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_csv, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
