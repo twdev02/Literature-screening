@@ -187,6 +187,79 @@ st.markdown(
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
     
+
+    /* ==================================================
+       Screening Dashboard 5 Buttons
+       ================================================== */
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"] div[data-testid="stButton"] > button {
+        min-height: 74px !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    /* 전체 대상 - Gray */
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(1) div[data-testid="stButton"] > button {
+        background: rgba(148, 163, 184, 0.16) !important;
+        border: 1px solid rgba(100, 116, 139, 0.30) !important;
+        color: #334155 !important;
+    }
+
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(1) div[data-testid="stButton"] > button:hover {
+        background: rgba(148, 163, 184, 0.27) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Include - Green */
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(2) div[data-testid="stButton"] > button {
+        background: rgba(34, 197, 94, 0.13) !important;
+        border: 1px solid rgba(34, 197, 94, 0.30) !important;
+        color: #166534 !important;
+    }
+
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(2) div[data-testid="stButton"] > button:hover {
+        background: rgba(34, 197, 94, 0.23) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Exclude - Red */
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(3) div[data-testid="stButton"] > button {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border: 1px solid rgba(239, 68, 68, 0.30) !important;
+        color: #991b1b !important;
+    }
+
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(3) div[data-testid="stButton"] > button:hover {
+        background: rgba(239, 68, 68, 0.22) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Full-Text / Manual - Amber */
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(4) div[data-testid="stButton"] > button {
+        background: rgba(245, 158, 11, 0.14) !important;
+        border: 1px solid rgba(245, 158, 11, 0.32) !important;
+        color: #92400e !important;
+    }
+
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(4) div[data-testid="stButton"] > button:hover {
+        background: rgba(245, 158, 11, 0.24) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Duplicated - Purple */
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(5) div[data-testid="stButton"] > button {
+        background: rgba(139, 92, 246, 0.12) !important;
+        border: 1px solid rgba(139, 92, 246, 0.30) !important;
+        color: #6d28d9 !important;
+    }
+
+    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(5) div[data-testid="stButton"] > button:hover {
+        background: rgba(139, 92, 246, 0.22) !important;
+        transform: translateY(-2px);
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -244,37 +317,49 @@ def render_interactive_dashboard(df, key_prefix):
     pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
-    c1, c2, c3, c4, c5 = st.columns(5)
-    
-    with c1:
-        st.markdown('<div class="res-card-btn all">', unsafe_allow_html=True)
-        if st.button(f"전체 대상\n\n{total_cnt}건", key=f"{key_prefix}_btn_all", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "ALL"
-        st.markdown('</div>', unsafe_allow_html=True)
-            
-    with c2:
-        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
-        if st.button(f"Include (포함)\n\n{inc_cnt}건", key=f"{key_prefix}_btn_inc", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "INC"
-        st.markdown('</div>', unsafe_allow_html=True)
+    # 대시보드 버튼 영역을 고유 key의 container로 묶어 CSS가 다른 영역에 영향을 주지 않도록 함
+    with st.container(key=f"dashboard_cards_{key_prefix}"):
+        c1, c2, c3, c4, c5 = st.columns(5)
+        
+        with c1:
+            if st.button(
+                f"전체 대상\n\n{total_cnt}건",
+                key=f"{key_prefix}_btn_all",
+                use_container_width=True
+            ):
+                st.session_state["active_dashboard_filter"] = "ALL"
+                
+        with c2:
+            if st.button(
+                f"Include (포함)\n\n{inc_cnt}건",
+                key=f"{key_prefix}_btn_inc",
+                use_container_width=True
+            ):
+                st.session_state["active_dashboard_filter"] = "INC"
 
-    with c3:
-        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
-        if st.button(f"Exclude (제외)\n\n{exc_cnt}건", key=f"{key_prefix}_btn_exc", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "EXC"
-        st.markdown('</div>', unsafe_allow_html=True)
+        with c3:
+            if st.button(
+                f"Exclude (제외)\n\n{exc_cnt}건",
+                key=f"{key_prefix}_btn_exc",
+                use_container_width=True
+            ):
+                st.session_state["active_dashboard_filter"] = "EXC"
 
-    with c4:
-        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
-        if st.button(f"Full-Text / Manual\n\n{pending_cnt}건", key=f"{key_prefix}_btn_pending", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "PENDING"
-        st.markdown('</div>', unsafe_allow_html=True)
+        with c4:
+            if st.button(
+                f"Full-Text / Manual\n\n{pending_cnt}건",
+                key=f"{key_prefix}_btn_pending",
+                use_container_width=True
+            ):
+                st.session_state["active_dashboard_filter"] = "PENDING"
 
-    with c5:
-        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
-        if st.button(f"Duplicated (중복)\n\n{dup_cnt}건", key=f"{key_prefix}_btn_dup", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "DUP"
-        st.markdown('</div>', unsafe_allow_html=True)
+        with c5:
+            if st.button(
+                f"Duplicated (중복)\n\n{dup_cnt}건",
+                key=f"{key_prefix}_btn_dup",
+                use_container_width=True
+            ):
+                st.session_state["active_dashboard_filter"] = "DUP"
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
