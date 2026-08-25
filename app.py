@@ -187,47 +187,49 @@ st.markdown(
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
     /* 💡 인터랙티브 대시보드 버튼 스타일 (요청 2: 각 버튼별 반투명 색상 구별 강화) */
-    div.res-card-btn button {
+    /* 💡 대시보드 반투명 파스텔톤 버튼 CSS (Streamlit 최상위 셀렉터 타겟팅) */
+    div.res-card-btn div[data-testid="stButton"] > button {
         width: 100% !important;
         border-radius: 10px !important;
         padding: 12px 10px !important;
         text-align: center !important;
         transition: all 0.2s ease !important;
         font-weight: 700 !important;
+        backdrop-filter: blur(4px) !important;
     }
-    div.res-card-btn button:hover {
-        transform: translateY(-2px);
+    div.res-card-btn div[data-testid="stButton"] > button:hover {
+        transform: translateY(-2px) !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
     }
     
-    /* 1. 전체 대상 (반투명 연blue) */
-    div.res-card-btn.all button {
-        background-color: rgba(224, 242, 254, 0.8) !important;
-        border: 1px solid #7dd3fc !important;
+    /* 1. 전체 대상 (반투명 파란색) */
+    div.res-card-btn.all div[data-testid="stButton"] > button {
+        background-color: rgba(224, 242, 254, 0.75) !important;
+        border: 1.5px solid #7dd3fc !important;
         color: #0369a1 !important;
     }
-    /* 2. Include (반투명 연green) */
-    div.res-card-btn.inc button {
-        background-color: rgba(220, 252, 231, 0.85) !important;
-        border: 1px solid #86efac !important;
+    /* 2. Include (반투명 초록색) */
+    div.res-card-btn.inc div[data-testid="stButton"] > button {
+        background-color: rgba(220, 252, 231, 0.8) !important;
+        border: 1.5px solid #86efac !important;
         color: #15803d !important;
     }
-    /* 3. Exclude (반투명 연red) */
-    div.res-card-btn.exc button {
-        background-color: rgba(254, 226, 226, 0.85) !important;
-        border: 1px solid #fca5a5 !important;
+    /* 3. Exclude (반투명 빨간색) */
+    div.res-card-btn.exc div[data-testid="stButton"] > button {
+        background-color: rgba(254, 226, 226, 0.8) !important;
+        border: 1.5px solid #fca5a5 !important;
         color: #b91c1c !important;
     }
-    /* 4. Full-Text/Manual Needed (반투명 연amber) */
-    div.res-card-btn.pending button {
+    /* 4. Full-Text/Manual Needed (반투명 주황색) */
+    div.res-card-btn.pending div[data-testid="stButton"] > button {
         background-color: rgba(254, 243, 199, 0.85) !important;
-        border: 1px solid #fde047 !important;
+        border: 1.5px solid #fde047 !important;
         color: #b45309 !important;
     }
-    /* 5. Duplicated (반투명 연gray) */
-    div.res-card-btn.dup button {
+    /* 5. Duplicated (반투명 회색) */
+    div.res-card-btn.dup div[data-testid="stButton"] > button {
         background-color: rgba(241, 245, 249, 0.85) !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1.5px solid #cbd5e1 !important;
         color: #475569 !important;
     }
 
@@ -334,7 +336,6 @@ def render_interactive_dashboard(df, key_prefix):
     elif current_filter == "EXC":
         filtered_df = filtered_df[filtered_df["AI 판정"] == "Exclude (제외)"]
         
-        # 💡 Exclude 선택 시 세부 사유 필터 드롭다운 활성화
         exclude_reasons = [
             "전체 제외 사유 보기",
             "Literature without human clinical data",
@@ -344,7 +345,7 @@ def render_interactive_dashboard(df, key_prefix):
             "Held by Taewoong Medical"
         ]
         selected_reason = st.selectbox(
-            "🔍 세부 Exclude 사유 필터:", 
+            "세부 Exclude 사유 필터:", 
             options=exclude_reasons, 
             key=f"{key_prefix}_reason_filter"
         )
@@ -357,10 +358,8 @@ def render_interactive_dashboard(df, key_prefix):
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
+    st.info("**팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
-    # 💡 Editable Table (st.data_editor)
-    # 요청 1: 'AI 판정', 'Conclusion' 제외 나머지 모든 열 수정 불가(disabled) 설정
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
             "AI 판정 (수동 수정 가능)",
@@ -384,7 +383,7 @@ def render_interactive_dashboard(df, key_prefix):
 
     excel_data = convert_df_to_excel(edited_df)
     st.download_button(
-        "📥 현재 목록 Excel(.xlsx) 다운로드",
+        "현재 목록 Excel(.xlsx) 다운로드",
         data=excel_data,
         file_name=f"screening_result_{current_filter.lower()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
