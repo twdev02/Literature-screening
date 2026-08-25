@@ -48,9 +48,9 @@ def to_unicode_bold(text):
 # 📊 Excel(.xlsx) 변환 헬퍼 함수 (유니코드 특수문자 깨짐 완벽 방지)
 # --------------------------------------------------
 def convert_df_to_excel(df_input):
+    import io
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.utils import dataframe_to_rows
 
     # 유니코드 수학 표기용 굵은 문자를 표준 일반 영문으로 변환 (엑셀 서식 호환)
     bold_reverse_map = {
@@ -65,48 +65,48 @@ def convert_df_to_excel(df_input):
                 lambda text: "".join(bold_reverse_map.get(c, c) for c in text)
             )
 
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Screening Results"
-
-    for r in dataframe_to_rows(df_clean, index=False, header=True):
-        ws.append(r)
-
-    header_fill = PatternFill(start_color="0B1A2D", end_color="0B1A2D", fill_type="solid")
-    header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
-    body_font = Font(name="Calibri", size=10)
-    
-    thin_border = Border(
-        left=Side(style='thin', color='E2E8F0'),
-        right=Side(style='thin', color='E2E8F0'),
-        top=Side(style='thin', color='E2E8F0'),
-        bottom=Side(style='thin', color='E2E8F0')
-    )
-
-    for cell in ws[1]:
-        cell.fill = header_fill
-        cell.font = header_font
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
-        for cell in row:
-            cell.font = body_font
-            cell.border = thin_border
-            cell.alignment = Alignment(vertical="top", wrap_text=True)
-            
-            val_str = str(cell.value or "")
-            if val_str.startswith("Include"):
-                cell.font = Font(name="Calibri", size=10, bold=True, color="166534")
-            elif val_str.startswith("Exclude"):
-                cell.font = Font(name="Calibri", size=10, bold=True, color="991B1B")
-
-    for col in ws.columns:
-        max_len = max(len(str(cell.value or '')) for cell in col)
-        col_letter = col[0].column_letter
-        ws.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 50)
-
     excel_io = io.BytesIO()
-    wb.save(excel_io)
+    
+    # pandas 내장 ExcelWriter 활용 (openpyxl 엔진 사용)
+    with pd.ExcelWriter(excel_io, engine='openpyxl') as writer:
+        df_clean.to_excel(writer, index=False, sheet_name='Screening Results')
+        
+        # 오픈파이엑셀 워크시트 객체 추출 후 스타일링 적용
+        ws = writer.sheets['Screening Results']
+
+        header_fill = PatternFill(start_color="0B1A2D", end_color="0B1A2D", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        body_font = Font(name="Calibri", size=10)
+        
+        thin_border = Border(
+            left=Side(style='thin', color='E2E8F0'),
+            right=Side(style='thin', color='E2E8F0'),
+            top=Side(style='thin', color='E2E8F0'),
+            bottom=Side(style='thin', color='E2E8F0')
+        )
+
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
+            for cell in row:
+                cell.font = body_font
+                cell.border = thin_border
+                cell.alignment = Alignment(vertical="top", wrap_text=True)
+                
+                val_str = str(cell.value or "")
+                if val_str.startswith("Include"):
+                    cell.font = Font(name="Calibri", size=10, bold=True, color="166534")
+                elif val_str.startswith("Exclude"):
+                    cell.font = Font(name="Calibri", size=10, bold=True, color="991B1B")
+
+        for col in ws.columns:
+            max_len = max(len(str(cell.value or '')) for cell in col)
+            col_letter = col[0].column_letter
+            ws.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 50)
+
     excel_io.seek(0)
     return excel_io.getvalue()
 
