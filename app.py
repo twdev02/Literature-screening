@@ -185,8 +185,6 @@ st.markdown(
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] { background-color: #0b1a2d !important; color: #ffffff !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
-    
-    
 </style>
 """,
     unsafe_allow_html=True,
@@ -235,7 +233,7 @@ def clear_history():
     st.session_state["show_reset_msg"] = True  
 
 # --------------------------------------------------
-# 🖱️ 클릭 및 수동 수정 가능한 대시보드 함수
+# 🖱️ 순수 HTML/JS 기반 반투명 색상 클릭 카드 대시보드
 # --------------------------------------------------
 def render_interactive_dashboard(df, key_prefix):
     total_cnt = len(df)
@@ -244,37 +242,101 @@ def render_interactive_dashboard(df, key_prefix):
     pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    # HTML 쿼리파라미터 이벤트 처리
+    selected_filter = st.query_params.get(f"{key_prefix}_dash_filter", None)
+    if selected_filter:
+        st.session_state["active_dashboard_filter"] = selected_filter
+
+    html_code = f"""
+    <style>
+        .dash-container {{
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }}
+        .dash-card {{
+            flex: 1;
+            padding: 16px 8px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            user-select: none;
+        }}
+        .dash-card:hover {{
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }}
+        .dash-label {{
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }}
+        .dash-val {{
+            font-size: 24px;
+            font-weight: 900;
+            line-height: 1.1;
+        }}
+
+        /* 반투명 파스텔 톤 색상 */
+        .card-all {{ background-color: rgba(224, 242, 254, 0.85); border: 1.5px solid #38bdf8; }}
+        .card-all .dash-label {{ color: #0369a1; }}
+        .card-all .dash-val {{ color: #0284c7; }}
+
+        .card-inc {{ background-color: rgba(220, 252, 231, 0.9); border: 1.5px solid #4ade80; }}
+        .card-inc .dash-label {{ color: #15803d; }}
+        .card-inc .dash-val {{ color: #16a34a; }}
+
+        .card-exc {{ background-color: rgba(254, 226, 226, 0.9); border: 1.5px solid #f87171; }}
+        .card-exc .dash-label {{ color: #b91c1c; }}
+        .card-exc .dash-val {{ color: #dc2626; }}
+
+        .card-pending {{ background-color: rgba(254, 243, 199, 0.95); border: 1.5px solid #facc15; }}
+        .card-pending .dash-label {{ color: #b45309; }}
+        .card-pending .dash-val {{ color: #d97706; }}
+
+        .card-dup {{ background-color: rgba(241, 245, 249, 0.95); border: 1.5px solid #94a3b8; }}
+        .card-dup .dash-label {{ color: #475569; }}
+        .card-dup .dash-val {{ color: #64748b; }}
+    </style>
+
+    <div class="dash-container">
+        <div class="dash-card card-all" onclick="selectFilter('ALL')">
+            <div class="dash-label">전체 대상</div>
+            <div class="dash-val">{total_cnt}건</div>
+        </div>
+        <div class="dash-card card-inc" onclick="selectFilter('INC')">
+            <div class="dash-label">Include (포함)</div>
+            <div class="dash-val">{inc_cnt}건</div>
+        </div>
+        <div class="dash-card card-exc" onclick="selectFilter('EXC')">
+            <div class="dash-label">Exclude (제외)</div>
+            <div class="dash-val">{exc_cnt}건</div>
+        </div>
+        <div class="dash-card card-pending" onclick="selectFilter('PENDING')">
+            <div class="dash-label">Full-Text / Manual</div>
+            <div class="dash-val">{pending_cnt}건</div>
+        </div>
+        <div class="dash-card card-dup" onclick="selectFilter('DUP')">
+            <div class="dash-label">Duplicated (중복)</div>
+            <div class="dash-val">{dup_cnt}건</div>
+        </div>
+    </div>
+
+    <script>
+    function selectFilter(filterName) {{
+        const url = new URL(window.parent.location.href);
+        url.searchParams.set('{key_prefix}_dash_filter', filterName);
+        window.parent.location.href = url.href;
+    }}
+    </script>
+    """
     
-    with c1:
-        st.markdown('<div class="res-card-btn all">', unsafe_allow_html=True)
-        if st.button(f"전체 대상\n\n{total_cnt}건", key=f"{key_prefix}_btn_all", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "ALL"
-        st.markdown('</div>', unsafe_allow_html=True)
-            
-    with c2:
-        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
-        if st.button(f"Include (포함)\n\n{inc_cnt}건", key=f"{key_prefix}_btn_inc", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "INC"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c3:
-        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
-        if st.button(f"Exclude (제외)\n\n{exc_cnt}건", key=f"{key_prefix}_btn_exc", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "EXC"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c4:
-        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
-        if st.button(f"Full-Text / Manual\n\n{pending_cnt}건", key=f"{key_prefix}_btn_pending", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "PENDING"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c5:
-        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
-        if st.button(f"Duplicated (중복)\n\n{dup_cnt}건", key=f"{key_prefix}_btn_dup", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "DUP"
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.components.v1.html(html_code, height=95)
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
@@ -308,6 +370,7 @@ def render_interactive_dashboard(df, key_prefix):
     st.markdown("<br>", unsafe_allow_html=True)
     st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
+    # 💡 1번 반영: AI 판정, Conclusion 제외 나머지 모든 열 수정 불가(disabled) 설정
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
             "AI 판정 (수동 수정 가능)",
@@ -337,7 +400,7 @@ def render_interactive_dashboard(df, key_prefix):
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=False
     )
-    
+
 # --------------------------------------------------
 # ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
