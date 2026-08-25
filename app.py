@@ -756,7 +756,7 @@ if not due_category:
             st.markdown(
                 """
                 <div class="card-title">TARGET PRODUCTS</div>
-                <div class="card-value">Taewoong Medical’s Stent Product Lines</div>
+                <div class="card-value">Taewoong Medical's Stent Product Lines</div>
                 <div class="card-desc">아래 상자를 클릭하여 세부 라인업 및 제품 카탈로그 정보를 확인하세요.</div>
                 """,
                 unsafe_allow_html=True,
@@ -1011,7 +1011,7 @@ if not due_category:
                     
                     with d_sub1:
                         spaxus_models = [
-                            ("SPAXUS", "drainage_spaxus.png", "Niti-S SPAXUS™ Stent is indicated for transgastric or transduodenal drainage of a pancreatic pseudocyst or a walled off necrosis or a gallbladder or the biliary tract."),
+                            ("SPAXUS", "drainage_spaxus.png", "Niti-S SPAXUS(TM) Stent is indicated for transgastric or transduodenal drainage of a pancreatic pseudocyst or a walled off necrosis or a gallbladder or the biliary tract."),
                         ]
                         with st.container(border=True):
                             for m_name, m_img, m_desc in spaxus_models:
@@ -1031,7 +1031,7 @@ if not due_category:
 
                     with d_sub2:
                         hot_spaxus_models = [
-                            ("Hot SPAXUS", "drainage_hot_spaxus.png", "Niti-S Hot SPAXUS™ Stent is indicated for transgastric or transduodenal drainage of a pancreatic pseudocyst or a walled off necrosis or a gallbladder or the biliary tract."),
+                            ("Hot SPAXUS", "drainage_hot_spaxus.png", "Niti-S Hot SPAXUS(TM) Stent is indicated for transgastric or transduodenal drainage of a pancreatic pseudocyst or a walled off necrosis or a gallbladder or the biliary tract."),
                         ]
                         with st.container(border=True):
                             for m_name, m_img, m_desc in hot_spaxus_models:
@@ -1051,7 +1051,7 @@ if not due_category:
 
                     with d_sub3:
                         nagi_models = [
-                            ("Nagi", "drainage_nagi.png", "Niti-S Nagi™ Stent is indicated for drainage of a pancreatic pseudocyst through a transgastric or transduodenal approach."),
+                            ("Nagi", "drainage_nagi.png", "Niti-S Nagi(TM) Stent is indicated for drainage of a pancreatic pseudocyst through a transgastric or transduodenal approach."),
                         ]
                         with st.container(border=True):
                             for m_name, m_img, m_desc in nagi_models:
