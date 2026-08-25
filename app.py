@@ -186,24 +186,26 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    /* 💡 인터랙티브 대시보드 버튼 스타일 */
+    /* 💡 인터랙티브 대시보드 버튼 스타일 (요청 2: 반투명 색상 배경 적용) */
     div.res-card-btn button {
         width: 100% !important;
         border-radius: 10px !important;
         padding: 12px 10px !important;
         text-align: center !important;
-        border: 1px solid #e2e8f0 !important;
-        background-color: #f8fafc !important;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        background-color: rgba(248, 250, 252, 0.65) !important;
+        backdrop-filter: blur(4px) !important;
         transition: all 0.2s ease !important;
+        color: #334155 !important;
     }
     div.res-card-btn button:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
     }
-    div.res-card-btn.inc button { border-top: 4px solid #10b981 !important; background: #f0fdf4 !important; }
-    div.res-card-btn.exc button { border-top: 4px solid #ef4444 !important; background: #fef2f2 !important; }
-    div.res-card-btn.pending button { border-top: 4px solid #f59e0b !important; background: #fffbeb !important; }
-    div.res-card-btn.dup button { border-top: 4px solid #64748b !important; background: #f8fafc !important; }
+    div.res-card-btn.inc button { border-top: 4px solid #10b981 !important; background: rgba(240, 253, 244, 0.75) !important; color: #166534 !important; }
+    div.res-card-btn.exc button { border-top: 4px solid #ef4444 !important; background: rgba(254, 242, 242, 0.75) !important; color: #991b1b !important; }
+    div.res-card-btn.pending button { border-top: 4px solid #f59e0b !important; background: rgba(255, 251, 235, 0.75) !important; color: #92400e !important; }
+    div.res-card-btn.dup button { border-top: 4px solid #64748b !important; background: rgba(248, 250, 252, 0.75) !important; color: #334155 !important; }
     
     .card-btn-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: block; }
     .card-btn-val { font-size: 22px; font-weight: 800; display: block; line-height: 1.2; }
@@ -334,19 +336,26 @@ def render_interactive_dashboard(df, key_prefix):
     st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
     # 💡 Editable Table (st.data_editor)
+    # 요청 1: 'AI 판정', 'Conclusion' 제외 나머지 모든 열 수정 불가(disabled) 설정
+    column_config_dict = {
+        "AI 판정": st.column_config.SelectboxColumn(
+            "AI 판정 (수동 수정 가능)",
+            options=["Include (포함)", "Exclude (제외)", "Manual Review Needed", "Duplicated"],
+            required=True
+        ),
+        "Conclusion": st.column_config.TextColumn("Conclusion (수동 수정 가능)", width="large"),
+    }
+    
+    for col_name in filtered_df.columns:
+        if col_name not in ["AI 판정", "Conclusion"]:
+            column_config_dict[col_name] = st.column_config.Column(disabled=True)
+
     edited_df = st.data_editor(
         filtered_df,
         key=f"{key_prefix}_editor_{current_filter}",
         hide_index=True,
         use_container_width=True,
-        column_config={
-            "AI 판정": st.column_config.SelectboxColumn(
-                "AI 판정 (수동 수정 가능)",
-                options=["Include (포함)", "Exclude (제외)", "Manual Review Needed", "Duplicated"],
-                required=True
-            ),
-            "Conclusion": st.column_config.TextColumn("Conclusion (수동 수정 가능)", width="large"),
-        }
+        column_config=column_config_dict
     )
 
     excel_data = convert_df_to_excel(edited_df)
