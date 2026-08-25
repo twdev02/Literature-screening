@@ -154,27 +154,28 @@ st.markdown(
     .card-value { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px; white-space: normal !important; word-break: keep-all !important; }
     .card-desc { font-size: 12px; color: #64748b; margin-bottom: 12px; word-break: keep-all !important; }
     
-    /* 💡 남색 브랜드 컬러 배너 스타일 적용 */
+    /* ✨ 세련된 현대적 스티키 네이비 카드 디자인 */
     .selected-category-box { 
-        background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%); 
+        background-color: #0f172a; /* 딥 네이비 단색으로 깔끔하게 */
+        border: 1px solid #1e293b; /* 과한 그림자 대신 얇고 은은한 테두리 */
         border-radius: 12px; 
-        padding: 18px 24px; 
-        margin-bottom: 18px; 
-        box-shadow: 0 4px 12px rgba(11, 26, 45, 0.15);
-        border-left: 5px solid #00a8ff;
+        padding: 20px 26px; 
+        margin-bottom: 20px; 
+        /* border-left 제거 완료 */
     }
     .selected-category-label { 
         font-size: 11px; 
-        font-weight: 800; 
-        color: #38bdf8; 
+        font-weight: 700; 
+        color: #0284c7; /* 차분하고 고급스러운 블루 */
         text-transform: uppercase; 
-        letter-spacing: 0.8px; 
-        margin-bottom: 4px; 
+        letter-spacing: 1.2px; /* 자간을 넓혀 트렌디한 느낌 연출 */
+        margin-bottom: 6px; 
     }
     .selected-category-title { 
-        font-size: 20px; 
+        font-size: 22px; 
         font-weight: 800; 
-        color: #ffffff; 
+        color: #f8fafc; /* 완전 완전 생흰색보다는 은은한 아이보리 화이트 */
+        letter-spacing: -0.5px;
         margin: 0; 
     }
     
@@ -1021,14 +1022,14 @@ else:
 # ✨ 2단계 세그먼티드 컨트롤 메뉴
 # --------------------------------------------------
 sub_model_html = (
-    f'<div style="font-size: 14px; font-weight: 500; color: #cbd5e1; margin-top: 4px;">{sub_model}</div>'
+    f'<div style="font-size: 14px; font-weight: 500; color: #94a3b8; margin-top: 4px;">{sub_model}</div>'
     if sub_model else ""
 )
 
 st.markdown(
     f"""
 <div class="selected-category-box">
-    <div class="selected-category-label">SELECTED CATEGORY</div>
+    <div class="selected-category-label">Selected Category</div>
     <div class="selected-category-title">{due_category}</div>
     {sub_model_html}
 </div>
