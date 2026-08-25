@@ -1599,7 +1599,7 @@ elif selected_mode == "PMID 리스트 업로드":
                         titles.append(title if title else "조회 실패")
                         abstracts.append("No Abstract or Full-text Available")
                         results.append("Manual Review Needed")
-                        conclusions.append(to_unicode_bold(f"Insufficient information: No abstract or open-access full-text available. Manual retrieval and review required."))
+                        conclusions.append(to_unicode_bold("No abstract or open-access full-text available. Manual retrieval and review required."))
                         eval_sources.append(eval_source)
                     else:
                         identifier = pmid
@@ -1838,7 +1838,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                     titles.append(title if title else "조회 실패")
                     abstracts.append("No Abstract or Full-text Available")
                     results.append("Manual Review Needed")
-                    conclusions.append(to_unicode_bold(f"Insufficient information: No abstract or open-access full-text available. Manual retrieval and review required."))
+                    conclusions.append(to_unicode_bold("No abstract or open-access full-text available. Manual retrieval and review required."))
                     eval_sources.append(eval_source)
                 else:
                     identifier = pmid
@@ -1940,7 +1940,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                         titles.append(title)
                         abstracts.append("No Abstract Available")
                         results.append("Manual Review Needed")
-                        conclusions.append(to_unicode_bold(f"Insufficient information: Abstract text is missing in the GIE RIS file. Manual full-text review is required."))
+                        conclusions.append(to_unicode_bold("Abstract text is missing in the GIE RIS file. Manual full-text review is required."))
                         eval_sources.append(eval_source)
                     else:
                         if identifier in st.session_state.get("screened_history", {}):
@@ -2115,7 +2115,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
                         titles.append(title)
                         abstracts.append("No Summary Available")
                         results.append("Manual Review Needed")
-                        conclusions.append(to_unicode_bold(f"Insufficient information: No brief summary available for {nct_id}."))
+                        conclusions.append(to_unicode_bold(f"No brief summary available for {nct_id}. Manual review required."))
                         eval_sources.append(eval_source)
                     else:
                         if identifier in st.session_state.get("screened_history", {}):
