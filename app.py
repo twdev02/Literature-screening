@@ -372,7 +372,7 @@ def render_interactive_dashboard(df, key_prefix):
     with c4:
         with st.container(key=f"screen_card_pending_{key_prefix}"):
             if st.button(
-                f"Review Required (확인 필요)\n\n{pending_cnt}건",
+                f"Full-Text / Manual\n\n{pending_cnt}건",
                 key=f"{key_prefix}_btn_pending",
                 use_container_width=True
             ):
@@ -417,7 +417,7 @@ def render_interactive_dashboard(df, key_prefix):
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("**팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
+    st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
     # --------------------------------------------------
     # AI 판정 표시값과 내부 저장값 분리
@@ -425,48 +425,44 @@ def render_interactive_dashboard(df, key_prefix):
     # - 화면의 드롭다운에서는 "Review Required"로 표시
     # --------------------------------------------------
     display_df = filtered_df.copy()
+    if "AI 판정" in display_df.columns:
+        display_df["AI 판정"] = display_df["AI 판정"].replace({
+            "Manual Review Needed": "Review Required"
+        })
 
-display_df["AI 판정"] = display_df["AI 판정"].replace({
-    "Include (포함)": "Include",
-    "Exclude (제외)": "Exclude",
-    "Manual Review Needed": "Review Required",
-    "Duplicated": "Duplicated"
-})
+    column_config_dict = {
+        "AI 판정": st.column_config.SelectboxColumn(
+            "AI 판정 (수동 수정 가능)",
+            options=[
+                "Include (포함)",
+                "Exclude (제외)",
+                "Review Required",
+                "Duplicated"
+            ],
+            required=True
+        ),
+        "Conclusion": st.column_config.TextColumn("Conclusion (수동 수정 가능)", width="large"),
+    }
+    
+    for col_name in display_df.columns:
+        if col_name not in ["AI 판정", "Conclusion"]:
+            column_config_dict[col_name] = st.column_config.Column(disabled=True)
 
-column_config_dict = {
-    "AI 판정": st.column_config.SelectboxColumn(
-        "AI 판정",
-        options=[
-            "Include",
-            "Exclude",
-            "Review Required",
-            "Duplicated"
-        ],
-        required=True
-    ),
-    "Conclusion": st.column_config.TextColumn(
-        "Conclusion",
-        width="large"
-    ),
-}
+    edited_df = st.data_editor(
+        display_df,
+        key=f"{key_prefix}_editor_{current_filter}",
+        hide_index=True,
+        use_container_width=True,
+        column_config=column_config_dict
+    )
 
-edited_display_df = st.data_editor(
-    display_df,
-    key=f"{key_prefix}_editor_{current_filter}",
-    hide_index=True,
-    use_container_width=True,
-    column_config=column_config_dict
-)
-
-# 다시 내부 저장값으로 복원
-edited_df = edited_display_df.copy()
-
-edited_df["AI 판정"] = edited_df["AI 판정"].replace({
-    "Include": "Include (포함)",
-    "Exclude": "Exclude (제외)",
-    "Review Required": "Manual Review Needed",
-    "Duplicated": "Duplicated"
-})
+    # 화면에서 변경된 "Review Required"를 실제 내부값인
+    # "Manual Review Needed"로 되돌려 기존 로직/데이터 구조를 유지
+    edited_df = edited_df.copy()
+    if "AI 판정" in edited_df.columns:
+        edited_df["AI 판정"] = edited_df["AI 판정"].replace({
+            "Review Required": "Manual Review Needed"
+        })
 
     excel_data = convert_df_to_excel(edited_df)
     st.download_button(
