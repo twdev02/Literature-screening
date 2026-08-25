@@ -358,7 +358,7 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    /* 💡 요약 상자 전용 대시보드 카드 CSS (일반 PICO 버튼 영향 무) */
+    /* 💡 요약 카드 박스별 은은한 배경색 및 포인트 컬러 스타일 */
     .dashboard-card-btn button {
         width: 100% !important;
         border-radius: 10px !important;
@@ -372,15 +372,32 @@ st.markdown(
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
     }
-    .dashboard-card-btn.inc button { border-top: 4px solid #10b981 !important; background: #f0fdf4 !important; }
-    .dashboard-card-btn.exc button { border-top: 4px solid #ef4444 !important; background: #fef2f2 !important; }
-    .dashboard-card-btn.pending button { border-top: 4px solid #f59e0b !important; background: #fffbeb !important; }
-    .dashboard-card-btn.dup button { border-top: 4px solid #64748b !important; background: #f8fafc !important; }
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
+    
+    /* 전체 대상: 소프트 블루 */
+    .dashboard-card-btn button {
+        border-top: 4px solid #0284c7 !important;
+        background: #f0f9ff !important;
+    }
+    /* Include: 연한 파스텔 초록 */
+    .dashboard-card-btn.inc button { 
+        border-top: 4px solid #10b981 !important; 
+        background: #f0fdf4 !important; 
+    }
+    /* Exclude: 연한 파스텔 빨강 */
+    .dashboard-card-btn.exc button { 
+        border-top: 4px solid #ef4444 !important; 
+        background: #fef2f2 !important; 
+    }
+    /* Review Needed: 연한 파스텔 노랑/주황 */
+    .dashboard-card-btn.pending button { 
+        border-top: 4px solid #f59e0b !important; 
+        background: #fffbeb !important; 
+    }
+    /* Duplicated: 연한 슬레이트 회색 */
+    .dashboard-card-btn.dup button { 
+        border-top: 4px solid #64748b !important; 
+        background: #f8fafc !important; 
+    }
 # --------------------------------------------------
 # Session State 메모리 저장소 초기화
 # --------------------------------------------------
