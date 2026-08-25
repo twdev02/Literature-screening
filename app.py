@@ -7,7 +7,7 @@ import google.generativeai as genai
 import openpyxl
 import pandas as pd
 import requests
-import rispy  # 👈 GIE RIS 파일 파싱용
+import rispy  # GIE RIS 파일 파싱용
 import streamlit as st
 
 st.set_page_config(
@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # --------------------------------------------------
-# 🛡️ 브라우저 새로고침(F5) 및 탭 닫기 이탈 방지 스크립트
+# 브라우저 새로고침(F5) 및 탭 닫기 이탈 방지 스크립트
 # --------------------------------------------------
 st.components.v1.html(
     """
@@ -30,7 +30,7 @@ st.components.v1.html(
 )
 
 # --------------------------------------------------
-# 🔤 마크다운 별표(**)를 유니코드 굵은 글씨로 변환하는 함수
+# 마크다운 별표(**)를 유니코드 굵은 글씨로 변환하는 함수
 # --------------------------------------------------
 def to_unicode_bold(text):
     if not text:
@@ -46,14 +46,14 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# 📊 Excel(.xlsx) 변환 헬퍼 함수 (유니코드 폰트 어긋남 완전 방지)
+# Excel(.xlsx) 변환 헬퍼 함수
 # --------------------------------------------------
 def convert_df_to_excel(df_input):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
     bold_reverse_map = {
         '𝐀': 'A', '𝐁': 'B', '𝐂': 'C', '𝐃': 'D', '𝐄': 'E', '𝐅': 'F', '𝐆': 'G', '𝐇': 'H', '𝐈': 'I', '𝐉': 'J', '𝐊': 'K', '𝐋': 'L', '𝐌': 'M', '𝐍': 'N', '𝐎': 'O', '𝐏': 'P', '𝐐': 'Q', '𝐑': 'R', '𝐒': 'S', '𝐓': 'T', '𝐔': 'U', '𝐕': 'V', '𝐖': 'W', '𝐗': 'X', '𝐘': 'Y', '𝐙': 'Z',
-        '𝐚': 'a', '𝐛': 'b', '𝐜': 'c', '𝐝': 'd', '𝐞': 'e', '𝐟': 'f', '𝐠': 'g', '𝐡': 'h', '𝐢': 'i', '𝐣': 'j', '𝐤': 'k', '𝐥': 'l', '𝐦': 'm', '𝐧': 'n', '𝐨': 'o', '𝐩': 'p', '𝐪': 'q', '𝐫': 'r', '𝐬': 's', '𝐭': 't', '𝐮': 'u', '𝐯': 'v', '𝐰': 'w', '𝐱': 'x', '𝐲': 'y', '𝐳': 'z'
+        '𝐚': 'a', '𝐛': 'b', '𝐜': 'c', 'd': 'd', '𝐞': 'e', '𝐟': 'f', '𝐠': 'g', '𝐡': 'h', '𝐢': 'i', '𝐣': 'j', '𝐤': 'k', '𝐥': 'l', '𝐦': 'm', '𝐧': 'n', '𝐨': 'o', '𝐩': 'p', '𝐪': 'q', '𝐫': 'r', '𝐬': 's', '𝐭': 't', '𝐮': 'u', '𝐯': 'v', '𝐰': 'w', '𝐱': 'x', '𝐲': 'y', '𝐳': 'z'
     }
     
     df_clean = df_input.copy()
@@ -186,7 +186,6 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    /* 💡 원본 컬러 카드 디자인 100% 복원 + 클릭 가능 스타일 */
     .res-card-box {
         position: relative;
         background: #f8fafc;
@@ -212,7 +211,6 @@ st.markdown(
     .res-card-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
     .res-card-val { font-size: 22px; font-weight: 800; }
 
-    /* Streamlit 기본 버튼 투명화 (카드 전체 클릭 지원) */
     div[data-testid="stColumn"] div.stButton > button {
         border: none !important;
         background: transparent !important;
@@ -221,9 +219,12 @@ st.markdown(
         box-shadow: none !important;
     }
 </style>
+""",
+    unsafe_allow_html=True,
+)
 
 # --------------------------------------------------
-# ⚙️ Session State 메모리 저장소 초기화
+# Session State 메모리 저장소 초기화
 # --------------------------------------------------
 if "tab1_result" not in st.session_state:
     st.session_state["tab1_result"] = None
@@ -265,7 +266,7 @@ def clear_history():
     st.session_state["show_reset_msg"] = True  
 
 # --------------------------------------------------
-# 🖱️ 클릭 및 수동 수정 가능한 대시보드 함수
+# 클릭 및 수동 수정 가능한 대시보드 함수
 # --------------------------------------------------
 def render_interactive_dashboard(df, key_prefix):
     total_cnt = len(df)
@@ -276,7 +277,6 @@ def render_interactive_dashboard(df, key_prefix):
 
     c1, c2, c3, c4, c5 = st.columns(5)
     
-    # 원본 카드의 HTML UI 내부에 버튼을 결합
     with c1:
         if st.button(f"전체_{total_cnt}", key=f"{key_prefix}_btn_all", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "ALL"
@@ -302,7 +302,6 @@ def render_interactive_dashboard(df, key_prefix):
             st.session_state["active_dashboard_filter"] = "DUP"
         st.markdown(f'<div class="res-card-box dup"><div class="res-card-label">DUPLICATED (중복)</div><div class="res-card-val">{dup_cnt}건</div></div>', unsafe_allow_html=True)
 
-    # (이하 필터링 및 data_editor 로직 동일)
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
 
@@ -320,7 +319,7 @@ def render_interactive_dashboard(df, key_prefix):
             "Held by Taewoong Medical"
         ]
         selected_reason = st.selectbox(
-            "🔍 세부 Exclude 사유 필터:", 
+            "세부 Exclude 사유 필터:", 
             options=exclude_reasons, 
             key=f"{key_prefix}_reason_filter"
         )
@@ -333,7 +332,6 @@ def render_interactive_dashboard(df, key_prefix):
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
     edited_df = st.data_editor(
         filtered_df,
@@ -352,7 +350,7 @@ def render_interactive_dashboard(df, key_prefix):
 
     excel_data = convert_df_to_excel(edited_df)
     st.download_button(
-        "📥 현재 목록 Excel(.xlsx) 다운로드",
+        "현재 목록 Excel(.xlsx) 다운로드",
         data=excel_data,
         file_name=f"screening_result_{current_filter.lower()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -360,10 +358,9 @@ def render_interactive_dashboard(df, key_prefix):
     )
 
 # --------------------------------------------------
-# ⚙️ 사이드바 UI 구성
+# 사이드바 UI 구성
 # --------------------------------------------------
 with st.sidebar:
-    # 1. Gemini API 키 불러오기 (클라우드 Secrets 우선)
     try:
         default_api_key = st.secrets["GEMINI_API_KEY"]
     except Exception:
@@ -385,13 +382,11 @@ with st.sidebar:
     )
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
-    # 2. NCBI API 키 불러오기 (화면 입력창 숨김, 백그라운드에서만 로드)
     try:
         ncbi_api_key = st.secrets["NCBI_API_KEY"]
     except Exception:
         ncbi_api_key = ""
 
-    # 연결 상태 표시
     if api_key:
         st.success("Gemini API Key 등록 완료")
     else:
@@ -487,7 +482,6 @@ with st.sidebar:
     history_cnt = len(st.session_state.get("screened_history", {}))
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
 
-    # 💡 이전 스크리닝 이력 복원
     with st.expander("이전 스크리닝 결과 불러오기"):
         history_files = st.file_uploader(
             "과거 스크리닝 결과 파일 선택",
@@ -545,7 +539,7 @@ with st.sidebar:
         clear_history()
 
     if st.session_state.get("show_reset_msg", False):
-        st.success("✅ 누적 기록 및 업로드 파일이  \n성공적으로 초기화되었습니다.")
+        st.success("누적 기록 및 업로드 파일이 성공적으로 초기화되었습니다.")
         st.session_state["show_reset_msg"] = False  
         time.sleep(2)  
         st.rerun()    
@@ -562,11 +556,12 @@ with st.sidebar:
 # 🏠 1. 메인 홈 대시보드
 # --------------------------------------------------
 if not due_category:
+    dept_info = "Development Department &nbsp;|&nbsp; Development 2nd Team"
     st.markdown(
-        """<div class="hero-container">
+        f"""<div class="hero-container">
 <div class="hero-header-flex">
 <div class="hero-tag">TAEWOONG MEDICAL CLINICAL EVALUATION PLATFORM</div>
-<div class="dept-tag">Development Department &nbsp;|&nbsp; Development 2nd Team</div>
+<div class="dept-tag">{dept_info}</div>
 </div>
 <div class="hero-title">AI 문헌 스크리닝 시스템</div>
 <div class="hero-subtitle">Medical Device Regulatory Compliance & Systematic Literature Review Powered by Gemini 3.6 Flash</div>
@@ -592,7 +587,6 @@ if not due_category:
                     "Biliary", "Esophageal", "Pyloric/Duodenal", "Colonic", "Drainage"
                 ])
 
-                # 1. Biliary Stent
                 with c_tab1:
                     st.markdown("#### **Niti-S & ComVi Biliary Stent**")
                     b_sub1, b_sub2, b_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -611,7 +605,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Biliary Uncovered Stent [{m_name}]</div>'
@@ -636,7 +630,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Biliary Covered Stent [{m_name}]</div>'
@@ -658,7 +652,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">ComVi Biliary Stent [{m_name}]</div>'
@@ -667,7 +661,6 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 2. Esophageal Stent
                 with c_tab2:
                     st.markdown("#### **Niti-S Esophageal Stent**")
                     e_sub1 = st.tabs(["Covered Stent"])[0]
@@ -689,7 +682,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Esophageal Covered Stent [{m_name}]</div>'
@@ -698,7 +691,6 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 3. Pyloric/Duodenal Stent
                 with c_tab3:
                     st.markdown("#### **Niti-S & ComVi Pyloric/Duodenal Stent**")
                     p_sub1, p_sub2, p_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -714,7 +706,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Pyloric/Duodenal Uncovered Stent [{m_name}]</div>'
@@ -736,7 +728,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Pyloric/Duodenal Covered Stent [{m_name}]</div>'
@@ -757,7 +749,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">ComVi Pyloric/Duodenal Stent [{m_name}]</div>'
@@ -766,7 +758,6 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 4. Colonic Stent
                 with c_tab4:
                     st.markdown("#### **Niti-S & ComVi Enteral Colonic Stent**")
                     col_sub1, col_sub2, col_sub3 = st.tabs(["Uncovered Stent", "Covered Stent", "ComVi Stent"])
@@ -783,7 +774,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Enteral Colonic Uncovered Stent [{m_name}]</div>'
@@ -805,7 +796,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Enteral Colonic Covered Stent [{m_name}]</div>'
@@ -825,7 +816,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">ComVi Enteral Colonic Stent [{m_name}]</div>'
@@ -834,7 +825,6 @@ if not due_category:
                                     )
                                 st.divider()
 
-                # 5. Drainage Stent
                 with c_tab5:
                     st.markdown("#### **Niti-S Drainage Stent**")
                     d_sub1, d_sub2, d_sub3 = st.tabs(["SPAXUS Stent", "Hot SPAXUS Stent", "Nagi Stent"])
@@ -850,7 +840,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S SPAXUS Stent</div>'
@@ -870,7 +860,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Hot SPAXUS Stent</div>'
@@ -890,7 +880,7 @@ if not due_category:
                                     if os.path.exists(m_img):
                                         st.image(m_img, use_container_width=True)
                                     else:
-                                        st.caption(f"📷 {m_img} 이미지 등록 필요")
+                                        st.caption(f"이미지 등록 필요: {m_img}")
                                 with c2:
                                     st.markdown(
                                         f'<div class="prod-item-title">Niti-S Nagi Stent</div>'
@@ -924,7 +914,7 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅
+# 세부 모델별 프롬프트 및 PICO 키워드 세팅
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -1141,235 +1131,6 @@ else:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # --------------------------------------------------
-# API 기능 및 파싱 함수들
-# --------------------------------------------------
-def parse_pico_input(text):
-    if not text or not text.strip(): return ""
-    raw_keywords = text.replace(",", "\n").split("\n")
-    keywords = [kw.strip() for kw in raw_keywords if kw.strip()]
-    if not keywords: return ""
-    formatted = [kw if '"' in kw or "[" in kw else f"({kw})" for kw in keywords]
-    return formatted[0] if len(formatted) == 1 else f"({' OR '.join(formatted)})"
-
-def search_pubmed_pmids_pico(p_text="", i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key="", direct_query=""):
-    if direct_query:
-        full_query = direct_query
-    else:
-        query_parts = []
-        for q in [parse_pico_input(t) for t in [p_text, i_text, c_text, o_text]]:
-            if q: query_parts.append(q)
-        full_query = " AND ".join(query_parts)
-        
-    if not full_query: return [], ""
-
-    min_date_str = f"{start_year}/{int(start_month):02d}/01"
-    max_date_str = f"{end_year}/{int(end_month):02d}/31"
-    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-
-    params_count = {
-        "db": "pubmed", "term": full_query, "retmode": "json", "retmax": 0,
-        "datetype": "pdat", "mindate": min_date_str, "maxdate": max_date_str,
-    }
-    if ncbi_api_key: params_count["api_key"] = ncbi_api_key
-
-    try:
-        res_count = requests.get(url, params=params_count, timeout=10).json()
-        total_found = int(res_count.get("esearchresult", {}).get("count", 0))
-        actual_retmax = total_found if fetch_all else min(max_results, total_found)
-        if actual_retmax == 0: return [], full_query
-
-        params_fetch = params_count.copy()
-        params_fetch["retmax"] = actual_retmax
-
-        response = requests.get(url, params=params_fetch, timeout=10)
-        pmid_list = response.json().get("esearchresult", {}).get("idlist", [])
-        return pmid_list, full_query
-    except Exception as e:
-        st.error(f"PubMed 검색 오류: {str(e)}")
-        return [], full_query
-
-def fetch_pubmed_by_pmid(pmid, ncbi_api_key=""):
-    pmid = str(pmid).replace(".0", "").strip()
-    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml"
-    if ncbi_api_key: url += f"&api_key={ncbi_api_key}"
-        
-    try:
-        response = requests.get(url, timeout=10)
-        if response.status_code != 200:
-            return None, None, None, f"NCBI 서버 통신 실패 (코드 {response.status_code})"
-
-        root = ET.fromstring(response.content)
-        article = root.find(".//Article")
-        if article is None:
-            return None, None, None, "존재하지 않는 PMID이거나 정보가 없습니다."
-
-        title_elem = article.find(".//ArticleTitle")
-        title = "".join(title_elem.itertext()).strip() if title_elem is not None else "제목 없음"
-
-        pmcid = None
-        pmcid_elem = root.find(".//ArticleIdList/ArticleId[@IdType='pmc']")
-        if pmcid_elem is not None:
-            pmcid = pmcid_elem.text.strip() 
-
-        abstract_elem = article.find(".//Abstract")
-        if abstract_elem is None:
-            abstract_elem = root.find(".//OtherAbstract")
-
-        abstract_text = "".join(abstract_elem.itertext()).strip() if abstract_elem is not None else None
-
-        return title, abstract_text, pmcid, "성공"
-    except Exception as e:
-        return None, None, None, f"데이터 파싱 에러: {str(e)}"
-
-def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
-    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id={pmcid}&retmode=xml"
-    if ncbi_api_key: url += f"&api_key={ncbi_api_key}"
-    try:
-        response = requests.get(url, timeout=15)
-        if response.status_code != 200: return None
-        root = ET.fromstring(response.content)
-        body_elem = root.find(".//body")
-        if body_elem is None: return None
-        full_text = "".join(body_elem.itertext()).strip()
-        return re.sub(r'\s+', ' ', full_text)
-    except Exception:
-        return None
-
-def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, fetch_all=False, max_results=20):
-    url = "https://clinicaltrials.gov/api/v2/studies"
-    page_size = 1000 if fetch_all else min(max_results, 1000)
-    
-    params = {
-        "pageSize": page_size,
-        "format": "json",
-        "countTotal": "true"
-    }
-    if condition: params["query.cond"] = condition
-    if intervention: params["query.intr"] = intervention
-    
-    if status_filters:
-        params["filter.overallStatus"] = ",".join(status_filters)
-        
-    if type_filters:
-        params["filter.studyType"] = ",".join(type_filters)
-    
-    results = []
-    page_token = None
-    first_url = None
-
-    try:
-        while True:
-            current_params = params.copy()
-            if page_token:
-                current_params["pageToken"] = page_token
-            
-            response = requests.get(url, params=current_params, timeout=15)
-            if response.status_code != 200: 
-                return [], "API 통신 에러"
-            
-            if first_url is None:
-                first_url = response.url
-                
-            data = response.json()
-            studies = data.get("studies", [])
-            
-            for study in studies:
-                protocol = study.get("protocolSection", {})
-                ident = protocol.get("identificationModule", {})
-                desc = protocol.get("descriptionModule", {})
-                status_mod = protocol.get("statusModule", {})
-                
-                nct_id = ident.get("nctId", "Unknown")
-                title = desc.get("briefTitle", "제목 없음")
-                summary = desc.get("briefSummary", "")
-                status = status_mod.get("overallStatus", "Unknown")
-                
-                results.append((nct_id, title, summary, status))
-                
-                if not fetch_all and len(results) >= max_results:
-                    break
-            
-            if not fetch_all and len(results) >= max_results:
-                results = results[:max_results]
-                break
-                
-            page_token = data.get("nextPageToken")
-            if not page_token:
-                break
-                
-        return results, first_url
-    except Exception as e:
-        return [], str(e)
-
-def call_gemini_with_retry(model, prompt, max_retries=3):
-    for attempt in range(max_retries):
-        try:
-            res = model.generate_content(prompt)
-            return res.text, None
-        except Exception as e:
-            if "429" in str(e) and attempt < max_retries - 1:
-                time.sleep(5)
-                continue
-            return None, str(e)
-
-# --------------------------------------------------
-# 🤖 공통 AI 프롬프트 (판정 우선순위 및 Case Report 방어 적용)
-# --------------------------------------------------
-def generate_prompt(due_category, include_criteria, exclude_criteria, title, article_content):
-    return f"""
-    너는 의료기기 임상평가(CER) 및 체계적 문헌고찰(Systematic Review) 전문가야. 
-    아래 제공된 논문 정보(초록 또는 전문(Full-text))를 정밀하게 읽고, 제공된 [포함기준]과 [제외기준] 및 [인간 평가자 실제 판정 예시]를 학습하여 정확한 판정을 내려라.
-
-    [선택된 카테고리/분류]: {due_category} ({sub_model})
-
-    [엄격한 판정 가이드라인]:
-    1. Include 조건: [포함기준]을 완벽히 만족하고, 컴포넌트나 적응증이 임상적으로 타당한 경우 'Include'로 판정한다. 원문(Full-text) 전체가 제공된 경우, 서론보다는 연구 방법(Methods)과 결과(Results) 섹션을 중점적으로 확인하여 평가 대상 기구가 실제 사용되었는지 엄격히 검증하라.
-    
-    2. CER 통합 보고서 연속성 및 Benign(양성) 처리 핵심 지침 (중요!):
-       - 현재 선택된 모델이 Uncovered 라 하더라도, 논문에 Benign(양성) 적응증 관련 내용이 포함되어 있다는 이유만으로 선제적 배제(Exclude)를 하지 말 것!
-       - 이유: 본 스크리닝은 하나의 통합 CER 보고서 섹션으로 취급되므로, Uncovered 단계에서 Benign 논문이 불필요하게 Exclude 되면 차후 Covered 단계 검토 시 'Duplicated(중복)' 처리되어 영구 누락되는 사고가 발생함. 양성/악성 모두 유연하게 포용하여 판단할 것.
-       
-    3. Exclude 판단 핵심 규칙 및 적용 순서 (★반드시 아래 1순위부터 순서대로 검토하여 가장 먼저 해당하는 사유를 적용할 것):
-       - 1순위. **Literature without human clinical data**: Preclinical proof-of-concept, In-vitro, 동물실험 연구 등 인간 대상 임상 데이터가 없는 경우.
-       - 2순위. **Irrelevant article**: 평가 대상 스텐트 기구(I)가 아닌 타 장기 기구(예: 식도 스텐트 심사 시 기도/기관지 스텐트 사용)를 사용했거나, 스텐트 성과/안전성과 무관한 타 시술/수술(RFA, EIs, 진단 기술 등)이 주목적인 경우.
-       - 3순위. **Different indication**: 평가 대상 스텐트 기구(I)를 사용했으나, Target 적응증이 아닌 전혀 무관한 질환/목적으로 사용된 경우.
-       - 4순위. **Insufficient information**: 위 1~3순위에 모두 해당하지 않으면서(즉, 올바른 기구와 적응증을 사용했음에도) 아래의 이유로 평가가 불가한 경우에만 최후의 수단으로 적용할 것.
-         * Valid information relevant to performance and/or safety is limited: 제공된 텍스트 상 유효 데이터가 부족하여 스텐트의 실제 성능 및 안전성을 확인할 수 없는 경우.
-         * Letter / Protocol: 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우. (🚨강력 주의: 서론에서 타 연구를 인용 및 논평하는 문장이 있더라도, 실제 환자의 임상 경과를 다룬 'Case Report'나 'Case Series'라면 절대 이 사유로 배제하지 말고 최우선적으로 Include 할 것!)
-       - 5순위. **This article is already held by Taewoong Medical.**: 태웅메디칼 내부 보유 또는 이전에 검토 완료된 문헌인 경우.
-
-    [품목별 인간 평가자 주요 판정 학습 예시 (Few-shot Examples)]:
-    - Biliary: Covered SEMS vs Uncovered SEMS 유효성/안전성 Meta-analysis 및 RCT -> Include
-    - Esophageal: FC-SEMS 마이그레이션 방지(Suturing 등) 비교 연구 -> Include | 기도/기관지 스텐트(Airway stent) 사용 연구 -> Exclude (Irrelevant article: The study focuses on airway/tracheal stenting rather than esophageal stent placement.)
-    - Pyloric/Duodenal: EUS-GJ vs Duodenal SEMS vs SGJ 삼자 비교 Review -> Include | Balloon dilation vs SEMS 비교 -> Include | 2차 Duodenal SEMS 재시술 성과 -> Include | Case Report -> Include
-    - Colonic: Emergency Surgery 대비 Bridge 단기 목적 SEMS 성과/생존율 -> Include | CReST2 Trial(완화 목적 Covered vs Uncovered) -> Include | Stent Patency 예측 모델 개발 -> Include
-    - Drainage: Percutaneous cystogastrostomy / EUS-GBD / EUS-BD 임상 성과 -> Include | High-surgical-risk 환자 배액술 가이드라인 -> Include | EUS-BD 안전성 실무 임상 -> Include
-
-    [포함기준]:
-    {include_criteria}
-
-    [제외기준]:
-    {exclude_criteria}
-
-    [평가 대상 논문 정보]
-    - [논문 제목]: {title}
-    - [제공된 텍스트 (초록 또는 전문)]: 
-    {article_content}
-
-    답변형식 (한국어 설명 없이 오직 아래 지정된 영문 형식으로만 완벽히 작성할 것):
-
-    판정: (Include 또는 Exclude)
-
-    Conclusion:
-    (영문 사유 1문장)
-
-    [Conclusion 작성 규칙]:
-    1. 마크다운 별표(**)를 절대로 사용하지 마라.
-    2. Include인 경우: 'Conclusion:' 이라는 말머리나 수식어('Included because' 등)를 일체 붙이지 말고 완결된 1개 영문 문장 자체만 적어라.
-    3. Exclude인 경우: 반드시 위에서 지정한 1~5순위 사유 중 가장 먼저 해당하는 정확한 사유의 말머리(예: 'Irrelevant article:', 'Different indication:')를 맨 앞에 붙이고 사유를 적어라.
-    """
-
-# --------------------------------------------------
 # MODE 1: 단일 PMID 테스트
 # --------------------------------------------------
 if selected_mode == "단일 PMID 입력":
@@ -1389,7 +1150,7 @@ if selected_mode == "단일 PMID 입력":
             eval_source = ""
 
             if pmcid:
-                st.info(f"💡 Open Access 논문 확인됨 (PMCID: {pmcid}). 전문(Full-text)을 가져옵니다.")
+                st.info(f"Open Access 논문 확인됨 (PMCID: {pmcid}). 전문(Full-text)을 가져옵니다.")
                 full_text = fetch_pmc_fulltext(pmcid, ncbi_api_key)
                 if full_text:
                     eval_source = "Full-text (Open Access)"
@@ -1405,7 +1166,7 @@ if selected_mode == "단일 PMID 입력":
 
             if eval_source == "No Data":
                 st.warning(f"**논문 제목:** {title if title else '제목 없음'}")
-                st.info(f"📌 **원문 직접 링크:** [{pmid_url}]({pmid_url})")
+                st.info(f"원문 직접 링크: [{pmid_url}]({pmid_url})")
                 st.error(f"판정: **Manual Review Needed (Abstract Missing)**")
                 st.caption(f"Reason: **Insufficient information:** Abstract/Full-text is unavailable. Manual full-text review is required.")
             else:
@@ -1424,7 +1185,7 @@ if selected_mode == "단일 PMID 입력":
                     st.error(f"AI 통신 에러 발생: {err}")
 
 # --------------------------------------------------
-# MODE 2: PMID 리스트 파일 업로드 (Excel 및 CSV 지원)
+# MODE 2: PMID 리스트 파일 업로드
 # --------------------------------------------------
 elif selected_mode == "PMID 리스트 업로드":
     uploaded_file = st.file_uploader("PMID가 적힌 파일 업로드 ('PMID' 열 필수)", type=["xlsx", "csv"])
@@ -1466,7 +1227,7 @@ elif selected_mode == "PMID 리스트 업로드":
                     eval_source = ""
 
                     if pmcid:
-                        status_text.markdown(f"⏳ **[{idx+1}/{total}] PMC 원문 수집 & 정밀 분석 중...** (PMID: {pmid})")
+                        status_text.markdown(f"**[{idx+1}/{total}] PMC 원문 수집 & 정밀 분석 중...** (PMID: {pmid})")
                         full_text = fetch_pmc_fulltext(pmcid, ncbi_api_key)
                         if full_text:
                             eval_source = "Full-text (Open Access)"
@@ -1475,11 +1236,11 @@ elif selected_mode == "PMID 리스트 업로드":
                             eval_source = "Abstract Only"
                             content_for_ai = f"[Title]\n{title}\n\n[Abstract]\n{abs_text}"
                     elif abs_text:
-                        status_text.markdown(f"⏳ **[{idx+1}/{total}] 초록(Abstract) 분석 중...** (PMID: {pmid})")
+                        status_text.markdown(f"**[{idx+1}/{total}] 초록(Abstract) 분석 중...** (PMID: {pmid})")
                         eval_source = "Abstract Only"
                         content_for_ai = f"[Title]\n{title}\n\n[Abstract]\n{abs_text}"
                     else:
-                        status_text.markdown(f"⏳ **[{idx+1}/{total}] 데이터 확보 불가, 예외 처리 중...** (PMID: {pmid})")
+                        status_text.markdown(f"**[{idx+1}/{total}] 데이터 확보 불가, 예외 처리 중...** (PMID: {pmid})")
                         eval_source = "No Data"
 
                     if eval_source == "No Data":
@@ -1705,7 +1466,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 eval_source = ""
 
                 if pmcid:
-                    status_text.markdown(f"⏳ **[{idx+1}/{total}] PMC 원문 수집 & 정밀 분석 중...** (PMID: {pmid})")
+                    status_text.markdown(f"**[{idx+1}/{total}] PMC 원문 수집 & 정밀 분석 중...** (PMID: {pmid})")
                     full_text = fetch_pmc_fulltext(pmcid, ncbi_api_key)
                     if full_text:
                         eval_source = "Full-text (Open Access)"
@@ -1714,11 +1475,11 @@ elif selected_mode == "PubMed PICO 자동 검색":
                         eval_source = "Abstract Only"
                         content_for_ai = f"[Title]\n{title}\n\n[Abstract]\n{abs_text}"
                 elif abs_text:
-                    status_text.markdown(f"⏳ **[{idx+1}/{total}] 초록(Abstract) 분석 중...** (PMID: {pmid})")
+                    status_text.markdown(f"**[{idx+1}/{total}] 초록(Abstract) 분석 중...** (PMID: {pmid})")
                     eval_source = "Abstract Only"
                     content_for_ai = f"[Title]\n{title}\n\n[Abstract]\n{abs_text}"
                 else:
-                    status_text.markdown(f"⏳ **[{idx+1}/{total}] 데이터 확보 불가, 예외 처리 중...** (PMID: {pmid})")
+                    status_text.markdown(f"**[{idx+1}/{total}] 데이터 확보 불가, 예외 처리 중...** (PMID: {pmid})")
                     eval_source = "No Data"
 
                 if eval_source == "No Data":
@@ -1788,7 +1549,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
 # --------------------------------------------------
 elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
     st.subheader("GIE Journal RIS 파일 업로드 스크리닝")
-    st.caption("giejournal.org 접속 ➔ Advanced Search 실행 ➔ [Export Citation] ➔ RIS 파일 다운로드 ➔ 아래 업로드 창에 드래그 & 드롭")
+    st.caption("giejournal.org 접속 -> Advanced Search 실행 -> [Export Citation] -> RIS 파일 다운로드 -> 아래 업로드 창에 드래그 & 드롭")
 
     gie_file = st.file_uploader("GIE에서 Export한 RIS 파일(.ris)을 업로드하세요", type=["ris", "txt"])
 
@@ -1817,7 +1578,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     abstract_text = entry.get("abstract", "").strip()
                     doi = entry.get("doi", entry.get("url", "-")).strip()
 
-                    status_text.markdown(f"⏳ **[{idx+1}/{total}] GIE 초록 AI 분석 진행 중...** ({title[:30]}...)")
+                    status_text.markdown(f"**[{idx+1}/{total}] GIE 초록 AI 분석 진행 중...** ({title[:30]}...)")
                     identifier = doi.lower() if doi and doi != "-" else title.lower()
 
                     doi_list.append(doi)
@@ -1988,7 +1749,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
                 total = len(studies)
 
                 for idx, (nct_id, title, summary, status) in enumerate(studies):
-                    status_text.markdown(f"⏳ **[{idx+1}/{total}] 임상시험 브리핑(Summary) AI 분석 중...** ({nct_id})")
+                    status_text.markdown(f"**[{idx+1}/{total}] 임상시험 브리핑(Summary) AI 분석 중...** ({nct_id})")
                     
                     nct_url = f"https://clinicaltrials.gov/study/{nct_id}"
                     identifier = nct_id.lower()
