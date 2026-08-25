@@ -243,7 +243,7 @@ st.markdown(
         transform: translateY(-1px);
     }
 
-    /* Full-Text / Manual - Amber */
+    /* Review Required - Amber */
     [class*="st-key-screen_card_pending_"] div[data-testid="stButton"] button {
         background: rgba(245, 158, 11, 0.14) !important;
         border: 1px solid rgba(245, 158, 11, 0.32) !important;
@@ -372,7 +372,7 @@ def render_interactive_dashboard(df, key_prefix):
     with c4:
         with st.container(key=f"screen_card_pending_{key_prefix}"):
             if st.button(
-                f"Full-Text / Manual\n\n{pending_cnt}건",
+                f"Review Required\n\n{pending_cnt}건",
                 key=f"{key_prefix}_btn_pending",
                 use_container_width=True
             ):
