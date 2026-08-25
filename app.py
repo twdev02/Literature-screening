@@ -335,9 +335,9 @@ def clear_history():
 # --------------------------------------------------
 def render_interactive_dashboard(df, key_prefix):
     total_cnt = len(df)
-    inc_cnt = len(df[df["AI 판정"] == "Include (포함)"])
-    exc_cnt = len(df[df["AI 판정"] == "Exclude (제외)"])
-    pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
+    inc_cnt = len(df[df["AI 판정"].str.contains("Include", na=False)])
+    exc_cnt = len(df[df["AI 판정"].str.contains("Exclude", na=False)])
+    pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed|Review Required|Review", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -391,9 +391,9 @@ def render_interactive_dashboard(df, key_prefix):
     filtered_df = df.copy()
 
     if current_filter == "INC":
-        filtered_df = filtered_df[filtered_df["AI 판정"] == "Include (포함)"]
+        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Include", na=False)]
     elif current_filter == "EXC":
-        filtered_df = filtered_df[filtered_df["AI 판정"] == "Exclude (제외)"]
+        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Exclude", na=False)]
         
         exclude_reasons = [
             "전체 제외 사유 보기",
@@ -412,7 +412,7 @@ def render_interactive_dashboard(df, key_prefix):
             filtered_df = filtered_df[filtered_df["Conclusion"].str.contains(selected_reason, na=False, case=False)]
 
     elif current_filter == "PENDING":
-        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)]
+        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed|Review Required|Review", na=False)]
     elif current_filter == "DUP":
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
@@ -420,23 +420,30 @@ def render_interactive_dashboard(df, key_prefix):
     st.info("**팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
     # --------------------------------------------------
-    # AI 판정 표시값과 내부 저장값 분리
-    # - 내부 데이터의 "Manual Review Needed"는 그대로 유지
-    # - 화면의 드롭다운에서는 "Review Required"로 표시
+    # AI 판정 표시값을 요청하신 4가지 옵션(Include, Exclude, Review, Duplicated)으로 매핑
     # --------------------------------------------------
     display_df = filtered_df.copy()
     if "AI 판정" in display_df.columns:
-        display_df["AI 판정"] = display_df["AI 판정"].replace({
-            "Manual Review Needed": "Review Required"
-        })
+        def simplify_status(val):
+            val_str = str(val or "")
+            if "Include" in val_str:
+                return "Include"
+            elif "Exclude" in val_str:
+                return "Exclude"
+            elif "Duplicated" in val_str:
+                return "Duplicated"
+            else:
+                return "Review"
+                
+        display_df["AI 판정"] = display_df["AI 판정"].apply(simplify_status)
 
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
             "AI 판정",
             options=[
-                "Include (포함)",
-                "Exclude (제외)",
-                "Review Required",
+                "Include",
+                "Exclude",
+                "Review",
                 "Duplicated"
             ],
             required=True
@@ -455,14 +462,6 @@ def render_interactive_dashboard(df, key_prefix):
         use_container_width=True,
         column_config=column_config_dict
     )
-
-    # 화면에서 변경된 "Review Required"를 실제 내부값인
-    # "Manual Review Needed"로 되돌려 기존 로직/데이터 구조를 유지
-    edited_df = edited_df.copy()
-    if "AI 판정" in edited_df.columns:
-        edited_df["AI 판정"] = edited_df["AI 판정"].replace({
-            "Review Required": "Manual Review Needed"
-        })
 
     excel_data = convert_df_to_excel(edited_df)
     st.download_button(
