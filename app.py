@@ -287,34 +287,54 @@ def render_interactive_dashboard(df, key_prefix):
     c1, c2, c3, c4, c5 = st.columns(5)
     
     with c1:
-        st.markdown('<div class="res-card-btn all">', unsafe_allow_html=True)
-        if st.button(f'<span class="dash-btn-label">전체 대상</span><span class="dash-btn-val">{total_cnt}건</span>', key=f"{key_prefix}_btn_all", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card all">
+                <div class="dash-card-label">전체 대상</div>
+                <div class="dash-card-val">{total_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("전체 보기", key=f"{key_prefix}_btn_all", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "ALL"
-        st.markdown('</div>', unsafe_allow_html=True)
             
     with c2:
-        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
-        if st.button(f'<span class="dash-btn-label">Include (포함)</span><span class="dash-btn-val">{inc_cnt}건</span>', key=f"{key_prefix}_btn_inc", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card inc">
+                <div class="dash-card-label">Include (포함)</div>
+                <div class="dash-card-val">{inc_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("포함 보기", key=f"{key_prefix}_btn_inc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "INC"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with c3:
-        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
-        if st.button(f'<span class="dash-btn-label">Exclude (제외)</span><span class="dash-btn-val">{exc_cnt}건</span>', key=f"{key_prefix}_btn_exc", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card exc">
+                <div class="dash-card-label">Exclude (제외)</div>
+                <div class="dash-card-val">{exc_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("제외 보기", key=f"{key_prefix}_btn_exc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "EXC"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with c4:
-        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
-        if st.button(f'<span class="dash-btn-label">Full-Text/Manual Needed</span><span class="dash-btn-val">{pending_cnt}건</span>', key=f"{key_prefix}_btn_pending", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card pending">
+                <div class="dash-card-label">Full-Text/Manual Needed</div>
+                <div class="dash-card-val">{pending_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("검토필요 보기", key=f"{key_prefix}_btn_pending", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "PENDING"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with c5:
-        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
-        if st.button(f'<span class="dash-btn-label">Duplicated (중복)</span><span class="dash-btn-val">{dup_cnt}건</span>', key=f"{key_prefix}_btn_dup", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card dup">
+                <div class="dash-card-label">Duplicated (중복)</div>
+                <div class="dash-card-val">{dup_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("중복 보기", key=f"{key_prefix}_btn_dup", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "DUP"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
