@@ -266,20 +266,18 @@ with st.sidebar:
         default_api_key = ""
 
     st.markdown(
-        """
-        <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 2px;">
-            Gemini API Key
-        </div>
-        <div style="font-size: 12px; font-weight: 400; color: #64748B; margin-bottom: 6px;">
-            (미입력 시 클라우드 기본키 적용)
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    user_api_key = st.text_input(
-        "Gemini API Key Input", type="password", label_visibility="collapsed"
-    )
-    api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
+    """
+    <p style="font-size: 13px; font-weight: 600; color: #334155; margin: 0px;">
+        Gemini API Key
+    </p>
+    <p style="font-size: 11px; color: #0284c7; margin-top: 2px; margin-bottom: 6px;">
+        * 미입력 시 클라우드 기본키가 자동 적용됩니다.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+user_api_key = st.text_input("Gemini API Key Input", type="password", label_visibility="collapsed")
+api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
     # 2. NCBI API 키 불러오기 (화면 입력창 숨김, 백그라운드에서만 로드)
     try:
