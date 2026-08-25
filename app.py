@@ -187,52 +187,46 @@ st.markdown(
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
     /* 💡 대시보드 커스텀 반투명 파스텔 카드 스타일 */
-    .dash-card {
-        width: 100%;
-        border-radius: 12px;
-        padding: 14px 10px;
-        text-align: center;
-        backdrop-filter: blur(8px);
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        margin-bottom: 6px;
+    div.res-card-btn div[data-testid="stButton"] > button {
+        width: 100% !important;
+        border-radius: 12px !important;
+        padding: 16px 8px !important;
+        text-align: center !important;
+        transition: all 0.2s ease !important;
+        backdrop-filter: blur(8px) !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-    .dash-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-    }
-    .dash-card-label {
-        font-size: 13px;
-        font-weight: 800;
-        margin-bottom: 4px;
-        letter-spacing: -0.3px;
-    }
-    .dash-card-val {
-        font-size: 22px;
-        font-weight: 900;
-        line-height: 1.1;
+    div.res-card-btn div[data-testid="stButton"] > button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1) !important;
     }
 
-    /* 각 카드의 반투명 파스텔 배경 및 색상 정의 */
-    .dash-card.all { background: rgba(224, 242, 254, 0.75); border: 1.5px solid #7dd3fc; }
-    .dash-card.all .dash-card-label { color: #0369a1; }
-    .dash-card.all .dash-card-val { color: #0284c7; }
+    .dash-btn-label { font-size: 13px; font-weight: 800; margin-bottom: 2px; letter-spacing: -0.3px; display: block; }
+    .dash-btn-val { font-size: 22px; font-weight: 900; line-height: 1.1; display: block; }
 
-    .dash-card.inc { background: rgba(220, 252, 231, 0.8); border: 1.5px solid #86efac; }
-    .dash-card.inc .dash-card-label { color: #15803d; }
-    .dash-card.inc .dash-card-val { color: #16a34a; }
+    div.res-card-btn.all div[data-testid="stButton"] > button { background-color: rgba(224, 242, 254, 0.75) !important; border: 1.5px solid #7dd3fc !important; }
+    div.res-card-btn.all .dash-btn-label { color: #0369a1 !important; }
+    div.res-card-btn.all .dash-btn-val { color: #0284c7 !important; }
 
-    .dash-card.exc { background: rgba(254, 226, 226, 0.8); border: 1.5px solid #fca5a5; }
-    .dash-card.exc .dash-card-label { color: #b91c1c; }
-    .dash-card.exc .dash-card-val { color: #dc2626; }
+    div.res-card-btn.inc div[data-testid="stButton"] > button { background-color: rgba(220, 252, 231, 0.8) !important; border: 1.5px solid #86efac !important; }
+    div.res-card-btn.inc .dash-btn-label { color: #15803d !important; }
+    div.res-card-btn.inc .dash-btn-val { color: #16a34a !important; }
 
-    .dash-card.pending { background: rgba(254, 243, 199, 0.85); border: 1.5px solid #fde047; }
-    .dash-card.pending .dash-card-label { color: #b45309; }
-    .dash-card.pending .dash-card-val { color: #d97706; }
+    div.res-card-btn.exc div[data-testid="stButton"] > button { background-color: rgba(254, 226, 226, 0.8) !important; border: 1.5px solid #fca5a5 !important; }
+    div.res-card-btn.exc .dash-btn-label { color: #b91c1c !important; }
+    div.res-card-btn.exc .dash-btn-val { color: #dc2626 !important; }
 
-    .dash-card.dup { background: rgba(241, 245, 249, 0.85); border: 1.5px solid #cbd5e1; }
-    .dash-card.dup .dash-card-label { color: #475569; }
-    .dash-card.dup .dash-card-val { color: #64748b; }
+    div.res-card-btn.pending div[data-testid="stButton"] > button { background-color: rgba(254, 243, 199, 0.85) !important; border: 1.5px solid #fde047 !important; }
+    div.res-card-btn.pending .dash-btn-label { color: #b45309 !important; }
+    div.res-card-btn.pending .dash-btn-val { color: #d97706 !important; }
+
+    div.res-card-btn.dup div[data-testid="stButton"] > button { background-color: rgba(241, 245, 249, 0.85) !important; border: 1.5px solid #cbd5e1 !important; }
+    div.res-card-btn.dup .dash-btn-label { color: #475569 !important; }
+    div.res-card-btn.dup .dash-btn-val { color: #64748b !important; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -293,54 +287,34 @@ def render_interactive_dashboard(df, key_prefix):
     c1, c2, c3, c4, c5 = st.columns(5)
     
     with c1:
-        st.markdown(f'''
-            <div class="dash-card all">
-                <div class="dash-card-label">전체 대상</div>
-                <div class="dash-card-val">{total_cnt}건</div>
-            </div>
-        ''', unsafe_allow_html=True)
-        if st.button("전체 보기", key=f"{key_prefix}_btn_all", use_container_width=True):
+        st.markdown('<div class="res-card-btn all">', unsafe_allow_html=True)
+        if st.button(f'<span class="dash-btn-label">전체 대상</span><span class="dash-btn-val">{total_cnt}건</span>', key=f"{key_prefix}_btn_all", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "ALL"
+        st.markdown('</div>', unsafe_allow_html=True)
             
     with c2:
-        st.markdown(f'''
-            <div class="dash-card inc">
-                <div class="dash-card-label">Include (포함)</div>
-                <div class="dash-card-val">{inc_cnt}건</div>
-            </div>
-        ''', unsafe_allow_html=True)
-        if st.button("포함 보기", key=f"{key_prefix}_btn_inc", use_container_width=True):
+        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
+        if st.button(f'<span class="dash-btn-label">Include (포함)</span><span class="dash-btn-val">{inc_cnt}건</span>', key=f"{key_prefix}_btn_inc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "INC"
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c3:
-        st.markdown(f'''
-            <div class="dash-card exc">
-                <div class="dash-card-label">Exclude (제외)</div>
-                <div class="dash-card-val">{exc_cnt}건</div>
-            </div>
-        ''', unsafe_allow_html=True)
-        if st.button("제외 보기", key=f"{key_prefix}_btn_exc", use_container_width=True):
+        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
+        if st.button(f'<span class="dash-btn-label">Exclude (제외)</span><span class="dash-btn-val">{exc_cnt}건</span>', key=f"{key_prefix}_btn_exc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "EXC"
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c4:
-        st.markdown(f'''
-            <div class="dash-card pending">
-                <div class="dash-card-label">Full-Text/Manual Needed</div>
-                <div class="dash-card-val">{pending_cnt}건</div>
-            </div>
-        ''', unsafe_allow_html=True)
-        if st.button("검토필요 보기", key=f"{key_prefix}_btn_pending", use_container_width=True):
+        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
+        if st.button(f'<span class="dash-btn-label">Full-Text/Manual Needed</span><span class="dash-btn-val">{pending_cnt}건</span>', key=f"{key_prefix}_btn_pending", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "PENDING"
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c5:
-        st.markdown(f'''
-            <div class="dash-card dup">
-                <div class="dash-card-label">Duplicated (중복)</div>
-                <div class="dash-card-val">{dup_cnt}건</div>
-            </div>
-        ''', unsafe_allow_html=True)
-        if st.button("중복 보기", key=f"{key_prefix}_btn_dup", use_container_width=True):
+        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
+        if st.button(f'<span class="dash-btn-label">Duplicated (중복)</span><span class="dash-btn-val">{dup_cnt}건</span>', key=f"{key_prefix}_btn_dup", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "DUP"
+        st.markdown('</div>', unsafe_allow_html=True)
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
