@@ -153,9 +153,31 @@ st.markdown(
     .card-title { font-size: 12px; font-weight: 700; color: #0284c7; text-transform: uppercase; margin-bottom: 4px; }
     .card-value { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px; white-space: normal !important; word-break: keep-all !important; }
     .card-desc { font-size: 12px; color: #64748b; margin-bottom: 12px; word-break: keep-all !important; }
-    .selected-category-box { background-color: rgba(11, 26, 45, 0.04); border: 1px solid rgba(11, 26, 45, 0.12); border-left: 5px solid #0284c7; border-radius: 12px; padding: 16px 22px; margin-bottom: 18px; }
-    .selected-category-label { font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-    .selected-category-title { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0; }
+    
+    /* 💡 남색 브랜드 컬러 배너 스타일 적용 */
+    .selected-category-box { 
+        background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%); 
+        border-radius: 12px; 
+        padding: 18px 24px; 
+        margin-bottom: 18px; 
+        box-shadow: 0 4px 12px rgba(11, 26, 45, 0.15);
+        border-left: 5px solid #00a8ff;
+    }
+    .selected-category-label { 
+        font-size: 11px; 
+        font-weight: 800; 
+        color: #38bdf8; 
+        text-transform: uppercase; 
+        letter-spacing: 0.8px; 
+        margin-bottom: 4px; 
+    }
+    .selected-category-title { 
+        font-size: 20px; 
+        font-weight: 800; 
+        color: #ffffff; 
+        margin: 0; 
+    }
+    
     div[data-testid="stSegmentedControl"] { background-color: #f1f5f9; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; }
     div[data-testid="stSegmentedControl"] button { border-radius: 8px !important; font-weight: 1000 !important; font-size: 13px !important; border: none !important; padding: 8px 14px !important; white-space: nowrap !important; transition: all 0.2s ease !important; flex: 1 1 auto !important; }
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] { background-color: #0b1a2d !important; color: #ffffff !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
@@ -999,7 +1021,7 @@ else:
 # ✨ 2단계 세그먼티드 컨트롤 메뉴
 # --------------------------------------------------
 sub_model_html = (
-    f'<div style="font-size: 15px; font-weight: 600; color: #475569; margin-top: 4px;">{sub_model}</div>'
+    f'<div style="font-size: 14px; font-weight: 500; color: #cbd5e1; margin-top: 4px;">{sub_model}</div>'
     if sub_model else ""
 )
 
