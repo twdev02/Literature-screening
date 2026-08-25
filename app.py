@@ -1001,7 +1001,7 @@ else:
 st.markdown(
     f"""
 <div class="selected-category-box">
-    <div class="selected-category-label">SELECTED CATEGORY & MODEL</div>
+    <div class="selected-category-label">SELECTED CATEGORY</div>
     <div class="selected-category-title">{due_category} - {sub_model}</div>
 </div>
 """,
