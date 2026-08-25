@@ -186,53 +186,7 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    /* 💡 Streamlit 버튼 자체를 반투명 색상 카드로 만들기 */
-    div[data-testid="stColumn"] div[data-testid="stButton"] > button {
-        width: 100% !important;
-        border-radius: 12px !important;
-        padding: 12px 6px !important;
-        text-align: center !important;
-        font-size: 14px !important;
-        font-weight: 800 !important;
-        white-space: pre-wrap !important; /* 줄바꿈 허용 */
-        line-height: 1.4 !important;
-        transition: all 0.2s ease !important;
-    }
-    div[data-testid="stColumn"] div[data-testid="stButton"] > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-    }
-
-    /* 1. 전체 대상 (반투명 파란색) */
-    div.res-card-btn.all div[data-testid="stButton"] > button {
-        background-color: rgba(224, 242, 254, 0.8) !important;
-        border: 1.5px solid #38bdf8 !important;
-        color: #0369a1 !important;
-    }
-    /* 2. Include (반투명 초록색) */
-    div.res-card-btn.inc div[data-testid="stButton"] > button {
-        background-color: rgba(220, 252, 231, 0.85) !important;
-        border: 1.5px solid #4ade80 !important;
-        color: #15803d !important;
-    }
-    /* 3. Exclude (반투명 빨간색) */
-    div.res-card-btn.exc div[data-testid="stButton"] > button {
-        background-color: rgba(254, 226, 226, 0.85) !important;
-        border: 1.5px solid #f87171 !important;
-        color: #b91c1c !important;
-    }
-    /* 4. Full-Text/Manual Needed (반투명 주황색) */
-    div.res-card-btn.pending div[data-testid="stButton"] > button {
-        background-color: rgba(254, 243, 199, 0.9) !important;
-        border: 1.5px solid #facc15 !important;
-        color: #b45309 !important;
-    }
-    /* 5. Duplicated (반투명 회색) */
-    div.res-card-btn.dup div[data-testid="stButton"] > button {
-        background-color: rgba(241, 245, 249, 0.9) !important;
-        border: 1.5px solid #94a3b8 !important;
-        color: #475569 !important;
-    }
+    
 </style>
 """,
     unsafe_allow_html=True,
@@ -383,6 +337,7 @@ def render_interactive_dashboard(df, key_prefix):
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=False
     )
+    
 # --------------------------------------------------
 # ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
