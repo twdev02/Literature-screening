@@ -266,7 +266,7 @@ with st.sidebar:
         default_api_key = ""
 
     user_api_key = st.text_input(
-        "Gemini API Key (미입력 시 클라우드 기본키 적용)", type="password"
+        "Gemini API Key\n(미입력 시 클라우드 기본키 적용)", type="password"
     )
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
