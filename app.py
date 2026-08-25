@@ -186,35 +186,41 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    /* 💡 인터랙티브 대시보드 버튼 스타일 */
-    div.res-card-btn button {
-        width: 100% !important;
-        border-radius: 10px !important;
-        padding: 12px 10px !important;
-        text-align: center !important;
-        border: 1px solid #e2e8f0 !important;
-        background-color: #f8fafc !important;
-        transition: all 0.2s ease !important;
+    /* 💡 원본 컬러 카드 디자인 100% 복원 + 클릭 가능 스타일 */
+    .res-card-box {
+        position: relative;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 14px;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    div.res-card-btn button:hover {
+    .res-card-box:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
-    div.res-card-btn.inc button { border-top: 4px solid #10b981 !important; background: #f0fdf4 !important; }
-    div.res-card-btn.exc button { border-top: 4px solid #ef4444 !important; background: #fef2f2 !important; }
-    div.res-card-btn.pending button { border-top: 4px solid #f59e0b !important; background: #fffbeb !important; }
-    div.res-card-btn.dup button { border-top: 4px solid #64748b !important; background: #f8fafc !important; }
+    .res-card-box.inc { border-top: 4px solid #10b981; background: #f0fdf4; }
+    .res-card-box.inc .res-card-val { color: #166534; }
+    .res-card-box.exc { border-top: 4px solid #ef4444; background: #fef2f2; }
+    .res-card-box.exc .res-card-val { color: #991b1b; }
+    .res-card-box.pending { border-top: 4px solid #f59e0b; background: #fffbeb; }
+    .res-card-box.pending .res-card-val { color: #92400e; }
+    .res-card-box.dup { border-top: 4px solid #64748b; background: #f8fafc; }
+    .res-card-box.dup .res-card-val { color: #334155; }
     
-    .card-btn-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: block; }
-    .card-btn-val { font-size: 22px; font-weight: 800; display: block; line-height: 1.2; }
-    .inc .card-btn-val { color: #166534; }
-    .exc .card-btn-val { color: #991b1b; }
-    .pending .card-btn-val { color: #92400e; }
-    .dup .card-btn-val { color: #334155; }
+    .res-card-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+    .res-card-val { font-size: 22px; font-weight: 800; }
+
+    /* Streamlit 기본 버튼 투명화 (카드 전체 클릭 지원) */
+    div[data-testid="stColumn"] div.stButton > button {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        width: 100% !important;
+        box-shadow: none !important;
+    }
 </style>
-""",
-    unsafe_allow_html=True,
-)
 
 # --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화
@@ -270,36 +276,33 @@ def render_interactive_dashboard(df, key_prefix):
 
     c1, c2, c3, c4, c5 = st.columns(5)
     
+    # 원본 카드의 HTML UI 내부에 버튼을 결합
     with c1:
-        st.markdown('<div class="res-card-btn">', unsafe_allow_html=True)
-        if st.button(f"전체 대상\n{total_cnt}건", key=f"{key_prefix}_btn_all", use_container_width=True):
+        if st.button(f"전체_{total_cnt}", key=f"{key_prefix}_btn_all", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "ALL"
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="res-card-box"><div class="res-card-label">전체 대상</div><div class="res-card-val">{total_cnt}건</div></div>', unsafe_allow_html=True)
         
     with c2:
-        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
-        if st.button(f"Include (포함)\n{inc_cnt}건", key=f"{key_prefix}_btn_inc", use_container_width=True):
+        if st.button(f"포함_{inc_cnt}", key=f"{key_prefix}_btn_inc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "INC"
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="res-card-box inc"><div class="res-card-label">INCLUDE (포함)</div><div class="res-card-val">{inc_cnt}건</div></div>', unsafe_allow_html=True)
 
     with c3:
-        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
-        if st.button(f"Exclude (제외)\n{exc_cnt}건", key=f"{key_prefix}_btn_exc", use_container_width=True):
+        if st.button(f"제외_{exc_cnt}", key=f"{key_prefix}_btn_exc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "EXC"
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="res-card-box exc"><div class="res-card-label">EXCLUDE (제외)</div><div class="res-card-val">{exc_cnt}건</div></div>', unsafe_allow_html=True)
 
     with c4:
-        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
-        if st.button(f"Full-Text/Manual Needed\n{pending_cnt}건", key=f"{key_prefix}_btn_pending", use_container_width=True):
+        if st.button(f"보류_{pending_cnt}", key=f"{key_prefix}_btn_pending", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "PENDING"
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="res-card-box pending"><div class="res-card-label">FULL-TEXT/MANUAL REVIEW NEEDED</div><div class="res-card-val">{pending_cnt}건</div></div>', unsafe_allow_html=True)
 
     with c5:
-        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
-        if st.button(f"Duplicated (중복)\n{dup_cnt}건", key=f"{key_prefix}_btn_dup", use_container_width=True):
+        if st.button(f"중복_{dup_cnt}", key=f"{key_prefix}_btn_dup", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "DUP"
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="res-card-box dup"><div class="res-card-label">DUPLICATED (중복)</div><div class="res-card-val">{dup_cnt}건</div></div>', unsafe_allow_html=True)
 
+    # (이하 필터링 및 data_editor 로직 동일)
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
 
@@ -308,7 +311,6 @@ def render_interactive_dashboard(df, key_prefix):
     elif current_filter == "EXC":
         filtered_df = filtered_df[filtered_df["AI 판정"] == "Exclude (제외)"]
         
-        # 💡 Exclude 선택 시 세부 사유 필터 드롭다운 활성화
         exclude_reasons = [
             "전체 제외 사유 보기",
             "Literature without human clinical data",
@@ -333,7 +335,6 @@ def render_interactive_dashboard(df, key_prefix):
     st.markdown("<br>", unsafe_allow_html=True)
     st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
-    # 💡 Editable Table (st.data_editor)
     edited_df = st.data_editor(
         filtered_df,
         key=f"{key_prefix}_editor_{current_filter}",
