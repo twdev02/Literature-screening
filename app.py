@@ -337,7 +337,7 @@ def render_interactive_dashboard(df, key_prefix):
     total_cnt = len(df)
     inc_cnt = len(df[df["AI 판정"] == "Include (포함)"])
     exc_cnt = len(df[df["AI 판정"] == "Exclude (제외)"])
-    pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
+    pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Review Required", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -412,7 +412,7 @@ def render_interactive_dashboard(df, key_prefix):
             filtered_df = filtered_df[filtered_df["Conclusion"].str.contains(selected_reason, na=False, case=False)]
 
     elif current_filter == "PENDING":
-        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)]
+        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Full-text Screening Needed|Review Required", na=False)]
     elif current_filter == "DUP":
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
@@ -422,7 +422,7 @@ def render_interactive_dashboard(df, key_prefix):
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
             "AI 판정",
-            options=["Include (포함)", "Exclude (제외)", "Manual Review Needed", "Duplicated"],
+            options=["Include", "Exclude", "Review Required", "Duplicated"],
             required=True
         ),
         "Conclusion": st.column_config.TextColumn("Conclusion", width="large"),
