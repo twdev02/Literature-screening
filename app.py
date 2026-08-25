@@ -998,14 +998,17 @@ else:
 # --------------------------------------------------
 # ✨ 2단계 세그먼티드 컨트롤 메뉴
 # --------------------------------------------------
+sub_model_html = (
+    f'<div style="font-size: 15px; font-weight: 600; color: #475569; margin-top: 4px;">{sub_model}</div>'
+    if sub_model else ""
+)
+
 st.markdown(
     f"""
 <div class="selected-category-box">
     <div class="selected-category-label">SELECTED CATEGORY & MODEL</div>
     <div class="selected-category-title">{due_category}</div>
-    <div style="font-size: 15px; font-weight: 600; color: #475569; margin-top: 4px;">
-        {sub_model}
-    </div>
+    {sub_model_html}
 </div>
 """,
     unsafe_allow_html=True,
