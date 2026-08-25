@@ -106,7 +106,7 @@ def convert_df_to_excel(df_input):
     return excel_io.getvalue()
 
 # --------------------------------------------------
-# 🛠️ API 기능 및 파싱 함수들 (상단에 최우선 배치)
+# 🛠️ API 기능 및 파싱 함수들
 # --------------------------------------------------
 def parse_pico_input(text):
     if not text or not text.strip(): return ""
@@ -358,7 +358,7 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    /* 💡 요약 카드 박스별 은은한 배경색 및 포인트 컬러 스타일 (전용 감싸기로 격리) */
+    /* 💡 요약 카드 박스별 은은한 배경색 및 포인트 컬러 스타일 */
     .dashboard-card-btn button {
         width: 100% !important;
         border-radius: 10px !important;
