@@ -1001,8 +1001,11 @@ else:
 st.markdown(
     f"""
 <div class="selected-category-box">
-    <div class="selected-category-label">SELECTED CATEGORY</div>
-    <div class="selected-category-title">{due_category} - {sub_model}</div>
+    <div class="selected-category-label">SELECTED CATEGORY & MODEL</div>
+    <div class="selected-category-title">{due_category}</div>
+    <div style="font-size: 15px; font-weight: 600; color: #475569; margin-top: 4px;">
+        {sub_model}
+    </div>
 </div>
 """,
     unsafe_allow_html=True,
