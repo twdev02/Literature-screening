@@ -318,7 +318,7 @@ with st.sidebar:
     sub_model = None
 
     if current_engine == "ClinicalTrials Engine":
-        sub_model = "통합 품목 검색"
+        sub_model = None  # 👈 기존 "통합 품목 검색" 대신 None 할당
     else:
         if due_category == "1. Biliary Stent":
             sub_model = st.selectbox(
