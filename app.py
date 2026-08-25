@@ -204,16 +204,16 @@ st.markdown(
         box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
     }
 
-    /* 전체 대상 - Gray */
+    /* 전체 대상 - Blue */
     [class*="st-key-screen_card_all_"] div[data-testid="stButton"] button {
-        background: rgba(148, 163, 184, 0.16) !important;
-        border: 1px solid rgba(100, 116, 139, 0.30) !important;
-        color: #334155 !important;
+        background: rgba(59, 130, 246, 0.12) !important;
+        border: 1px solid rgba(59, 130, 246, 0.30) !important;
+        color: #1D4ED8 !important;
     }
 
     [class*="st-key-screen_card_all_"] div[data-testid="stButton"] button:hover {
-        background: rgba(148, 163, 184, 0.28) !important;
-        border-color: rgba(100, 116, 139, 0.45) !important;
+        background: rgba(59, 130, 246, 0.24) !important;
+        border-color: rgba(59, 130, 246, 0.45) !important;
         transform: translateY(-1px);
     }
 
@@ -256,16 +256,16 @@ st.markdown(
         transform: translateY(-1px);
     }
 
-    /* Duplicated - Purple */
+    /* Duplicated - Gray */
     [class*="st-key-screen_card_dup_"] div[data-testid="stButton"] button {
-        background: rgba(139, 92, 246, 0.12) !important;
-        border: 1px solid rgba(139, 92, 246, 0.30) !important;
-        color: #6D28D9 !important;
+        background: rgba(148, 163, 184, 0.16) !important;
+        border: 1px solid rgba(100, 116, 139, 0.30) !important;
+        color: #334155 !important;
     }
 
     [class*="st-key-screen_card_dup_"] div[data-testid="stButton"] button:hover {
-        background: rgba(139, 92, 246, 0.24) !important;
-        border-color: rgba(139, 92, 246, 0.45) !important;
+        background: rgba(148, 163, 184, 0.28) !important;
+        border-color: rgba(100, 116, 139, 0.45) !important;
         transform: translateY(-1px);
     }
 
