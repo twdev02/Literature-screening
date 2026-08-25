@@ -190,76 +190,99 @@ st.markdown(
 
     /* ==================================================
        Screening Dashboard 5 Buttons
+       각 버튼을 고유한 Streamlit container key로 지정하여
+       버튼 자체에 색상을 직접 적용
        ================================================== */
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"] div[data-testid="stButton"] > button {
+    [class*="st-key-screen_card_"] div[data-testid="stButton"] button {
         min-height: 74px !important;
+        height: 74px !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
         font-size: 13px !important;
         line-height: 1.5 !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.18s ease !important;
         box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
     }
 
     /* 전체 대상 - Gray */
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(1) div[data-testid="stButton"] > button {
+    [class*="st-key-screen_card_all_"] div[data-testid="stButton"] button {
         background: rgba(148, 163, 184, 0.16) !important;
         border: 1px solid rgba(100, 116, 139, 0.30) !important;
         color: #334155 !important;
     }
 
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(1) div[data-testid="stButton"] > button:hover {
-        background: rgba(148, 163, 184, 0.27) !important;
-        transform: translateY(-2px);
+    [class*="st-key-screen_card_all_"] div[data-testid="stButton"] button:hover {
+        background: rgba(148, 163, 184, 0.28) !important;
+        border-color: rgba(100, 116, 139, 0.45) !important;
+        transform: translateY(-1px);
     }
 
     /* Include - Green */
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(2) div[data-testid="stButton"] > button {
+    [class*="st-key-screen_card_inc_"] div[data-testid="stButton"] button {
         background: rgba(34, 197, 94, 0.13) !important;
         border: 1px solid rgba(34, 197, 94, 0.30) !important;
         color: #166534 !important;
     }
 
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(2) div[data-testid="stButton"] > button:hover {
-        background: rgba(34, 197, 94, 0.23) !important;
-        transform: translateY(-2px);
+    [class*="st-key-screen_card_inc_"] div[data-testid="stButton"] button:hover {
+        background: rgba(34, 197, 94, 0.25) !important;
+        border-color: rgba(34, 197, 94, 0.45) !important;
+        transform: translateY(-1px);
     }
 
     /* Exclude - Red */
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(3) div[data-testid="stButton"] > button {
+    [class*="st-key-screen_card_exc_"] div[data-testid="stButton"] button {
         background: rgba(239, 68, 68, 0.12) !important;
         border: 1px solid rgba(239, 68, 68, 0.30) !important;
-        color: #991b1b !important;
+        color: #991B1B !important;
     }
 
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(3) div[data-testid="stButton"] > button:hover {
-        background: rgba(239, 68, 68, 0.22) !important;
-        transform: translateY(-2px);
+    [class*="st-key-screen_card_exc_"] div[data-testid="stButton"] button:hover {
+        background: rgba(239, 68, 68, 0.24) !important;
+        border-color: rgba(239, 68, 68, 0.45) !important;
+        transform: translateY(-1px);
     }
 
     /* Full-Text / Manual - Amber */
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(4) div[data-testid="stButton"] > button {
+    [class*="st-key-screen_card_pending_"] div[data-testid="stButton"] button {
         background: rgba(245, 158, 11, 0.14) !important;
         border: 1px solid rgba(245, 158, 11, 0.32) !important;
-        color: #92400e !important;
+        color: #92400E !important;
     }
 
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(4) div[data-testid="stButton"] > button:hover {
-        background: rgba(245, 158, 11, 0.24) !important;
-        transform: translateY(-2px);
+    [class*="st-key-screen_card_pending_"] div[data-testid="stButton"] button:hover {
+        background: rgba(245, 158, 11, 0.26) !important;
+        border-color: rgba(245, 158, 11, 0.48) !important;
+        transform: translateY(-1px);
     }
 
     /* Duplicated - Purple */
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(5) div[data-testid="stButton"] > button {
+    [class*="st-key-screen_card_dup_"] div[data-testid="stButton"] button {
         background: rgba(139, 92, 246, 0.12) !important;
         border: 1px solid rgba(139, 92, 246, 0.30) !important;
-        color: #6d28d9 !important;
+        color: #6D28D9 !important;
     }
 
-    [class*="st-key-dashboard_cards_"] div[data-testid="column"]:nth-child(5) div[data-testid="stButton"] > button:hover {
-        background: rgba(139, 92, 246, 0.22) !important;
-        transform: translateY(-2px);
+    [class*="st-key-screen_card_dup_"] div[data-testid="stButton"] button:hover {
+        background: rgba(139, 92, 246, 0.24) !important;
+        border-color: rgba(139, 92, 246, 0.45) !important;
+        transform: translateY(-1px);
     }
+
+    /* 버튼 내부 텍스트 */
+    [class*="st-key-screen_card_"] div[data-testid="stButton"] button p {
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+
+    /* ==================================================
+       현재 선택된 필터를 조금 더 진하게 표시
+       ================================================== */
+    [class*="st-key-screen_card_"] div[data-testid="stButton"] button:focus-visible {
+        outline: 2px solid rgba(15, 23, 42, 0.35) !important;
+        outline-offset: 2px !important;
+    }
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -317,19 +340,19 @@ def render_interactive_dashboard(df, key_prefix):
     pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
-    # 대시보드 버튼 영역을 고유 key의 container로 묶어 CSS가 다른 영역에 영향을 주지 않도록 함
-    with st.container(key=f"dashboard_cards_{key_prefix}"):
-        c1, c2, c3, c4, c5 = st.columns(5)
-        
-        with c1:
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    with c1:
+        with st.container(key=f"screen_card_all_{key_prefix}"):
             if st.button(
                 f"전체 대상\n\n{total_cnt}건",
                 key=f"{key_prefix}_btn_all",
                 use_container_width=True
             ):
                 st.session_state["active_dashboard_filter"] = "ALL"
-                
-        with c2:
+
+    with c2:
+        with st.container(key=f"screen_card_inc_{key_prefix}"):
             if st.button(
                 f"Include (포함)\n\n{inc_cnt}건",
                 key=f"{key_prefix}_btn_inc",
@@ -337,7 +360,8 @@ def render_interactive_dashboard(df, key_prefix):
             ):
                 st.session_state["active_dashboard_filter"] = "INC"
 
-        with c3:
+    with c3:
+        with st.container(key=f"screen_card_exc_{key_prefix}"):
             if st.button(
                 f"Exclude (제외)\n\n{exc_cnt}건",
                 key=f"{key_prefix}_btn_exc",
@@ -345,7 +369,8 @@ def render_interactive_dashboard(df, key_prefix):
             ):
                 st.session_state["active_dashboard_filter"] = "EXC"
 
-        with c4:
+    with c4:
+        with st.container(key=f"screen_card_pending_{key_prefix}"):
             if st.button(
                 f"Full-Text / Manual\n\n{pending_cnt}건",
                 key=f"{key_prefix}_btn_pending",
@@ -353,7 +378,8 @@ def render_interactive_dashboard(df, key_prefix):
             ):
                 st.session_state["active_dashboard_filter"] = "PENDING"
 
-        with c5:
+    with c5:
+        with st.container(key=f"screen_card_dup_{key_prefix}"):
             if st.button(
                 f"Duplicated (중복)\n\n{dup_cnt}건",
                 key=f"{key_prefix}_btn_dup",
