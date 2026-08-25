@@ -417,7 +417,7 @@ def render_interactive_dashboard(df, key_prefix):
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
+    st.info("**팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
     # --------------------------------------------------
     # AI 판정 표시값과 내부 저장값 분리
@@ -432,7 +432,7 @@ def render_interactive_dashboard(df, key_prefix):
 
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
-            "AI 판정 (수동 수정 가능)",
+            "AI 판정",
             options=[
                 "Include (포함)",
                 "Exclude (제외)",
@@ -441,7 +441,7 @@ def render_interactive_dashboard(df, key_prefix):
             ],
             required=True
         ),
-        "Conclusion": st.column_config.TextColumn("Conclusion (수동 수정 가능)", width="large"),
+        "Conclusion": st.column_config.TextColumn("Conclusion", width="large"),
     }
     
     for col_name in display_df.columns:
