@@ -154,27 +154,28 @@ st.markdown(
     .card-value { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px; white-space: normal !important; word-break: keep-all !important; }
     .card-desc { font-size: 12px; color: #64748b; margin-bottom: 12px; word-break: keep-all !important; }
     
-    /* ✨ 세련된 현대적 스티키 네이비 카드 디자인 */
+    /* ✨ 트렌디한 글래스모피즘 은은한 반투명 카드 */
     .selected-category-box { 
-        background-color: #0f172a; /* 딥 네이비 단색으로 깔끔하게 */
-        border: 1px solid #1e293b; /* 과한 그림자 대신 얇고 은은한 테두리 */
+        background: rgba(15, 23, 42, 0.92); /* 92% 미세 반투명 딥 네이비 */
+        backdrop-filter: blur(8px); /* 뒤 배경을 은은하게 해주는 블러 효과 */
+        border: 1px solid rgba(255, 255, 255, 0.08); /* 유리 느낌을 주는 미세 흰색 테두리 */
         border-radius: 12px; 
         padding: 20px 26px; 
         margin-bottom: 20px; 
-        /* border-left 제거 완료 */
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12); /* 은은하고 가벼운 그림자 */
     }
     .selected-category-label { 
         font-size: 11px; 
         font-weight: 700; 
-        color: #0284c7; /* 차분하고 고급스러운 블루 */
+        color: #38bdf8; /* 눈이 편안한 스카이블루 포인트 */
         text-transform: uppercase; 
-        letter-spacing: 1.2px; /* 자간을 넓혀 트렌디한 느낌 연출 */
+        letter-spacing: 1.2px; 
         margin-bottom: 6px; 
     }
     .selected-category-title { 
         font-size: 22px; 
         font-weight: 800; 
-        color: #f8fafc; /* 완전 완전 생흰색보다는 은은한 아이보리 화이트 */
+        color: #ffffff; 
         letter-spacing: -0.5px;
         margin: 0; 
     }
