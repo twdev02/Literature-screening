@@ -1424,7 +1424,9 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
             excel_data = convert_df_to_excel(res_df)
-            st.download_button("📊 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="cer_screening_result_all.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+            col_d1, _ = st.columns([1, 2])
+            with col_d1:
+                st.download_button("📊 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="cer_screening_result_all.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
                 
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
@@ -1432,7 +1434,9 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 st.warning("아래 목록은 PubMed 데이터상 초록이 없고 Open Access가 아니어서 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="cer_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                col_d2, _ = st.columns([1, 2])
+                with col_d2:
+                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="cer_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
 
 # --------------------------------------------------
 # MODE 3: PubMed PICO 키워드 자동 검색 & 스크리닝
@@ -1685,14 +1689,18 @@ elif selected_mode == "PubMed PICO 자동 검색":
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
             excel_data = convert_df_to_excel(res_df)
-            st.download_button("📊 PICO 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+            col_d1, _ = st.columns([1, 2])
+            with col_d1:
+                st.download_button("📊 PICO 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                col_d2, _ = st.columns([1, 2])
+                with col_d2:
+                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1804,14 +1812,18 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
             excel_data = convert_df_to_excel(res_df)
-            st.download_button("📊 GIE 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="gie_ris_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+            col_d1, _ = st.columns([1, 2])
+            with col_d1:
+                st.download_button("📊 GIE 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="gie_ris_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="gie_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                col_d2, _ = st.columns([1, 2])
+                with col_d2:
+                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="gie_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
@@ -1998,11 +2010,15 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
             excel_data = convert_df_to_excel(res_df)
-            st.download_button("📊 ClinicalTrials 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="clinicaltrials_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+            col_d1, _ = st.columns([1, 2])
+            with col_d1:
+                st.download_button("📊 ClinicalTrials 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="clinicaltrials_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 임상이 없습니다.")
             else:
                 st.warning("아래 목록은 Summary 데이터 부족으로 수동 검토가 필요한 임상시험들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="clinicaltrials_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                col_d2, _ = st.columns([1, 2])
+                with col_d2:
+                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="clinicaltrials_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
