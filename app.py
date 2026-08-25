@@ -825,8 +825,8 @@ if not due_category:
             st.markdown(
                 """
                 <div class="card-title">AI PIPELINE</div>
-                <div class="card-value">Gemini 3.6 Flash + PubMed / GIE / ClinicalTrials</div>
-                <div class="card-desc">AI 기반 문헌 스크리닝 (Open Access 지원)</div>
+                <div class="card-value">Gemini 3.6 Flash</div>
+                <div class="card-desc">AI 기반 문헌 스크리닝</div>
                 <br>
                 """,
                 unsafe_allow_html=True,
