@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # --------------------------------------------------
-# 브라우저 새로고침(F5) 및 탭 닫기 이탈 방지 스크립트
+# 🛡️ 브라우저 새로고침(F5) 및 탭 닫기 이탈 방지 스크립트
 # --------------------------------------------------
 st.components.v1.html(
     """
@@ -30,7 +30,7 @@ st.components.v1.html(
 )
 
 # --------------------------------------------------
-# 마크다운 별표(**)를 유니코드 굵은 글씨로 변환하는 함수
+# 🔤 마크다운 별표(**)를 유니코드 굵은 글씨로 변환하는 함수
 # --------------------------------------------------
 def to_unicode_bold(text):
     if not text:
@@ -46,14 +46,14 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# Excel(.xlsx) 변환 헬퍼 함수
+# 📊 Excel(.xlsx) 변환 헬퍼 함수
 # --------------------------------------------------
 def convert_df_to_excel(df_input):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
     bold_reverse_map = {
         '𝐀': 'A', '𝐁': 'B', '𝐂': 'C', '𝐃': 'D', '𝐄': 'E', '𝐅': 'F', '𝐆': 'G', '𝐇': 'H', '𝐈': 'I', '𝐉': 'J', '𝐊': 'K', '𝐋': 'L', '𝐌': 'M', '𝐍': 'N', '𝐎': 'O', '𝐏': 'P', '𝐐': 'Q', '𝐑': 'R', '𝐒': 'S', '𝐓': 'T', '𝐔': 'U', '𝐕': 'V', '𝐖': 'W', '𝐗': 'X', '𝐘': 'Y', '𝐙': 'Z',
-        '𝐚': 'a', '𝐛': 'b', '𝐜': 'c', 'd': 'd', '𝐞': 'e', '𝐟': 'f', '𝐠': 'g', '𝐡': 'h', '𝐢': 'i', '𝐣': 'j', '𝐤': 'k', '𝐥': 'l', '𝐦': 'm', '𝐧': 'n', '𝐨': 'o', '𝐩': 'p', '𝐪': 'q', '𝐫': 'r', '𝐬': 's', '𝐭': 't', '𝐮': 'u', '𝐯': 'v', '𝐰': 'w', '𝐱': 'x', '𝐲': 'y', '𝐳': 'z'
+        '𝐚': 'a', '𝐛': 'b', '𝐜': 'c', '𝐝': 'd', '𝐞': 'e', '𝐟': 'f', '𝐠': 'g', '𝐡': 'h', '𝐢': 'i', '𝐣': 'j', '𝐤': 'k', '𝐥': 'l', '𝐦': 'm', '𝐧': 'n', '𝐨': 'o', '𝐩': 'p', '𝐪': 'q', '𝐫': 'r', '𝐬': 's', '𝐭': 't', '𝐮': 'u', '𝐯': 'v', '𝐰': 'w', '𝐱': 'x', '𝐲': 'y', '𝐳': 'z'
     }
     
     df_clean = df_input.copy()
@@ -106,7 +106,179 @@ def convert_df_to_excel(df_input):
     return excel_io.getvalue()
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS
+# 🛠️ API 기능 및 파싱 함수들 (NameError 완전 방지 상단 배치)
+# --------------------------------------------------
+def parse_pico_input(text):
+    if not text or not text.strip(): return ""
+    raw_keywords = text.replace(",", "\n").split("\n")
+    keywords = [kw.strip() for kw in raw_keywords if kw.strip()]
+    if not keywords: return ""
+    formatted = [kw if '"' in kw or "[" in kw else f"({kw})" for kw in keywords]
+    return formatted[0] if len(formatted) == 1 else f"({' OR '.join(formatted)})"
+
+def search_pubmed_pmids_pico(p_text="", i_text="", c_text="", o_text="", start_year=2026, start_month=1, end_year=2026, end_month=12, fetch_all=False, max_results=20, ncbi_api_key="", direct_query=""):
+    if direct_query:
+        full_query = direct_query
+    else:
+        query_parts = []
+        for q in [parse_pico_input(t) for t in [p_text, i_text, c_text, o_text]]:
+            if q: query_parts.append(q)
+        full_query = " AND ".join(query_parts)
+        
+    if not full_query: return [], ""
+
+    min_date_str = f"{start_year}/{int(start_month):02d}/01"
+    max_date_str = f"{end_year}/{int(end_month):02d}/31"
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+
+    params_count = {
+        "db": "pubmed", "term": full_query, "retmode": "json", "retmax": 0,
+        "datetype": "pdat", "mindate": min_date_str, "maxdate": max_date_str,
+    }
+    if ncbi_api_key: params_count["api_key"] = ncbi_api_key
+
+    try:
+        res_count = requests.get(url, params=params_count, timeout=10).json()
+        total_found = int(res_count.get("esearchresult", {}).get("count", 0))
+        actual_retmax = total_found if fetch_all else min(max_results, total_found)
+        if actual_retmax == 0: return [], full_query
+
+        params_fetch = params_count.copy()
+        params_fetch["retmax"] = actual_retmax
+
+        response = requests.get(url, params=params_fetch, timeout=10)
+        pmid_list = response.json().get("esearchresult", {}).get("idlist", [])
+        return pmid_list, full_query
+    except Exception as e:
+        st.error(f"PubMed 검색 오류: {str(e)}")
+        return [], full_query
+
+def fetch_pubmed_by_pmid(pmid, ncbi_api_key=""):
+    pmid = str(pmid).replace(".0", "").strip()
+    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml"
+    if ncbi_api_key: url += f"&api_key={ncbi_api_key}"
+        
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            return None, None, None, f"NCBI 서버 통신 실패 (코드 {response.status_code})"
+
+        root = ET.fromstring(response.content)
+        article = root.find(".//Article")
+        if article is None:
+            return None, None, None, "존재하지 않는 PMID이거나 정보가 없습니다."
+
+        title_elem = article.find(".//ArticleTitle")
+        title = "".join(title_elem.itertext()).strip() if title_elem is not None else "제목 없음"
+
+        pmcid = None
+        pmcid_elem = root.find(".//ArticleIdList/ArticleId[@IdType='pmc']")
+        if pmcid_elem is not None:
+            pmcid = pmcid_elem.text.strip() 
+
+        abstract_elem = article.find(".//Abstract")
+        if abstract_elem is None:
+            abstract_elem = root.find(".//OtherAbstract")
+
+        abstract_text = "".join(abstract_elem.itertext()).strip() if abstract_elem is not None else None
+
+        return title, abstract_text, pmcid, "성공"
+    except Exception as e:
+        return None, None, None, f"데이터 파싱 에러: {str(e)}"
+
+def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
+    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id={pmcid}&retmode=xml"
+    if ncbi_api_key: url += f"&api_key={ncbi_api_key}"
+    try:
+        response = requests.get(url, timeout=15)
+        if response.status_code != 200: return None
+        root = ET.fromstring(response.content)
+        body_elem = root.find(".//body")
+        if body_elem is None: return None
+        full_text = "".join(body_elem.itertext()).strip()
+        return re.sub(r'\s+', ' ', full_text)
+    except Exception:
+        return None
+
+def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, fetch_all=False, max_results=20):
+    url = "https://clinicaltrials.gov/api/v2/studies"
+    page_size = 1000 if fetch_all else min(max_results, 1000)
+    
+    params = {
+        "pageSize": page_size,
+        "format": "json",
+        "countTotal": "true"
+    }
+    if condition: params["query.cond"] = condition
+    if intervention: params["query.intr"] = intervention
+    
+    if status_filters:
+        params["filter.overallStatus"] = ",".join(status_filters)
+        
+    if type_filters:
+        params["filter.studyType"] = ",".join(type_filters)
+    
+    results = []
+    page_token = None
+    first_url = None
+
+    try:
+        while True:
+            current_params = params.copy()
+            if page_token:
+                current_params["pageToken"] = page_token
+            
+            response = requests.get(url, params=current_params, timeout=15)
+            if response.status_code != 200: 
+                return [], "API 통신 에러"
+            
+            if first_url is None:
+                first_url = response.url
+                
+            data = response.json()
+            studies = data.get("studies", [])
+            
+            for study in studies:
+                protocol = study.get("protocolSection", {})
+                ident = protocol.get("identificationModule", {})
+                desc = protocol.get("descriptionModule", {})
+                status_mod = protocol.get("statusModule", {})
+                
+                nct_id = ident.get("nctId", "Unknown")
+                title = desc.get("briefTitle", "제목 없음")
+                summary = desc.get("briefSummary", "")
+                status = status_mod.get("overallStatus", "Unknown")
+                
+                results.append((nct_id, title, summary, status))
+                
+                if not fetch_all and len(results) >= max_results:
+                    break
+            
+            if not fetch_all and len(results) >= max_results:
+                results = results[:max_results]
+                break
+                
+            page_token = data.get("nextPageToken")
+            if not page_token:
+                break
+                
+        return results, first_url
+    except Exception as e:
+        return [], str(e)
+
+def call_gemini_with_retry(model, prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            res = model.generate_content(prompt)
+            return res.text, None
+        except Exception as e:
+            if "429" in str(e) and attempt < max_retries - 1:
+                time.sleep(5)
+                continue
+            return None, str(e)
+
+# --------------------------------------------------
+# 🎨 고급 커스텀 CSS (일반 버튼 영향 최소화하도록 전용 클래스만 격리)
 # --------------------------------------------------
 st.markdown(
     """
@@ -186,38 +358,24 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    .res-card-box {
-        position: relative;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px 14px;
-        text-align: center;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .res-card-box:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    .res-card-box.inc { border-top: 4px solid #10b981; background: #f0fdf4; }
-    .res-card-box.inc .res-card-val { color: #166534; }
-    .res-card-box.exc { border-top: 4px solid #ef4444; background: #fef2f2; }
-    .res-card-box.exc .res-card-val { color: #991b1b; }
-    .res-card-box.pending { border-top: 4px solid #f59e0b; background: #fffbeb; }
-    .res-card-box.pending .res-card-val { color: #92400e; }
-    .res-card-box.dup { border-top: 4px solid #64748b; background: #f8fafc; }
-    .res-card-box.dup .res-card-val { color: #334155; }
-    
-    .res-card-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-    .res-card-val { font-size: 22px; font-weight: 800; }
-
-    div[data-testid="stColumn"] div.stButton > button {
-        border: none !important;
-        background: transparent !important;
-        padding: 0 !important;
+    /* 💡 요약 상자 전용 대시보드 카드 CSS (일반 PICO 버튼 영향 무) */
+    .dashboard-card-btn button {
         width: 100% !important;
-        box-shadow: none !important;
+        border-radius: 10px !important;
+        padding: 12px 10px !important;
+        text-align: center !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #f8fafc !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     }
+    .dashboard-card-btn button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    }
+    .dashboard-card-btn.inc button { border-top: 4px solid #10b981 !important; background: #f0fdf4 !important; }
+    .dashboard-card-btn.exc button { border-top: 4px solid #ef4444 !important; background: #fef2f2 !important; }
+    .dashboard-card-btn.pending button { border-top: 4px solid #f59e0b !important; background: #fffbeb !important; }
+    .dashboard-card-btn.dup button { border-top: 4px solid #64748b !important; background: #f8fafc !important; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -266,7 +424,7 @@ def clear_history():
     st.session_state["show_reset_msg"] = True  
 
 # --------------------------------------------------
-# 클릭 및 수동 수정 가능한 대시보드 함수
+# 🖱️ 요약 상자 클릭 및 수동 수정 대시보드 함수
 # --------------------------------------------------
 def render_interactive_dashboard(df, key_prefix):
     total_cnt = len(df)
@@ -278,29 +436,34 @@ def render_interactive_dashboard(df, key_prefix):
     c1, c2, c3, c4, c5 = st.columns(5)
     
     with c1:
-        if st.button(f"전체_{total_cnt}", key=f"{key_prefix}_btn_all", use_container_width=True):
+        st.markdown('<div class="dashboard-card-btn">', unsafe_allow_html=True)
+        if st.button(f"전체 대상\n\n:blue[{total_cnt}건]", key=f"{key_prefix}_btn_all", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "ALL"
-        st.markdown(f'<div class="res-card-box"><div class="res-card-label">전체 대상</div><div class="res-card-val">{total_cnt}건</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
     with c2:
-        if st.button(f"포함_{inc_cnt}", key=f"{key_prefix}_btn_inc", use_container_width=True):
+        st.markdown('<div class="dashboard-card-btn inc">', unsafe_allow_html=True)
+        if st.button(f"INCLUDE (포함)\n\n:green[{inc_cnt}건]", key=f"{key_prefix}_btn_inc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "INC"
-        st.markdown(f'<div class="res-card-box inc"><div class="res-card-label">INCLUDE (포함)</div><div class="res-card-val">{inc_cnt}건</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c3:
-        if st.button(f"제외_{exc_cnt}", key=f"{key_prefix}_btn_exc", use_container_width=True):
+        st.markdown('<div class="dashboard-card-btn exc">', unsafe_allow_html=True)
+        if st.button(f"EXCLUDE (제외)\n\n:red[{exc_cnt}건]", key=f"{key_prefix}_btn_exc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "EXC"
-        st.markdown(f'<div class="res-card-box exc"><div class="res-card-label">EXCLUDE (제외)</div><div class="res-card-val">{exc_cnt}건</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c4:
-        if st.button(f"보류_{pending_cnt}", key=f"{key_prefix}_btn_pending", use_container_width=True):
+        st.markdown('<div class="dashboard-card-btn pending">', unsafe_allow_html=True)
+        if st.button(f"FULL-TEXT/MANUAL NEEDED\n\n:orange[{pending_cnt}건]", key=f"{key_prefix}_btn_pending", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "PENDING"
-        st.markdown(f'<div class="res-card-box pending"><div class="res-card-label">FULL-TEXT/MANUAL REVIEW NEEDED</div><div class="res-card-val">{pending_cnt}건</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with c5:
-        if st.button(f"중복_{dup_cnt}", key=f"{key_prefix}_btn_dup", use_container_width=True):
+        st.markdown('<div class="dashboard-card-btn dup">', unsafe_allow_html=True)
+        if st.button(f"DUPLICATED (중복)\n\n:gray[{dup_cnt}건]", key=f"{key_prefix}_btn_dup", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "DUP"
-        st.markdown(f'<div class="res-card-box dup"><div class="res-card-label">DUPLICATED (중복)</div><div class="res-card-val">{dup_cnt}건</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
@@ -358,7 +521,7 @@ def render_interactive_dashboard(df, key_prefix):
     )
 
 # --------------------------------------------------
-# 사이드바 UI 구성
+# ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
 with st.sidebar:
     try:
@@ -1129,6 +1292,63 @@ else:
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
+
+# --------------------------------------------------
+# 🤖 공통 AI 프롬프트 (판정 우선순위 및 Case Report 방어 적용)
+# --------------------------------------------------
+def generate_prompt(due_category, include_criteria, exclude_criteria, title, article_content):
+    return f"""
+    너는 의료기기 임상평가(CER) 및 체계적 문헌고찰(Systematic Review) 전문가야. 
+    아래 제공된 논문 정보(초록 또는 전문(Full-text))를 정밀하게 읽고, 제공된 [포함기준]과 [제외기준] 및 [인간 평가자 실제 판정 예시]를 학습하여 정확한 판정을 내려라.
+
+    [선택된 카테고리/분류]: {due_category} ({sub_model})
+
+    [엄격한 판정 가이드라인]:
+    1. Include 조건: [포함기준]을 완벽히 만족하고, 컴포넌트나 적응증이 임상적으로 타당한 경우 'Include'로 판정한다. 원문(Full-text) 전체가 제공된 경우, 서론보다는 연구 방법(Methods)과 결과(Results) 섹션을 중점적으로 확인하여 평가 대상 기구가 실제 사용되었는지 엄격히 검증하라.
+    
+    2. CER 통합 보고서 연속성 및 Benign(양성) 처리 핵심 지침 (중요!):
+       - 현재 선택된 모델이 Uncovered 라 하더라도, 논문에 Benign(양성) 적응증 관련 내용이 포함되어 있다는 이유만으로 선제적 배제(Exclude)를 하지 말 것!
+       - 이유: 본 스크리닝은 하나의 통합 CER 보고서 섹션으로 취급되므로, Uncovered 단계에서 Benign 논문이 불필요하게 Exclude 되면 차후 Covered 단계 검토 시 'Duplicated(중복)' 처리되어 영구 누락되는 사고가 발생함. 양성/악성 모두 유연하게 포용하여 판단할 것.
+       
+    3. Exclude 판단 핵심 규칙 및 적용 순서 (★반드시 아래 1순위부터 순서대로 검토하여 가장 먼저 해당하는 사유를 적용할 것):
+       - 1순위. **Literature without human clinical data**: Preclinical proof-of-concept, In-vitro, 동물실험 연구 등 인간 대상 임상 데이터가 없는 경우.
+       - 2순위. **Irrelevant article**: 평가 대상 스텐트 기구(I)가 아닌 타 장기 기구(예: 식도 스텐트 심사 시 기도/기관지 스텐트 사용)를 사용했거나, 스텐트 성과/안전성과 무관한 타 시술/수술(RFA, EIs, 진단 기술 등)이 주목적인 경우.
+       - 3순위. **Different indication**: 평가 대상 스텐트 기구(I)를 사용했으나, Target 적응증이 아닌 전혀 무관한 질환/목적으로 사용된 경우.
+       - 4순위. **Insufficient information**: 위 1~3순위에 모두 해당하지 않으면서(즉, 올바른 기구와 적응증을 사용했음에도) 아래의 이유로 평가가 불가한 경우에만 최후의 수단으로 적용할 것.
+         * Valid information relevant to performance and/or safety is limited: 제공된 텍스트 상 유효 데이터가 부족하여 스텐트의 실제 성능 및 안전성을 확인할 수 없는 경우.
+         * Letter / Protocol: 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우. (🚨강력 주의: 서론에서 타 연구를 인용 및 논평하는 문장이 있더라도, 실제 환자의 임상 경과를 다룬 'Case Report'나 'Case Series'라면 절대 이 사유로 배제하지 말고 최우선적으로 Include 할 것!)
+       - 5순위. **This article is already held by Taewoong Medical.**: 태웅메디칼 내부 보유 또는 이전에 검토 완료된 문헌인 경우.
+
+    [품목별 인간 평가자 주요 판정 학습 예시 (Few-shot Examples)]:
+    - Biliary: Covered SEMS vs Uncovered SEMS 유효성/안전성 Meta-analysis 및 RCT -> Include
+    - Esophageal: FC-SEMS 마이그레이션 방지(Suturing 등) 비교 연구 -> Include | 기도/기관지 스텐트(Airway stent) 사용 연구 -> Exclude (Irrelevant article: The study focuses on airway/tracheal stenting rather than esophageal stent placement.)
+    - Pyloric/Duodenal: EUS-GJ vs Duodenal SEMS vs SGJ 삼자 비교 Review -> Include | Balloon dilation vs SEMS 비교 -> Include | 2차 Duodenal SEMS 재시술 성과 -> Include | Case Report -> Include
+    - Colonic: Emergency Surgery 대비 Bridge 단기 목적 SEMS 성과/생존율 -> Include | CReST2 Trial(완화 목적 Covered vs Uncovered) -> Include | Stent Patency 예측 모델 개발 -> Include
+    - Drainage: Percutaneous cystogastrostomy / EUS-GBD / EUS-BD 임상 성과 -> Include | High-surgical-risk 환자 배액술 가이드라인 -> Include | EUS-BD 안전성 실무 임상 -> Include
+
+    [포함기준]:
+    {include_criteria}
+
+    [제외기준]:
+    {exclude_criteria}
+
+    [평가 대상 논문 정보]
+    - [논문 제목]: {title}
+    - [제공된 텍스트 (초록 또는 전문)]: 
+    {article_content}
+
+    답변형식 (한국어 설명 없이 오직 아래 지정된 영문 형식으로만 완벽히 작성할 것):
+
+    판정: (Include 또는 Exclude)
+
+    Conclusion:
+    (영문 사유 1문장)
+
+    [Conclusion 작성 규칙]:
+    1. 마크다운 별표(**)를 절대로 사용하지 마라.
+    2. Include인 경우: 'Conclusion:' 이라는 말머리나 수식어('Included because' 등)를 일체 붙이지 말고 완결된 1개 영문 문장 자체만 적어라.
+    3. Exclude인 경우: 반드시 위에서 지정한 1~5순위 사유 중 가장 먼저 해당하는 정확한 사유의 말머리(예: 'Irrelevant article:', 'Different indication:')를 맨 앞에 붙이고 사유를 적어라.
+    """
 
 # --------------------------------------------------
 # MODE 1: 단일 PMID 테스트
