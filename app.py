@@ -404,7 +404,7 @@ def render_interactive_dashboard(df, key_prefix):
             "Held by Taewoong Medical"
         ]
         selected_reason = st.selectbox(
-            "🔍 세부 Exclude 사유 필터:", 
+            "세부 Exclude 사유 필터:", 
             options=exclude_reasons, 
             key=f"{key_prefix}_reason_filter"
         )
@@ -465,7 +465,7 @@ def render_interactive_dashboard(df, key_prefix):
 
     excel_data = convert_df_to_excel(edited_df)
     st.download_button(
-        "📥 현재 목록 Excel(.xlsx) 다운로드",
+        "현재 목록 Excel(.xlsx) 다운로드",
         data=excel_data,
         file_name=f"screening_result_{current_filter.lower()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
