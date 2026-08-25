@@ -1718,7 +1718,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         )
 
     st.markdown("---")
-    st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
+    st.subheader("문헌 검색 기간 설정")
 
     col_s1, col_s2, col_e1, col_e2 = st.columns(4)
     with col_s1: start_year = st.number_input("시작 연도", min_value=1990, max_value=2026, value=2026)
