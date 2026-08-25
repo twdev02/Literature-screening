@@ -106,7 +106,7 @@ def convert_df_to_excel(df_input):
     return excel_io.getvalue()
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS
+# 🎨 고급 커스텀 CSS (반투명 파스텔톤 클릭 카드)
 # --------------------------------------------------
 st.markdown(
     """
@@ -185,8 +185,69 @@ st.markdown(
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] { background-color: #0b1a2d !important; color: #ffffff !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
-    
-    
+
+    /* 💡 대시보드 Pills 반투명 색상 카드 스타일 정의 */
+    div.dash-pills-wrapper div[data-testid="stPills"] > div {
+        background-color: transparent !important;
+        border: none !important;
+        gap: 12px !important;
+        display: flex !important;
+        width: 100% !important;
+    }
+
+    div.dash-pills-wrapper div[data-testid="stPills"] button {
+        flex: 1 !important;
+        border-radius: 12px !important;
+        padding: 14px 10px !important;
+        font-weight: 800 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease !important;
+        white-space: pre-wrap !important;
+        line-height: 1.35 !important;
+        text-align: center !important;
+    }
+
+    div.dash-pills-wrapper div[data-testid="stPills"] button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    /* 1. 전체 대상 (반투명 파란색) */
+    div.dash-pills-wrapper div[data-testid="stPills"] button:nth-child(1) {
+        background-color: rgba(224, 242, 254, 0.85) !important;
+        border: 1.5px solid #38bdf8 !important;
+        color: #0369a1 !important;
+    }
+    /* 2. Include (반투명 초록색) */
+    div.dash-pills-wrapper div[data-testid="stPills"] button:nth-child(2) {
+        background-color: rgba(220, 252, 231, 0.9) !important;
+        border: 1.5px solid #4ade80 !important;
+        color: #15803d !important;
+    }
+    /* 3. Exclude (반투명 빨간색) */
+    div.dash-pills-wrapper div[data-testid="stPills"] button:nth-child(3) {
+        background-color: rgba(254, 226, 226, 0.9) !important;
+        border: 1.5px solid #f87171 !important;
+        color: #b91c1c !important;
+    }
+    /* 4. Full-Text/Manual Needed (반투명 주황색) */
+    div.dash-pills-wrapper div[data-testid="stPills"] button:nth-child(4) {
+        background-color: rgba(254, 243, 199, 0.95) !important;
+        border: 1.5px solid #facc15 !important;
+        color: #b45309 !important;
+    }
+    /* 5. Duplicated (반투명 회색) */
+    div.dash-pills-wrapper div[data-testid="stPills"] button:nth-child(5) {
+        background-color: rgba(241, 245, 249, 0.95) !important;
+        border: 1.5px solid #94a3b8 !important;
+        color: #475569 !important;
+    }
+
+    /* Active (선택된 카드) 윤곽선 테두리 강조 효과 */
+    div.dash-pills-wrapper div[data-testid="stPills"] button[aria-selected="true"] {
+        box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.85) !important;
+        font-weight: 900 !important;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -244,39 +305,32 @@ def render_interactive_dashboard(df, key_prefix):
     pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
-    c1, c2, c3, c4, c5 = st.columns(5)
-    
-    with c1:
-        st.markdown('<div class="res-card-btn all">', unsafe_allow_html=True)
-        if st.button(f"전체 대상\n\n{total_cnt}건", key=f"{key_prefix}_btn_all", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "ALL"
-        st.markdown('</div>', unsafe_allow_html=True)
-            
-    with c2:
-        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
-        if st.button(f"Include (포함)\n\n{inc_cnt}건", key=f"{key_prefix}_btn_inc", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "INC"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c3:
-        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
-        if st.button(f"Exclude (제외)\n\n{exc_cnt}건", key=f"{key_prefix}_btn_exc", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "EXC"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c4:
-        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
-        if st.button(f"Full-Text / Manual\n\n{pending_cnt}건", key=f"{key_prefix}_btn_pending", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "PENDING"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c5:
-        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
-        if st.button(f"Duplicated (중복)\n\n{dup_cnt}건", key=f"{key_prefix}_btn_dup", use_container_width=True):
-            st.session_state["active_dashboard_filter"] = "DUP"
-        st.markdown('</div>', unsafe_allow_html=True)
+    filter_options = {
+        "ALL": f"전체 대상\n{total_cnt}건",
+        "INC": f"Include (포함)\n{inc_cnt}건",
+        "EXC": f"Exclude (제외)\n{exc_cnt}건",
+        "PENDING": f"Full-Text / Manual\n{pending_cnt}건",
+        "DUP": f"Duplicated (중복)\n{dup_cnt}건",
+    }
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
+
+    # Native Pills 기반 반투명 색상 클릭 카드
+    st.markdown('<div class="dash-pills-wrapper">', unsafe_allow_html=True)
+    selected_label = st.pills(
+        "",
+        options=list(filter_options.values()),
+        default=filter_options[current_filter],
+        key=f"{key_prefix}_dashboard_pills",
+        label_visibility="collapsed"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    label_to_code = {v: k for k, v in filter_options.items()}
+    if selected_label in label_to_code:
+        current_filter = label_to_code[selected_label]
+        st.session_state["active_dashboard_filter"] = current_filter
+
     filtered_df = df.copy()
 
     if current_filter == "INC":
@@ -308,6 +362,7 @@ def render_interactive_dashboard(df, key_prefix):
     st.markdown("<br>", unsafe_allow_html=True)
     st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
+    # 💡 1번 수정 반영: 'AI 판정', 'Conclusion' 제외 나머지 모든 열 수정 불가(disabled) 설정
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
             "AI 판정 (수동 수정 가능)",
@@ -337,7 +392,7 @@ def render_interactive_dashboard(df, key_prefix):
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=False
     )
-    
+
 # --------------------------------------------------
 # ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
