@@ -373,9 +373,9 @@ with st.sidebar:
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
 
     # 💡 이전 스크리닝 이력 복원 (Excel 및 CSV 동시 지원)
-    with st.expander("이전 스크리닝 결과 불러오기 (Excel/CSV)"):
+    with st.expander("이전 스크리닝 결과 불러오기"):
         history_files = st.file_uploader(
-            "과거 스크리닝 결과 파일 선택 (Excel/CSV 복수 가능)",
+            "과거 스크리닝 결과 파일 선택",
             type=["xlsx", "csv"],
             accept_multiple_files=True,
             key=f"history_csv_uploader_{st.session_state['uploader_key']}", 
@@ -1434,7 +1434,7 @@ elif selected_mode == "PMID 리스트 업로드":
             excel_data = convert_df_to_excel(res_df)
             col_d1, _ = st.columns([1, 2])
             with col_d1:
-                st.download_button("📊 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="cer_screening_result_all.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+                st.download_button("전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="cer_screening_result_all.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
                 
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
@@ -1699,7 +1699,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             excel_data = convert_df_to_excel(res_df)
             col_d1, _ = st.columns([1, 2])
             with col_d1:
-                st.download_button("📊 PICO 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+                st.download_button("PubMed 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
             else:
@@ -1822,7 +1822,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
             excel_data = convert_df_to_excel(res_df)
             col_d1, _ = st.columns([1, 2])
             with col_d1:
-                st.download_button("📊 GIE 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="gie_ris_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+                st.download_button("GIE 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="gie_ris_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
             else:
@@ -2020,7 +2020,7 @@ elif selected_mode == "ClinicalTrials 자동 검색":
             excel_data = convert_df_to_excel(res_df)
             col_d1, _ = st.columns([1, 2])
             with col_d1:
-                st.download_button("📊 ClinicalTrials 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="clinicaltrials_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+                st.download_button("NCT 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="clinicaltrials_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 임상이 없습니다.")
             else:
