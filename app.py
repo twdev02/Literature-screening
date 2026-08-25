@@ -265,8 +265,19 @@ with st.sidebar:
     except Exception:
         default_api_key = ""
 
+    st.markdown(
+        """
+        <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 2px;">
+            Gemini API Key
+        </div>
+        <div style="font-size: 12px; font-weight: 400; color: #64748B; margin-bottom: 6px;">
+            (미입력 시 클라우드 기본키 적용)
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     user_api_key = st.text_input(
-        "Gemini API Key\n(미입력 시 클라우드 기본키 적용)", type="password"
+        "Gemini API Key Input", type="password", label_visibility="collapsed"
     )
     api_key = user_api_key.strip() if user_api_key.strip() else default_api_key
 
