@@ -4,6 +4,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 import google.generativeai as genai
+import openpyxl
 import pandas as pd
 import requests
 import rispy  # 👈 GIE RIS 파일 파싱용
@@ -45,14 +46,12 @@ def to_unicode_bold(text):
     return re.sub(r'\*\*(.*?)\*\*', replace_bold, text)
 
 # --------------------------------------------------
-# 📊 Excel(.xlsx) 변환 헬퍼 함수 (유니코드 특수문자 깨짐 완벽 방지)
+# 📊 Excel(.xlsx) 변환 헬퍼 함수 (유니코드 폰트 어긋남 완전 방지)
 # --------------------------------------------------
 def convert_df_to_excel(df_input):
-    import io
-    import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
-    # 유니코드 수학 표기용 굵은 문자를 표준 일반 영문으로 변환 (엑셀 서식 호환)
+    # 엑셀 다운로드 시 유니코드 굵은 특수문자를 일반 표준 영문으로 원복하여 어긋남 방지
     bold_reverse_map = {
         '𝐀': 'A', '𝐁': 'B', '𝐂': 'C', '𝐃': 'D', '𝐄': 'E', '𝐅': 'F', '𝐆': 'G', '𝐇': 'H', '𝐈': 'I', '𝐉': 'J', '𝐊': 'K', '𝐋': 'L', '𝐌': 'M', '𝐍': 'N', '𝐎': 'O', '𝐏': 'P', '𝐐': 'Q', '𝐑': 'R', '𝐒': 'S', '𝐓': 'T', '𝐔': 'U', '𝐕': 'V', '𝐖': 'W', '𝐗': 'X', '𝐘': 'Y', '𝐙': 'Z',
         '𝐚': 'a', '𝐛': 'b', '𝐜': 'c', '𝐝': 'd', '𝐞': 'e', '𝐟': 'f', '𝐠': 'g', '𝐡': 'h', '𝐢': 'i', '𝐣': 'j', '𝐤': 'k', '𝐥': 'l', '𝐦': 'm', '𝐧': 'n', '𝐨': 'o', '𝐩': 'p', '𝐪': 'q', '𝐫': 'r', '𝐬': 's', '𝐭': 't', '𝐮': 'u', '𝐯': 'v', '𝐰': 'w', '𝐱': 'x', '𝐲': 'y', '𝐳': 'z'
@@ -67,11 +66,8 @@ def convert_df_to_excel(df_input):
 
     excel_io = io.BytesIO()
     
-    # pandas 내장 ExcelWriter 활용 (openpyxl 엔진 사용)
     with pd.ExcelWriter(excel_io, engine='openpyxl') as writer:
         df_clean.to_excel(writer, index=False, sheet_name='Screening Results')
-        
-        # 오픈파이엑셀 워크시트 객체 추출 후 스타일링 적용
         ws = writer.sheets['Screening Results']
 
         header_fill = PatternFill(start_color="0B1A2D", end_color="0B1A2D", fill_type="solid")
@@ -376,10 +372,10 @@ with st.sidebar:
     history_cnt = len(st.session_state.get("screened_history", {}))
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
 
-    with st.expander("이전 스크리닝 CSV 불러오기"):
+    with st.expander("이전 스크리닝 결과 불러오기 (Excel/CSV)"):
         history_files = st.file_uploader(
-            "과거 스크리닝 결과 CSV 선택 (복수 가능)",
-            type=["csv"],
+            "과거 스크리닝 결과 파일 선택 (복수 가능)",
+            type=["xlsx", "csv"],
             accept_multiple_files=True,
             key=f"history_csv_uploader_{st.session_state['uploader_key']}", 
         )
@@ -388,10 +384,13 @@ with st.sidebar:
                 restored_count = 0
                 for h_file in history_files:
                     try:
-                        try:
-                            h_df = pd.read_csv(h_file, encoding="utf-8")
-                        except UnicodeDecodeError:
-                            h_df = pd.read_csv(h_file, encoding="cp949")
+                        if h_file.name.endswith(".xlsx"):
+                            h_df = pd.read_excel(h_file)
+                        else:
+                            try:
+                                h_df = pd.read_csv(h_file, encoding="utf-8")
+                            except UnicodeDecodeError:
+                                h_df = pd.read_csv(h_file, encoding="cp949")
 
                         for _, row in h_df.iterrows():
                             identifier = None
@@ -408,7 +407,7 @@ with st.sidebar:
 
                             if identifier and identifier != "-":
                                 cat = str(row.get("카테고리", "기존 이력"))
-                                mod = str(row.get("세부 모델", "과거 CSV"))
+                                mod = str(row.get("세부 모델", "과거 파일"))
                                 res = str(row.get("AI 판정", "Screened"))
 
                                 if "screened_history" not in st.session_state:
@@ -424,7 +423,7 @@ with st.sidebar:
                     except Exception as e:
                         st.error(f"파일 읽기 오류 ({h_file.name}): {str(e)}")
             else:
-                st.warning("복원할 CSV 파일을 선택하세요.")
+                st.warning("복원할 파일 선택하세요.")
 
     if st.button("이전 스크리닝 기록 초기화"):
         clear_history()
@@ -444,7 +443,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 1. 카테고리가 아예 선택되지 않았을 때만 메인 홈 대시보드 표시
+# 🏠 1. 카테고리가 아예 선택되지 않았을 때만 메인 홈 대시보드 표시 (원본 제품 리스트 복원!)
 # --------------------------------------------------
 if not due_category:
     st.markdown(
@@ -1424,14 +1423,8 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
         v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
-            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
             excel_data = convert_df_to_excel(res_df)
-            
-            col_dl1, col_dl2 = st.columns(2)
-            with col_dl1:
-                st.download_button("📊 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="cer_screening_result_all.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-            with col_dl2:
-                st.download_button("전체 스크리닝 결과 CSV 다운로드", data=csv_data, file_name="cer_screening_result_all.csv", mime="text/csv", use_container_width=True)
+            st.download_button("📊 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="cer_screening_result_all.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
                 
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
@@ -1439,12 +1432,7 @@ elif selected_mode == "PMID 리스트 CSV 업로드":
                 st.warning("아래 목록은 PubMed 데이터상 초록이 없고 Open Access가 아니어서 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                
-                col_p_dl1, col_p_dl2 = st.columns(2)
-                with col_p_dl1:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="cer_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-                with col_p_dl2:
-                    st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="cer_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="cer_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 3: PubMed PICO 키워드 자동 검색 & 스크리닝
@@ -1696,26 +1684,15 @@ elif selected_mode == "PubMed PICO 자동 검색":
         v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
-            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
             excel_data = convert_df_to_excel(res_df)
-            
-            col_dl1, col_dl2 = st.columns(2)
-            with col_dl1:
-                st.download_button("📊 PICO 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-            with col_dl2:
-                st.download_button("PICO 스크리닝 전체 결과 CSV 다운로드", data=csv_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.csv", mime="text/csv", use_container_width=True)
+            st.download_button("📊 PICO 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
             else:
                 st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                
-                col_p_dl1, col_p_dl2 = st.columns(2)
-                with col_p_dl1:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-                with col_p_dl2:
-                    st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1826,26 +1803,15 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
         v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
-            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
             excel_data = convert_df_to_excel(res_df)
-            
-            col_dl1, col_dl2 = st.columns(2)
-            with col_dl1:
-                st.download_button("📊 GIE 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="gie_ris_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-            with col_dl2:
-                st.download_button("GIE 스크리닝 전체 결과 CSV 다운로드", data=csv_data, file_name="gie_ris_screening_result.csv", mime="text/csv", use_container_width=True)
+            st.download_button("📊 GIE 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="gie_ris_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
             else:
                 st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                
-                col_p_dl1, col_p_dl2 = st.columns(2)
-                with col_p_dl1:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="gie_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-                with col_p_dl2:
-                    st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="gie_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="gie_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
@@ -2031,23 +1997,12 @@ elif selected_mode == "ClinicalTrials 자동 검색":
         v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
         with v_tab1:
             st.dataframe(res_df, hide_index=True)
-            csv_data = res_df.to_csv(index=False).encode("utf-8-sig")
             excel_data = convert_df_to_excel(res_df)
-            
-            col_dl1, col_dl2 = st.columns(2)
-            with col_dl1:
-                st.download_button("📊 ClinicalTrials 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="clinicaltrials_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-            with col_dl2:
-                st.download_button("ClinicalTrials 전체 결과 CSV 다운로드", data=csv_data, file_name="clinicaltrials_screening_result.csv", mime="text/csv", use_container_width=True)
+            st.download_button("📊 ClinicalTrials 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="clinicaltrials_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
         with v_tab2:
             if len(pending_df) == 0: st.info("수동 검토 대상 임상이 없습니다.")
             else:
                 st.warning("아래 목록은 Summary 데이터 부족으로 수동 검토가 필요한 임상시험들입니다.")
                 st.dataframe(pending_df, hide_index=True)
                 pending_excel = convert_df_to_excel(pending_df)
-                
-                col_p_dl1, col_p_dl2 = st.columns(2)
-                with col_p_dl1:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="clinicaltrials_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-                with col_p_dl2:
-                    st.download_button("⚠️ 수동 검토 대상만 CSV 다운로드", data=pending_df.to_csv(index=False).encode("utf-8-sig"), file_name="clinicaltrials_manual_review_needed.csv", mime="text/csv", use_container_width=True)
+                st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="clinicaltrials_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
