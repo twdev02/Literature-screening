@@ -136,14 +136,17 @@ st.markdown(
         letter-spacing: -0.8px !important;
         white-space: nowrap !important;
     }
+    
+    /* ✨ 상단 메인 히어로 배너 - 모던 글래스모피즘 반투명 스타일 (왼쪽 세로선 제거) */
     .hero-container {
-        background: linear-gradient(135deg, #0b1a2d 0%, #1a324b 100%);
+        background: rgba(15, 23, 42, 0.92);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         padding: 28px 32px;
         border-radius: 16px;
         color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(11, 26, 45, 0.3);
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
         margin-bottom: 20px;
-        border-left: 6px solid #00a8ff;
     }
     .hero-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .hero-tag { background: linear-gradient(90deg, #84cc16 0%, #06b6d4 100%); color: #ffffff; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
@@ -154,20 +157,20 @@ st.markdown(
     .card-value { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px; white-space: normal !important; word-break: keep-all !important; }
     .card-desc { font-size: 12px; color: #64748b; margin-bottom: 12px; word-break: keep-all !important; }
     
-    /* ✨ 트렌디한 글래스모피즘 은은한 반투명 카드 */
+    /* ✨ 트렌디한 글래스모피즘 은은한 반투명 카드 (왼쪽 세로선 제거) */
     .selected-category-box { 
         background: rgba(15, 23, 42, 0.92); /* 92% 미세 반투명 딥 네이비 */
-        backdrop-filter: blur(8px); /* 뒤 배경을 은은하게 해주는 블러 효과 */
-        border: 1px solid rgba(255, 255, 255, 0.08); /* 유리 느낌을 주는 미세 흰색 테두리 */
+        backdrop-filter: blur(8px); /* 은은한 블러 효과 */
+        border: 1px solid rgba(255, 255, 255, 0.08); /* 미세 흰색 테두리 */
         border-radius: 12px; 
         padding: 20px 26px; 
         margin-bottom: 20px; 
-        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12); /* 은은하고 가벼운 그림자 */
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12);
     }
     .selected-category-label { 
         font-size: 11px; 
         font-weight: 700; 
-        color: #38bdf8; /* 눈이 편안한 스카이블루 포인트 */
+        color: #38bdf8; /* 스카이블루 포인트 */
         text-transform: uppercase; 
         letter-spacing: 1.2px; 
         margin-bottom: 6px; 
