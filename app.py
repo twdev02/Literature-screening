@@ -267,10 +267,10 @@ with st.sidebar:
 
     st.markdown(
         """
-        <div style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 2px;">
+        <div style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 2px;">
             Gemini API Key
         </div>
-        <div style="font-size: 13px; font-weight: 500; color: #64748B; margin-bottom: 6px;">
+        <div style="font-size: 12px; font-weight: 400; color: #64748B; margin-bottom: 6px;">
             (미입력 시 클라우드 기본키 적용)
         </div>
         """,
