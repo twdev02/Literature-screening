@@ -257,8 +257,6 @@ def render_result_dashboard(df):
 # ⚙️ 사이드바 UI 구성
 # --------------------------------------------------
 with st.sidebar:
-    st.header("시스템 설정")
-
     # 1. Gemini API 키 불러오기 (클라우드 Secrets 우선)
     try:
         default_api_key = st.secrets["GEMINI_API_KEY"]
