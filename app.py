@@ -106,7 +106,7 @@ def convert_df_to_excel(df_input):
     return excel_io.getvalue()
 
 # --------------------------------------------------
-# 🛠️ API 기능 및 파싱 함수들 (NameError 완전 방지 상단 배치)
+# 🛠️ API 기능 및 파싱 함수들 (상단에 최우선 배치)
 # --------------------------------------------------
 def parse_pico_input(text):
     if not text or not text.strip(): return ""
@@ -278,7 +278,7 @@ def call_gemini_with_retry(model, prompt, max_retries=3):
             return None, str(e)
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (일반 버튼 영향 최소화하도록 전용 클래스만 격리)
+# 🎨 고급 커스텀 CSS
 # --------------------------------------------------
 st.markdown(
     """
@@ -358,46 +358,30 @@ st.markdown(
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
-    /* 💡 요약 카드 박스별 은은한 배경색 및 포인트 컬러 스타일 */
+    /* 💡 요약 카드 박스별 은은한 배경색 및 포인트 컬러 스타일 (전용 감싸기로 격리) */
     .dashboard-card-btn button {
         width: 100% !important;
         border-radius: 10px !important;
         padding: 12px 10px !important;
         text-align: center !important;
         border: 1px solid #e2e8f0 !important;
-        background-color: #f8fafc !important;
+        border-top: 4px solid #0284c7 !important;
+        background: #f0f9ff !important;
         transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     }
     .dashboard-card-btn button:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
     }
-    
-    /* 전체 대상: 소프트 블루 */
-    .dashboard-card-btn button {
-        border-top: 4px solid #0284c7 !important;
-        background: #f0f9ff !important;
-    }
-    /* Include: 연한 파스텔 초록 */
-    .dashboard-card-btn.inc button { 
-        border-top: 4px solid #10b981 !important; 
-        background: #f0fdf4 !important; 
-    }
-    /* Exclude: 연한 파스텔 빨강 */
-    .dashboard-card-btn.exc button { 
-        border-top: 4px solid #ef4444 !important; 
-        background: #fef2f2 !important; 
-    }
-    /* Review Needed: 연한 파스텔 노랑/주황 */
-    .dashboard-card-btn.pending button { 
-        border-top: 4px solid #f59e0b !important; 
-        background: #fffbeb !important; 
-    }
-    /* Duplicated: 연한 슬레이트 회색 */
-    .dashboard-card-btn.dup button { 
-        border-top: 4px solid #64748b !important; 
-        background: #f8fafc !important; 
-    }
+    .dashboard-card-btn.inc button { border-top: 4px solid #10b981 !important; background: #f0fdf4 !important; }
+    .dashboard-card-btn.exc button { border-top: 4px solid #ef4444 !important; background: #fef2f2 !important; }
+    .dashboard-card-btn.pending button { border-top: 4px solid #f59e0b !important; background: #fffbeb !important; }
+    .dashboard-card-btn.dup button { border-top: 4px solid #64748b !important; background: #f8fafc !important; }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
 # --------------------------------------------------
 # Session State 메모리 저장소 초기화
 # --------------------------------------------------
@@ -1270,102 +1254,6 @@ else:
     exclude_criteria = "Exclude Non-Clinical/Irrelevant Papers"
     default_p, default_i, default_c, default_o = "Obstructive Jaundice\nBiliary Stricture", "Biliary Stent\nSEMS", "Surgery\nPlastic stent", "Technical success\nClinical success"
     add_search_queries = ['Taewoong AND Stent']
-
-# --------------------------------------------------
-# ✨ 2단계 세그먼티드 컨트롤 메뉴
-# --------------------------------------------------
-sub_model_html = (
-    f'<div style="font-size: 14px; font-weight: 500; color: #94a3b8; margin-top: 4px;">{sub_model}</div>'
-    if sub_model else ""
-)
-
-st.markdown(
-    f"""
-<div class="selected-category-box">
-    <div class="selected-category-label">Selected Category</div>
-    <div class="selected-category-title">{due_category}</div>
-    {sub_model_html}
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-target_engine = st.segmented_control(
-    "", options=["PubMed Engine", "GIE Journal Engine", "ClinicalTrials Engine"], default="PubMed Engine", key="engine_mode_seg",
-)
-st.markdown("<br>", unsafe_allow_html=True)
-
-if target_engine == "PubMed Engine":
-    selected_mode = st.segmented_control(
-        "", options=["PubMed PICO 자동 검색", "PMID 리스트 업로드", "단일 PMID 입력"], default="PubMed PICO 자동 검색", key="pubmed_sub_mode_seg",
-    )
-elif target_engine == "GIE Journal Engine":
-    selected_mode = st.segmented_control(
-        "", options=["GIE RIS 파일 일괄 스크리닝"], default="GIE RIS 파일 일괄 스크리닝", key="gie_sub_mode_seg",
-    )
-else:
-    selected_mode = st.segmented_control(
-        "", options=["ClinicalTrials 자동 검색"], default="ClinicalTrials 자동 검색", key="ct_sub_mode_seg",
-    )
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# --------------------------------------------------
-# 🤖 공통 AI 프롬프트 (판정 우선순위 및 Case Report 방어 적용)
-# --------------------------------------------------
-def generate_prompt(due_category, include_criteria, exclude_criteria, title, article_content):
-    return f"""
-    너는 의료기기 임상평가(CER) 및 체계적 문헌고찰(Systematic Review) 전문가야. 
-    아래 제공된 논문 정보(초록 또는 전문(Full-text))를 정밀하게 읽고, 제공된 [포함기준]과 [제외기준] 및 [인간 평가자 실제 판정 예시]를 학습하여 정확한 판정을 내려라.
-
-    [선택된 카테고리/분류]: {due_category} ({sub_model})
-
-    [엄격한 판정 가이드라인]:
-    1. Include 조건: [포함기준]을 완벽히 만족하고, 컴포넌트나 적응증이 임상적으로 타당한 경우 'Include'로 판정한다. 원문(Full-text) 전체가 제공된 경우, 서론보다는 연구 방법(Methods)과 결과(Results) 섹션을 중점적으로 확인하여 평가 대상 기구가 실제 사용되었는지 엄격히 검증하라.
-    
-    2. CER 통합 보고서 연속성 및 Benign(양성) 처리 핵심 지침 (중요!):
-       - 현재 선택된 모델이 Uncovered 라 하더라도, 논문에 Benign(양성) 적응증 관련 내용이 포함되어 있다는 이유만으로 선제적 배제(Exclude)를 하지 말 것!
-       - 이유: 본 스크리닝은 하나의 통합 CER 보고서 섹션으로 취급되므로, Uncovered 단계에서 Benign 논문이 불필요하게 Exclude 되면 차후 Covered 단계 검토 시 'Duplicated(중복)' 처리되어 영구 누락되는 사고가 발생함. 양성/악성 모두 유연하게 포용하여 판단할 것.
-       
-    3. Exclude 판단 핵심 규칙 및 적용 순서 (★반드시 아래 1순위부터 순서대로 검토하여 가장 먼저 해당하는 사유를 적용할 것):
-       - 1순위. **Literature without human clinical data**: Preclinical proof-of-concept, In-vitro, 동물실험 연구 등 인간 대상 임상 데이터가 없는 경우.
-       - 2순위. **Irrelevant article**: 평가 대상 스텐트 기구(I)가 아닌 타 장기 기구(예: 식도 스텐트 심사 시 기도/기관지 스텐트 사용)를 사용했거나, 스텐트 성과/안전성과 무관한 타 시술/수술(RFA, EIs, 진단 기술 등)이 주목적인 경우.
-       - 3순위. **Different indication**: 평가 대상 스텐트 기구(I)를 사용했으나, Target 적응증이 아닌 전혀 무관한 질환/목적으로 사용된 경우.
-       - 4순위. **Insufficient information**: 위 1~3순위에 모두 해당하지 않으면서(즉, 올바른 기구와 적응증을 사용했음에도) 아래의 이유로 평가가 불가한 경우에만 최후의 수단으로 적용할 것.
-         * Valid information relevant to performance and/or safety is limited: 제공된 텍스트 상 유효 데이터가 부족하여 스텐트의 실제 성능 및 안전성을 확인할 수 없는 경우.
-         * Letter / Protocol: 논문 형태가 Letter, Comment, 단순 Study Protocol인 경우. (🚨강력 주의: 서론에서 타 연구를 인용 및 논평하는 문장이 있더라도, 실제 환자의 임상 경과를 다룬 'Case Report'나 'Case Series'라면 절대 이 사유로 배제하지 말고 최우선적으로 Include 할 것!)
-       - 5순위. **This article is already held by Taewoong Medical.**: 태웅메디칼 내부 보유 또는 이전에 검토 완료된 문헌인 경우.
-
-    [품목별 인간 평가자 주요 판정 학습 예시 (Few-shot Examples)]:
-    - Biliary: Covered SEMS vs Uncovered SEMS 유효성/안전성 Meta-analysis 및 RCT -> Include
-    - Esophageal: FC-SEMS 마이그레이션 방지(Suturing 등) 비교 연구 -> Include | 기도/기관지 스텐트(Airway stent) 사용 연구 -> Exclude (Irrelevant article: The study focuses on airway/tracheal stenting rather than esophageal stent placement.)
-    - Pyloric/Duodenal: EUS-GJ vs Duodenal SEMS vs SGJ 삼자 비교 Review -> Include | Balloon dilation vs SEMS 비교 -> Include | 2차 Duodenal SEMS 재시술 성과 -> Include | Case Report -> Include
-    - Colonic: Emergency Surgery 대비 Bridge 단기 목적 SEMS 성과/생존율 -> Include | CReST2 Trial(완화 목적 Covered vs Uncovered) -> Include | Stent Patency 예측 모델 개발 -> Include
-    - Drainage: Percutaneous cystogastrostomy / EUS-GBD / EUS-BD 임상 성과 -> Include | High-surgical-risk 환자 배액술 가이드라인 -> Include | EUS-BD 안전성 실무 임상 -> Include
-
-    [포함기준]:
-    {include_criteria}
-
-    [제외기준]:
-    {exclude_criteria}
-
-    [평가 대상 논문 정보]
-    - [논문 제목]: {title}
-    - [제공된 텍스트 (초록 또는 전문)]: 
-    {article_content}
-
-    답변형식 (한국어 설명 없이 오직 아래 지정된 영문 형식으로만 완벽히 작성할 것):
-
-    판정: (Include 또는 Exclude)
-
-    Conclusion:
-    (영문 사유 1문장)
-
-    [Conclusion 작성 규칙]:
-    1. 마크다운 별표(**)를 절대로 사용하지 마라.
-    2. Include인 경우: 'Conclusion:' 이라는 말머리나 수식어('Included because' 등)를 일체 붙이지 말고 완결된 1개 영문 문장 자체만 적어라.
-    3. Exclude인 경우: 반드시 위에서 지정한 1~5순위 사유 중 가장 먼저 해당하는 정확한 사유의 말머리(예: 'Irrelevant article:', 'Different indication:')를 맨 앞에 붙이고 사유를 적어라.
-    """
 
 # --------------------------------------------------
 # MODE 1: 단일 PMID 테스트
