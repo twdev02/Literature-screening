@@ -106,7 +106,7 @@ def convert_df_to_excel(df_input):
     return excel_io.getvalue()
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS
+# 🎨 고급 커스텀 CSS (1단계 위치)
 # --------------------------------------------------
 st.markdown(
     """
@@ -185,52 +185,75 @@ st.markdown(
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] { background-color: #0b1a2d !important; color: #ffffff !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
+
+    /* 💡 Pills / Segmented Control에 반투명 색상 및 카드 스타일 적용 */
+    div[data-testid="stPills"] > div,
+    div[data-testid="stSegmentedControl"] > div {
+        background-color: transparent !important;
+        border: none !important;
+        gap: 10px !important;
+    }
+
+    div[data-testid="stPills"] button,
+    div[data-testid="stSegmentedControl"] button {
+        flex: 1 !important;
+        border-radius: 12px !important;
+        padding: 12px 8px !important;
+        font-weight: 800 !important;
+        font-size: 14px !important;
+        transition: all 0.2s ease !important;
+        white-space: pre-wrap !important;
+        line-height: 1.3 !important;
+    }
+
+    div[data-testid="stPills"] button:hover,
+    div[data-testid="stSegmentedControl"] button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    /* 각 항목별 고유 반투명 색상 */
+    div[data-testid="stPills"] button:nth-child(1),
+    div[data-testid="stSegmentedControl"] button:nth-child(1) {
+        background-color: rgba(224, 242, 254, 0.85) !important;
+        border: 1.5px solid #38bdf8 !important;
+        color: #0369a1 !important;
+    }
+    div[data-testid="stPills"] button:nth-child(2),
+    div[data-testid="stSegmentedControl"] button:nth-child(2) {
+        background-color: rgba(220, 252, 231, 0.9) !important;
+        border: 1.5px solid #4ade80 !important;
+        color: #15803d !important;
+    }
+    div[data-testid="stPills"] button:nth-child(3),
+    div[data-testid="stSegmentedControl"] button:nth-child(3) {
+        background-color: rgba(254, 226, 226, 0.9) !important;
+        border: 1.5px solid #f87171 !important;
+        color: #b91c1c !important;
+    }
+    div[data-testid="stPills"] button:nth-child(4),
+    div[data-testid="stSegmentedControl"] button:nth-child(4) {
+        background-color: rgba(254, 243, 199, 0.95) !important;
+        border: 1.5px solid #facc15 !important;
+        color: #b45309 !important;
+    }
+    div[data-testid="stPills"] button:nth-child(5),
+    div[data-testid="stSegmentedControl"] button:nth-child(5) {
+        background-color: rgba(241, 245, 249, 0.95) !important;
+        border: 1.5px solid #94a3b8 !important;
+        color: #475569 !important;
+    }
+
+    /* 선택(Active)되었을 때 강조 효과 */
+    div[data-testid="stPills"] button[aria-selected="true"],
+    div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
+        box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.8) !important;
+        font-weight: 900 !important;
+    }
 </style>
 """,
     unsafe_allow_html=True,
-)
-
-# --------------------------------------------------
-# ⚙️ Session State 메모리 저장소 초기화
-# --------------------------------------------------
-if "tab1_result" not in st.session_state:
-    st.session_state["tab1_result"] = None
-if "tab2_result" not in st.session_state:
-    st.session_state["tab2_result"] = None
-if "tab3_result" not in st.session_state:
-    st.session_state["tab3_result"] = None
-if "tab_gie_result" not in st.session_state:
-    st.session_state["tab_gie_result"] = None
-if "tab_ct_result" not in st.session_state:
-    st.session_state["tab_ct_result"] = None
-
-if "uploader_key" not in st.session_state:
-    st.session_state["uploader_key"] = 0
-if "show_reset_msg" not in st.session_state:
-    st.session_state["show_reset_msg"] = False
-if "screened_history" not in st.session_state:
-    st.session_state["screened_history"] = {}
-if "radio_category" not in st.session_state:
-    st.session_state["radio_category"] = None
-if "active_dashboard_filter" not in st.session_state:
-    st.session_state["active_dashboard_filter"] = "ALL"
-
-def clear_screening_results():
-    st.session_state["tab1_result"] = None
-    st.session_state["tab2_result"] = None
-    st.session_state["tab3_result"] = None
-    st.session_state["tab_gie_result"] = None
-    st.session_state["tab_ct_result"] = None
-    st.session_state["active_dashboard_filter"] = "ALL"
-
-def reset_to_home():
-    clear_screening_results()
-    st.session_state["radio_category"] = None
-
-def clear_history():
-    st.session_state["screened_history"] = {}
-    st.session_state["uploader_key"] += 1  
-    st.session_state["show_reset_msg"] = True  
+)  
 
 # --------------------------------------------------
 # 🖱️ 순수 HTML/JS 기반 반투명 색상 클릭 카드 대시보드
@@ -242,26 +265,27 @@ def render_interactive_dashboard(df, key_prefix):
     pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
-    # 대시보드 필터 옵션 라벨 세팅
+    # 대시보드 필터 옵션 세팅 (버튼 내 줄바꿈 포함)
     filter_options = {
-        "ALL": f"전체 대상 ({total_cnt}건)",
-        "INC": f"Include ({inc_cnt}건)",
-        "EXC": f"Exclude ({exc_cnt}건)",
-        "PENDING": f"Full-Text/Manual ({pending_cnt}건)",
-        "DUP": f"Duplicated ({dup_cnt}건)",
+        "ALL": f"전체 대상\n{total_cnt}건",
+        "INC": f"Include (포함)\n{inc_cnt}건",
+        "EXC": f"Exclude (제외)\n{exc_cnt}건",
+        "PENDING": f"Full-Text / Manual\n{pending_cnt}건",
+        "DUP": f"Duplicated (중복)\n{dup_cnt}건",
     }
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
 
-    # 대시보드 탭 필터 UI (Segmented Control)
-    selected_label = st.segmented_control(
-        "📊 필터 선택 (클릭 시 해당 목록만 표시):",
+    # Native Pills/SegmentedControl 활용한 색상 카드 필터
+    selected_label = st.pills(
+        "",
         options=list(filter_options.values()),
         default=filter_options[current_filter],
-        key=f"{key_prefix}_dashboard_seg_control"
+        key=f"{key_prefix}_dashboard_pills",
+        label_visibility="collapsed"
     )
 
-    # 선택된 라벨을 내부 코드값(ALL, INC 등)으로 역변환
+    # 선택된 옵션을 내부 코드값(ALL, INC 등)으로 매핑
     label_to_code = {v: k for k, v in filter_options.items()}
     if selected_label in label_to_code:
         current_filter = label_to_code[selected_label]
@@ -298,7 +322,7 @@ def render_interactive_dashboard(df, key_prefix):
     st.markdown("<br>", unsafe_allow_html=True)
     st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
-    # 1번 반영: AI 판정, Conclusion 제외 나머지 모든 열 수정 불가(disabled) 설정
+    # 1번 수정 반영: AI 판정, Conclusion 제외 나머지 모든 열 수정 불가(disabled) 고정
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
             "AI 판정 (수동 수정 가능)",
