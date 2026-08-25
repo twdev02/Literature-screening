@@ -243,7 +243,7 @@ st.markdown(
         transform: translateY(-1px);
     }
 
-    /* Review Required - Amber */
+    /* Full-Text / Manual - Amber */
     [class*="st-key-screen_card_pending_"] div[data-testid="stButton"] button {
         background: rgba(245, 158, 11, 0.14) !important;
         border: 1px solid rgba(245, 158, 11, 0.32) !important;
@@ -337,7 +337,7 @@ def render_interactive_dashboard(df, key_prefix):
     total_cnt = len(df)
     inc_cnt = len(df[df["AI 판정"] == "Include (포함)"])
     exc_cnt = len(df[df["AI 판정"] == "Exclude (제외)"])
-    pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Review Required", na=False)])
+    pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -372,7 +372,7 @@ def render_interactive_dashboard(df, key_prefix):
     with c4:
         with st.container(key=f"screen_card_pending_{key_prefix}"):
             if st.button(
-                f"Review Required\n\n{pending_cnt}건",
+                f"Full-Text / Manual\n\n{pending_cnt}건",
                 key=f"{key_prefix}_btn_pending",
                 use_container_width=True
             ):
@@ -404,7 +404,7 @@ def render_interactive_dashboard(df, key_prefix):
             "Held by Taewoong Medical"
         ]
         selected_reason = st.selectbox(
-            "세부 Exclude 사유 필터:", 
+            "🔍 세부 Exclude 사유 필터:", 
             options=exclude_reasons, 
             key=f"{key_prefix}_reason_filter"
         )
@@ -412,37 +412,61 @@ def render_interactive_dashboard(df, key_prefix):
             filtered_df = filtered_df[filtered_df["Conclusion"].str.contains(selected_reason, na=False, case=False)]
 
     elif current_filter == "PENDING":
-        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Full-text Screening Needed|Review Required", na=False)]
+        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)]
     elif current_filter == "DUP":
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("**팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
+    st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
+
+    # --------------------------------------------------
+    # AI 판정 표시값과 내부 저장값 분리
+    # - 내부 데이터의 "Manual Review Needed"는 그대로 유지
+    # - 화면의 드롭다운에서는 "Review Required"로 표시
+    # --------------------------------------------------
+    display_df = filtered_df.copy()
+    if "AI 판정" in display_df.columns:
+        display_df["AI 판정"] = display_df["AI 판정"].replace({
+            "Manual Review Needed": "Review Required"
+        })
 
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
-            "AI 판정",
-            options=["Include", "Exclude", "Review Required", "Duplicated"],
+            "AI 판정 (수동 수정 가능)",
+            options=[
+                "Include (포함)",
+                "Exclude (제외)",
+                "Review Required",
+                "Duplicated"
+            ],
             required=True
         ),
-        "Conclusion": st.column_config.TextColumn("Conclusion", width="large"),
+        "Conclusion": st.column_config.TextColumn("Conclusion (수동 수정 가능)", width="large"),
     }
     
-    for col_name in filtered_df.columns:
+    for col_name in display_df.columns:
         if col_name not in ["AI 판정", "Conclusion"]:
             column_config_dict[col_name] = st.column_config.Column(disabled=True)
 
     edited_df = st.data_editor(
-        filtered_df,
+        display_df,
         key=f"{key_prefix}_editor_{current_filter}",
         hide_index=True,
         use_container_width=True,
         column_config=column_config_dict
     )
 
+    # 화면에서 변경된 "Review Required"를 실제 내부값인
+    # "Manual Review Needed"로 되돌려 기존 로직/데이터 구조를 유지
+    edited_df = edited_df.copy()
+    if "AI 판정" in edited_df.columns:
+        edited_df["AI 판정"] = edited_df["AI 판정"].replace({
+            "Review Required": "Manual Review Needed"
+        })
+
     excel_data = convert_df_to_excel(edited_df)
     st.download_button(
-        "현재 목록 Excel(.xlsx) 다운로드",
+        "📥 현재 목록 Excel(.xlsx) 다운로드",
         data=excel_data,
         file_name=f"screening_result_{current_filter.lower()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1718,7 +1742,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
         )
 
     st.markdown("---")
-    st.subheader("문헌 검색 기간 설정")
+    st.subheader("문헌 검색 기간(연/월) 및 추출 개수 설정")
 
     col_s1, col_s2, col_e1, col_e2 = st.columns(4)
     with col_s1: start_year = st.number_input("시작 연도", min_value=1990, max_value=2026, value=2026)
