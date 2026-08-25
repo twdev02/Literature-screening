@@ -372,7 +372,7 @@ def render_interactive_dashboard(df, key_prefix):
     with c4:
         with st.container(key=f"screen_card_pending_{key_prefix}"):
             if st.button(
-                f"Full-Text / Manual\n\n{pending_cnt}건",
+                f"Review Required\n\n{pending_cnt}건",
                 key=f"{key_prefix}_btn_pending",
                 use_container_width=True
             ):
@@ -432,7 +432,7 @@ def render_interactive_dashboard(df, key_prefix):
 
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
-            "AI 판정 (수동 수정 가능)",
+            "AI 판정",
             options=[
                 "Include (포함)",
                 "Exclude (제외)",
@@ -441,7 +441,7 @@ def render_interactive_dashboard(df, key_prefix):
             ],
             required=True
         ),
-        "Conclusion": st.column_config.TextColumn("Conclusion (수동 수정 가능)", width="large"),
+        "Conclusion": st.column_config.TextColumn("Conclusion", width="large"),
     }
     
     for col_name in display_df.columns:
