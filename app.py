@@ -51,7 +51,6 @@ def to_unicode_bold(text):
 def convert_df_to_excel(df_input):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
-    # 엑셀 다운로드 시 유니코드 굵은 특수문자를 일반 표준 영문으로 원복하여 어긋남 방지
     bold_reverse_map = {
         '𝐀': 'A', '𝐁': 'B', '𝐂': 'C', '𝐃': 'D', '𝐄': 'E', '𝐅': 'F', '𝐆': 'G', '𝐇': 'H', '𝐈': 'I', '𝐉': 'J', '𝐊': 'K', '𝐋': 'L', '𝐌': 'M', '𝐍': 'N', '𝐎': 'O', '𝐏': 'P', '𝐐': 'Q', '𝐑': 'R', '𝐒': 'S', '𝐓': 'T', '𝐔': 'U', '𝐕': 'V', '𝐖': 'W', '𝐗': 'X', '𝐘': 'Y', '𝐙': 'Z',
         '𝐚': 'a', '𝐛': 'b', '𝐜': 'c', '𝐝': 'd', '𝐞': 'e', '𝐟': 'f', '𝐠': 'g', '𝐡': 'h', '𝐢': 'i', '𝐣': 'j', '𝐤': 'k', '𝐥': 'l', '𝐦': 'm', '𝐧': 'n', '𝐨': 'o', '𝐩': 'p', '𝐪': 'q', '𝐫': 'r', '𝐬': 's', '𝐭': 't', '𝐮': 'u', '𝐯': 'v', '𝐰': 'w', '𝐱': 'x', '𝐲': 'y', '𝐳': 'z'
@@ -107,7 +106,7 @@ def convert_df_to_excel(df_input):
     return excel_io.getvalue()
 
 # --------------------------------------------------
-# 🎨 고급 커스텀 CSS (기존 비율 유지 + 깨짐 방지)
+# 🎨 고급 커스텀 CSS
 # --------------------------------------------------
 st.markdown(
     """
@@ -137,7 +136,6 @@ st.markdown(
         white-space: nowrap !important;
     }
     
-    /* ✨ 상단 메인 히어로 배너 - 모던 글래스모피즘 반투명 스타일 (왼쪽 세로선 제거) */
     .hero-container {
         background: rgba(15, 23, 42, 0.92);
         backdrop-filter: blur(8px);
@@ -157,11 +155,10 @@ st.markdown(
     .card-value { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px; white-space: normal !important; word-break: keep-all !important; }
     .card-desc { font-size: 12px; color: #64748b; margin-bottom: 12px; word-break: keep-all !important; }
     
-    /* ✨ 트렌디한 글래스모피즘 은은한 반투명 카드 (왼쪽 세로선 제거) */
     .selected-category-box { 
-        background: rgba(15, 23, 42, 0.92); /* 92% 미세 반투명 딥 네이비 */
-        backdrop-filter: blur(8px); /* 은은한 블러 효과 */
-        border: 1px solid rgba(255, 255, 255, 0.08); /* 미세 흰색 테두리 */
+        background: rgba(15, 23, 42, 0.92);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px; 
         padding: 20px 26px; 
         margin-bottom: 20px; 
@@ -170,7 +167,7 @@ st.markdown(
     .selected-category-label { 
         font-size: 11px; 
         font-weight: 700; 
-        color: #38bdf8; /* 스카이블루 포인트 */
+        color: #38bdf8; 
         text-transform: uppercase; 
         letter-spacing: 1.2px; 
         margin-bottom: 6px; 
@@ -188,18 +185,32 @@ st.markdown(
     div[data-testid="stSegmentedControl"] button[aria-selected="true"] { background-color: #0b1a2d !important; color: #ffffff !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
     .prod-item-title { font-weight: 700; font-size: 15px; color: #0f172a; white-space: normal !important; word-break: keep-all !important; margin-bottom: 6px; }
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
-    .result-summary-box { display: flex; gap: 12px; margin-bottom: 16px; }
-    .res-card { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; text-align: center; }
-    .res-card-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-    .res-card-val { font-size: 22px; font-weight: 800; }
-    .res-card.inc { border-top: 3px solid #10b981; background: #f0fdf4; }
-    .res-card.inc .res-card-val { color: #166534; }
-    .res-card.exc { border-top: 3px solid #ef4444; background: #fef2f2; }
-    .res-card.exc .res-card-val { color: #991b1b; }
-    .res-card.pending { border-top: 3px solid #f59e0b; background: #fffbeb; }
-    .res-card.pending .res-card-val { color: #92400e; }
-    .res-card.dup { border-top: 3px solid #64748b; background: #f8fafc; }
-    .res-card.dup .res-card-val { color: #334155; }
+    
+    /* 💡 인터랙티브 대시보드 버튼 스타일 */
+    div.res-card-btn button {
+        width: 100% !important;
+        border-radius: 10px !important;
+        padding: 12px 10px !important;
+        text-align: center !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #f8fafc !important;
+        transition: all 0.2s ease !important;
+    }
+    div.res-card-btn button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    }
+    div.res-card-btn.inc button { border-top: 4px solid #10b981 !important; background: #f0fdf4 !important; }
+    div.res-card-btn.exc button { border-top: 4px solid #ef4444 !important; background: #fef2f2 !important; }
+    div.res-card-btn.pending button { border-top: 4px solid #f59e0b !important; background: #fffbeb !important; }
+    div.res-card-btn.dup button { border-top: 4px solid #64748b !important; background: #f8fafc !important; }
+    
+    .card-btn-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: block; }
+    .card-btn-val { font-size: 22px; font-weight: 800; display: block; line-height: 1.2; }
+    .inc .card-btn-val { color: #166534; }
+    .exc .card-btn-val { color: #991b1b; }
+    .pending .card-btn-val { color: #92400e; }
+    .dup .card-btn-val { color: #334155; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -227,7 +238,8 @@ if "screened_history" not in st.session_state:
     st.session_state["screened_history"] = {}
 if "radio_category" not in st.session_state:
     st.session_state["radio_category"] = None
-
+if "active_dashboard_filter" not in st.session_state:
+    st.session_state["active_dashboard_filter"] = "ALL"
 
 def clear_screening_results():
     st.session_state["tab1_result"] = None
@@ -235,6 +247,7 @@ def clear_screening_results():
     st.session_state["tab3_result"] = None
     st.session_state["tab_gie_result"] = None
     st.session_state["tab_ct_result"] = None
+    st.session_state["active_dashboard_filter"] = "ALL"
 
 def reset_to_home():
     clear_screening_results()
@@ -245,39 +258,104 @@ def clear_history():
     st.session_state["uploader_key"] += 1  
     st.session_state["show_reset_msg"] = True  
 
-def render_result_dashboard(df):
+# --------------------------------------------------
+# 🖱️ 클릭 및 수동 수정 가능한 대시보드 함수
+# --------------------------------------------------
+def render_interactive_dashboard(df, key_prefix):
     total_cnt = len(df)
     inc_cnt = len(df[df["AI 판정"] == "Include (포함)"])
     exc_cnt = len(df[df["AI 판정"] == "Exclude (제외)"])
     pending_cnt = len(df[df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)])
     dup_cnt = len(df[df["AI 판정"].str.contains("Duplicated", na=False)])
 
-    st.markdown(
-        f"""
-        <div class="result-summary-box">
-            <div class="res-card">
-                <div class="res-card-label">전체 대상</div>
-                <div class="res-card-val">{total_cnt}건</div>
-            </div>
-            <div class="res-card inc">
-                <div class="res-card-label">Include (포함)</div>
-                <div class="res-card-val">{inc_cnt}건</div>
-            </div>
-            <div class="res-card exc">
-                <div class="res-card-label">Exclude (제외)</div>
-                <div class="res-card-val">{exc_cnt}건</div>
-            </div>
-            <div class="res-card pending">
-                <div class="res-card-label">Full-Text/Manual Review Needed</div>
-                <div class="res-card-val">{pending_cnt}건</div>
-            </div>
-            <div class="res-card dup">
-                <div class="res-card-label">Duplicated (중복)</div>
-                <div class="res-card-val">{dup_cnt}건</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    c1, c2, c3, c4, c5 = st.columns(5)
+    
+    with c1:
+        st.markdown('<div class="res-card-btn">', unsafe_allow_html=True)
+        if st.button(f"전체 대상\n{total_cnt}건", key=f"{key_prefix}_btn_all", use_container_width=True):
+            st.session_state["active_dashboard_filter"] = "ALL"
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    with c2:
+        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
+        if st.button(f"Include (포함)\n{inc_cnt}건", key=f"{key_prefix}_btn_inc", use_container_width=True):
+            st.session_state["active_dashboard_filter"] = "INC"
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c3:
+        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
+        if st.button(f"Exclude (제외)\n{exc_cnt}건", key=f"{key_prefix}_btn_exc", use_container_width=True):
+            st.session_state["active_dashboard_filter"] = "EXC"
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c4:
+        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
+        if st.button(f"Full-Text/Manual Needed\n{pending_cnt}건", key=f"{key_prefix}_btn_pending", use_container_width=True):
+            st.session_state["active_dashboard_filter"] = "PENDING"
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c5:
+        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
+        if st.button(f"Duplicated (중복)\n{dup_cnt}건", key=f"{key_prefix}_btn_dup", use_container_width=True):
+            st.session_state["active_dashboard_filter"] = "DUP"
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    current_filter = st.session_state.get("active_dashboard_filter", "ALL")
+    filtered_df = df.copy()
+
+    if current_filter == "INC":
+        filtered_df = filtered_df[filtered_df["AI 판정"] == "Include (포함)"]
+    elif current_filter == "EXC":
+        filtered_df = filtered_df[filtered_df["AI 판정"] == "Exclude (제외)"]
+        
+        # 💡 Exclude 선택 시 세부 사유 필터 드롭다운 활성화
+        exclude_reasons = [
+            "전체 제외 사유 보기",
+            "Literature without human clinical data",
+            "Irrelevant article",
+            "Different indication",
+            "Insufficient information",
+            "Held by Taewoong Medical"
+        ]
+        selected_reason = st.selectbox(
+            "🔍 세부 Exclude 사유 필터:", 
+            options=exclude_reasons, 
+            key=f"{key_prefix}_reason_filter"
+        )
+        if selected_reason != "전체 제외 사유 보기":
+            filtered_df = filtered_df[filtered_df["Conclusion"].str.contains(selected_reason, na=False, case=False)]
+
+    elif current_filter == "PENDING":
+        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Full-text Screening Needed|Manual Review Needed", na=False)]
+    elif current_filter == "DUP":
+        filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
+
+    # 💡 Editable Table (st.data_editor)
+    edited_df = st.data_editor(
+        filtered_df,
+        key=f"{key_prefix}_editor_{current_filter}",
+        hide_index=True,
+        use_container_width=True,
+        column_config={
+            "AI 판정": st.column_config.SelectboxColumn(
+                "AI 판정 (수동 수정 가능)",
+                options=["Include (포함)", "Exclude (제외)", "Manual Review Needed", "Duplicated"],
+                required=True
+            ),
+            "Conclusion": st.column_config.TextColumn("Conclusion (수동 수정 가능)", width="large"),
+        }
+    )
+
+    excel_data = convert_df_to_excel(edited_df)
+    st.download_button(
+        "📥 현재 목록 Excel(.xlsx) 다운로드",
+        data=excel_data,
+        file_name=f"screening_result_{current_filter.lower()}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=False
     )
 
 # --------------------------------------------------
@@ -345,7 +423,7 @@ with st.sidebar:
     sub_model = None
 
     if current_engine == "ClinicalTrials Engine":
-        sub_model = None  # 👈 기존 "통합 품목 검색" 대신 None 할당
+        sub_model = None
     else:
         if due_category == "1. Biliary Stent":
             sub_model = st.selectbox(
@@ -408,7 +486,7 @@ with st.sidebar:
     history_cnt = len(st.session_state.get("screened_history", {}))
     st.caption(f"현재 누적 스크리닝 이력: **{history_cnt}건**")
 
-    # 💡 이전 스크리닝 이력 복원 (Excel 및 CSV 동시 지원)
+    # 💡 이전 스크리닝 이력 복원
     with st.expander("이전 스크리닝 결과 불러오기"):
         history_files = st.file_uploader(
             "과거 스크리닝 결과 파일 선택",
@@ -480,7 +558,7 @@ with st.sidebar:
     )
 
 # --------------------------------------------------
-# 🏠 1. 카테고리가 아예 선택되지 않았을 때만 메인 홈 대시보드 표시 (원본 제품 리스트 완벽 복원)
+# 🏠 1. 메인 홈 대시보드
 # --------------------------------------------------
 if not due_category:
     st.markdown(
@@ -845,7 +923,7 @@ if not due_category:
     st.stop()
 
 # --------------------------------------------------
-# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅 (Additional Search 1:1 매핑 정밀 추가)
+# 🔬 세부 모델별 프롬프트 및 PICO 키워드 세팅
 # --------------------------------------------------
 if due_category == "1. Biliary Stent":
     include_criteria = """1. Text availability: Full text (Original articles, Reviews, Case reports/series 모두 포함)
@@ -1156,7 +1234,6 @@ def fetch_pmc_fulltext(pmcid, ncbi_api_key=""):
     except Exception:
         return None
 
-# 🚀 ClinicalTrials.gov (NCT) API 전체/개수제한 수집 함수 (페이지네이션 적용)
 def search_clinicaltrials(condition, intervention, status_filters=None, type_filters=None, fetch_all=False, max_results=20):
     url = "https://clinicaltrials.gov/api/v2/studies"
     page_size = 1000 if fetch_all else min(max_results, 1000)
@@ -1466,27 +1543,7 @@ elif selected_mode == "PMID 리스트 업로드":
 
     if st.session_state["tab2_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] 일괄 스크리닝 결과")
-        res_df = st.session_state["tab2_result"]
-        render_result_dashboard(res_df)
-        pending_df = res_df[res_df["AI 판정"].str.contains("Manual Review Needed|Full-text Screening Needed", na=False)]
-
-        v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
-        with v_tab1:
-            st.dataframe(res_df, hide_index=True)
-            excel_data = convert_df_to_excel(res_df)
-            col_d1, _ = st.columns([1, 2])
-            with col_d1:
-                st.download_button("전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="cer_screening_result_all.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
-                
-        with v_tab2:
-            if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
-            else:
-                st.warning("아래 목록은 PubMed 데이터상 초록이 없고 Open Access가 아니어서 수동 검토가 필요한 문헌들입니다.")
-                st.dataframe(pending_df, hide_index=True)
-                pending_excel = convert_df_to_excel(pending_df)
-                col_d2, _ = st.columns([1, 2])
-                with col_d2:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="cer_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+        render_interactive_dashboard(st.session_state["tab2_result"], key_prefix="tab2")
 
 # --------------------------------------------------
 # MODE 3: PubMed PICO 키워드 자동 검색 & 스크리닝
@@ -1503,7 +1560,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
         c_val = st.text_area("C (Comparison)", value=default_c, height=140)
         o_val = st.text_area("O (Outcome)", value=default_o, height=140)
 
-    # 🚀 통합 세팅 구역: PICO 검색 조합 선택 + 퀵 버튼
     st.markdown("---")
     st.subheader("PICO 검색 조합 선택")
     st.caption("원하시는 퀵 세팅 버튼을 누르거나, 아래 체크박스를 통해 검색에 포함할 항목을 직접 조정하세요.")
@@ -1511,7 +1567,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     if "pico_preset" not in st.session_state:
         st.session_state["pico_preset"] = "P + I"
 
-    # ⚡ 자주 쓰는 조합 퀵 세팅 버튼 (한눈에 보이도록 통합)
     col_q1, col_q2, col_q3, col_q4, col_q5 = st.columns(5)
     with col_q1:
         if st.button("P + I", use_container_width=True):
@@ -1528,7 +1583,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     current_preset = st.session_state["pico_preset"]
 
-    # 프리셋 선택에 따른 기본 체크 상태 동적 지정
     default_chk_p = current_preset in ["P + I", "P + O", "P + C + O"]
     default_chk_i = current_preset in ["P + I"]
     default_chk_c = current_preset in ["P + C + O"]
@@ -1537,7 +1591,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 🚀 5개의 독립 체크박스 (P, I, C, O, Additional Search I)
     col_ck1, col_ck2, col_ck3, col_ck4, col_ck5 = st.columns(5)
     with col_ck1:
         use_p = st.checkbox("P (Patient / Population / Problem)", value=default_chk_p)
@@ -1550,7 +1603,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     with col_ck5:
         use_add_i = st.checkbox("Additional Search I", value=default_chk_add)
 
-    # 🚀 [드롭다운 변경 시 텍스트 상자 실시간 동기화 콜백 함수]
     def sync_query_input():
         st.session_state["custom_direct_query_input"] = st.session_state["sb_add_query_preset"]
 
@@ -1558,7 +1610,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
     if use_add_i:
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # 기본 세션 값 초기 세팅
         if "custom_direct_query_input" not in st.session_state:
             st.session_state["custom_direct_query_input"] = add_search_queries[0]
 
@@ -1567,7 +1618,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
             options=add_search_queries,
             index=0,
             key="sb_add_query_preset",
-            on_change=sync_query_input  # 👈 드롭다운 변경 시 텍스트 상자 즉시 갱신!
+            on_change=sync_query_input
         )
         
         selected_target_direct_query = st.text_input(
@@ -1594,7 +1645,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
         found_pmids = []
         used_query = ""
 
-        # 🚀 Additional Search I 가 체크된 경우 사용자가 직접 편집한 입력창 쿼리문 그대로 단독 실행
         if use_add_i and selected_target_direct_query:
             date_range_label = f"{start_year}년 {start_month:02d}월 ~ {end_year}년 {end_month:02d}월"
             with st.spinner(f"PubMed에서 [{selected_target_direct_query}] 단독 쿼리 실행 중..."):
@@ -1604,7 +1654,6 @@ elif selected_mode == "PubMed PICO 자동 검색":
                 )
 
         else:
-            # 일반 PICO 조합 검색 실행
             if not use_p and not use_i and not use_c and not use_o:
                 use_p, use_i = True, True
                 st.warning("선택된 요소가 없어 기본값 (P + I) 조합으로 자동 지정되었습니다.")
@@ -1731,26 +1780,7 @@ elif selected_mode == "PubMed PICO 자동 검색":
 
     if st.session_state["tab3_result"] is not None:
         st.success(f"[{due_category} - {sub_model}] PICO 기반 자동 스크리닝 완료 결과")
-        res_df = st.session_state["tab3_result"]
-        render_result_dashboard(res_df)
-
-        pending_df = res_df[res_df["AI 판정"].str.contains("Manual Review Needed|Full-text Screening Needed", na=False)]
-        v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
-        with v_tab1:
-            st.dataframe(res_df, hide_index=True)
-            excel_data = convert_df_to_excel(res_df)
-            col_d1, _ = st.columns([1, 2])
-            with col_d1:
-                st.download_button("PubMed 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name=f"pico_screening_{start_year}{start_month:02d}_{end_year}{end_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
-        with v_tab2:
-            if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
-            else:
-                st.warning("아래 목록은 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
-                st.dataframe(pending_df, hide_index=True)
-                pending_excel = convert_df_to_excel(pending_df)
-                col_d2, _ = st.columns([1, 2])
-                with col_d2:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name=f"pico_manual_review_needed_{start_year}{start_month:02d}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+        render_interactive_dashboard(st.session_state["tab3_result"], key_prefix="tab3")
 
 # --------------------------------------------------
 # MODE 4: GIE RIS 파일 전용 일괄 AI 스크리닝
@@ -1790,7 +1820,6 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
                     identifier = doi.lower() if doi and doi != "-" else title.lower()
 
                     doi_list.append(doi)
-                    
                     eval_source = "Abstract Only" if abstract_text else "No Data"
 
                     if eval_source == "No Data":
@@ -1854,26 +1883,7 @@ elif selected_mode == "GIE RIS 파일 일괄 스크리닝":
 
     if st.session_state["tab_gie_result"] is not None and selected_mode == "GIE RIS 파일 일괄 스크리닝":
         st.success(f"[{due_category} - {sub_model}] GIE RIS 스크리닝 완료 결과")
-        res_df = st.session_state["tab_gie_result"]
-        render_result_dashboard(res_df)
-
-        pending_df = res_df[res_df["AI 판정"].str.contains("Manual Review Needed|Full-text Screening Needed", na=False)]
-        v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
-        with v_tab1:
-            st.dataframe(res_df, hide_index=True)
-            excel_data = convert_df_to_excel(res_df)
-            col_d1, _ = st.columns([1, 2])
-            with col_d1:
-                st.download_button("GIE 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="gie_ris_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
-        with v_tab2:
-            if len(pending_df) == 0: st.info("수동 검토 대상 논문이 없습니다.")
-            else:
-                st.warning("아래 목록은 GIE RIS 파일 내 데이터 부족으로 수동 검토가 필요한 문헌들입니다.")
-                st.dataframe(pending_df, hide_index=True)
-                pending_excel = convert_df_to_excel(pending_df)
-                col_d2, _ = st.columns([1, 2])
-                with col_d2:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="gie_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+        render_interactive_dashboard(st.session_state["tab_gie_result"], key_prefix="gie")
 
 # --------------------------------------------------
 # MODE 5: ClinicalTrials.gov 전용 API 자동 스크리닝
@@ -2052,23 +2062,4 @@ elif selected_mode == "ClinicalTrials 자동 검색":
 
     if st.session_state.get("tab_ct_result") is not None and selected_mode == "ClinicalTrials 자동 검색":
         st.success(f"[{due_category} - {sub_model}] ClinicalTrials.gov 스크리닝 완료 결과")
-        res_df = st.session_state["tab_ct_result"]
-        render_result_dashboard(res_df)
-
-        pending_df = res_df[res_df["AI 판정"].str.contains("Manual Review Needed|Full-text Screening Needed", na=False)]
-        v_tab1, v_tab2 = st.tabs(["전체 스크리닝 결과 보기", f"⚠️ 수동 검토 필요 대상 모아보기 ({len(pending_df)}건)"])
-        with v_tab1:
-            st.dataframe(res_df, hide_index=True)
-            excel_data = convert_df_to_excel(res_df)
-            col_d1, _ = st.columns([1, 2])
-            with col_d1:
-                st.download_button("NCT 스크리닝 전체 결과 Excel(.xlsx) 다운로드", data=excel_data, file_name="clinicaltrials_screening_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
-        with v_tab2:
-            if len(pending_df) == 0: st.info("수동 검토 대상 임상이 없습니다.")
-            else:
-                st.warning("아래 목록은 Summary 데이터 부족으로 수동 검토가 필요한 임상시험들입니다.")
-                st.dataframe(pending_df, hide_index=True)
-                pending_excel = convert_df_to_excel(pending_df)
-                col_d2, _ = st.columns([1, 2])
-                with col_d2:
-                    st.download_button("⚠️ 수동 검토 대상 Excel(.xlsx) 다운로드", data=pending_excel, file_name="clinicaltrials_manual_review_needed.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=False)
+        render_interactive_dashboard(st.session_state["tab_ct_result"], key_prefix="ct")
