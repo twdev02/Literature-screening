@@ -187,62 +187,52 @@ st.markdown(
     .prod-item-desc { font-size: 13px; color: #475569; word-break: break-word !important; line-height: 1.5; }
     
     /* 💡 인터랙티브 대시보드 버튼 스타일 (요청 2: 각 버튼별 반투명 색상 구별 강화) */
-    /* 💡 대시보드 반투명 파스텔톤 버튼 CSS (Streamlit 최상위 셀렉터 타겟팅) */
-    div.res-card-btn div[data-testid="stButton"] > button {
-        width: 100% !important;
-        border-radius: 10px !important;
-        padding: 12px 10px !important;
-        text-align: center !important;
-        transition: all 0.2s ease !important;
-        font-weight: 700 !important;
-        backdrop-filter: blur(4px) !important;
+    /* 💡 대시보드 커스텀 반투명 파스텔 카드 스타일 */
+    .dash-card {
+        width: 100%;
+        border-radius: 12px;
+        padding: 14px 10px;
+        text-align: center;
+        backdrop-filter: blur(8px);
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
-    div.res-card-btn div[data-testid="stButton"] > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    .dash-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
     }
-    
-    /* 1. 전체 대상 (반투명 파란색) */
-    div.res-card-btn.all div[data-testid="stButton"] > button {
-        background-color: rgba(224, 242, 254, 0.75) !important;
-        border: 1.5px solid #7dd3fc !important;
-        color: #0369a1 !important;
+    .dash-card-label {
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 4px;
+        letter-spacing: -0.3px;
     }
-    /* 2. Include (반투명 초록색) */
-    div.res-card-btn.inc div[data-testid="stButton"] > button {
-        background-color: rgba(220, 252, 231, 0.8) !important;
-        border: 1.5px solid #86efac !important;
-        color: #15803d !important;
-    }
-    /* 3. Exclude (반투명 빨간색) */
-    div.res-card-btn.exc div[data-testid="stButton"] > button {
-        background-color: rgba(254, 226, 226, 0.8) !important;
-        border: 1.5px solid #fca5a5 !important;
-        color: #b91c1c !important;
-    }
-    /* 4. Full-Text/Manual Needed (반투명 주황색) */
-    div.res-card-btn.pending div[data-testid="stButton"] > button {
-        background-color: rgba(254, 243, 199, 0.85) !important;
-        border: 1.5px solid #fde047 !important;
-        color: #b45309 !important;
-    }
-    /* 5. Duplicated (반투명 회색) */
-    div.res-card-btn.dup div[data-testid="stButton"] > button {
-        background-color: rgba(241, 245, 249, 0.85) !important;
-        border: 1.5px solid #cbd5e1 !important;
-        color: #475569 !important;
+    .dash-card-val {
+        font-size: 22px;
+        font-weight: 900;
+        line-height: 1.1;
     }
 
-    .card-btn-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; display: block; }
-    .card-btn-val { font-size: 22px; font-weight: 800; display: block; line-height: 1.2; }
-    .inc .card-btn-val { color: #166534; }
-    .exc .card-btn-val { color: #991b1b; }
-    .pending .card-btn-val { color: #92400e; }
-    .dup .card-btn-val { color: #334155; }
-</style>
-""",
-    unsafe_allow_html=True,
-)
+    /* 각 카드의 반투명 파스텔 배경 및 색상 정의 */
+    .dash-card.all { background: rgba(224, 242, 254, 0.75); border: 1.5px solid #7dd3fc; }
+    .dash-card.all .dash-card-label { color: #0369a1; }
+    .dash-card.all .dash-card-val { color: #0284c7; }
+
+    .dash-card.inc { background: rgba(220, 252, 231, 0.8); border: 1.5px solid #86efac; }
+    .dash-card.inc .dash-card-label { color: #15803d; }
+    .dash-card.inc .dash-card-val { color: #16a34a; }
+
+    .dash-card.exc { background: rgba(254, 226, 226, 0.8); border: 1.5px solid #fca5a5; }
+    .dash-card.exc .dash-card-label { color: #b91c1c; }
+    .dash-card.exc .dash-card-val { color: #dc2626; }
+
+    .dash-card.pending { background: rgba(254, 243, 199, 0.85); border: 1.5px solid #fde047; }
+    .dash-card.pending .dash-card-label { color: #b45309; }
+    .dash-card.pending .dash-card-val { color: #d97706; }
+
+    .dash-card.dup { background: rgba(241, 245, 249, 0.85); border: 1.5px solid #cbd5e1; }
+    .dash-card.dup .dash-card-label { color: #475569; }
+    .dash-card.dup .dash-card-val { color: #64748b; }
 
 # --------------------------------------------------
 # ⚙️ Session State 메모리 저장소 초기화
@@ -299,34 +289,54 @@ def render_interactive_dashboard(df, key_prefix):
     c1, c2, c3, c4, c5 = st.columns(5)
     
     with c1:
-        st.markdown('<div class="res-card-btn all">', unsafe_allow_html=True)
-        if st.button(f"전체 대상\n{total_cnt}건", key=f"{key_prefix}_btn_all", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card all">
+                <div class="dash-card-label">전체 대상</div>
+                <div class="dash-card-val">{total_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("선택", key=f"{key_prefix}_btn_all", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "ALL"
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+            
     with c2:
-        st.markdown('<div class="res-card-btn inc">', unsafe_allow_html=True)
-        if st.button(f"Include (포함)\n{inc_cnt}건", key=f"{key_prefix}_btn_inc", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card inc">
+                <div class="dash-card-label">Include (포함)</div>
+                <div class="dash-card-val">{inc_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("선택", key=f"{key_prefix}_btn_inc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "INC"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with c3:
-        st.markdown('<div class="res-card-btn exc">', unsafe_allow_html=True)
-        if st.button(f"Exclude (제외)\n{exc_cnt}건", key=f"{key_prefix}_btn_exc", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card exc">
+                <div class="dash-card-label">Exclude (제외)</div>
+                <div class="dash-card-val">{exc_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("선택", key=f"{key_prefix}_btn_exc", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "EXC"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with c4:
-        st.markdown('<div class="res-card-btn pending">', unsafe_allow_html=True)
-        if st.button(f"Full-Text/Manual Needed\n{pending_cnt}건", key=f"{key_prefix}_btn_pending", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card pending">
+                <div class="dash-card-label">Full-Text/Manual Needed</div>
+                <div class="dash-card-val">{pending_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("선택", key=f"{key_prefix}_btn_pending", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "PENDING"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with c5:
-        st.markdown('<div class="res-card-btn dup">', unsafe_allow_html=True)
-        if st.button(f"Duplicated (중복)\n{dup_cnt}건", key=f"{key_prefix}_btn_dup", use_container_width=True):
+        st.markdown(f'''
+            <div class="dash-card dup">
+                <div class="dash-card-label">Duplicated (중복)</div>
+                <div class="dash-card-val">{dup_cnt}건</div>
+            </div>
+        ''', unsafe_allow_html=True)
+        if st.button("선택", key=f"{key_prefix}_btn_dup", use_container_width=True):
             st.session_state["active_dashboard_filter"] = "DUP"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     current_filter = st.session_state.get("active_dashboard_filter", "ALL")
     filtered_df = df.copy()
@@ -345,7 +355,7 @@ def render_interactive_dashboard(df, key_prefix):
             "Held by Taewoong Medical"
         ]
         selected_reason = st.selectbox(
-            "세부 Exclude 사유 필터:", 
+            "🔍 세부 Exclude 사유 필터:", 
             options=exclude_reasons, 
             key=f"{key_prefix}_reason_filter"
         )
@@ -358,7 +368,7 @@ def render_interactive_dashboard(df, key_prefix):
         filtered_df = filtered_df[filtered_df["AI 판정"].str.contains("Duplicated", na=False)]
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.info("**팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
+    st.info("💡 **팁:** 표의 **[AI 판정]** 및 **[Conclusion]** 셀을 직접 클릭하여 수동으로 수정한 후 엑셀을 다운로드할 수 있습니다.")
 
     column_config_dict = {
         "AI 판정": st.column_config.SelectboxColumn(
@@ -383,7 +393,7 @@ def render_interactive_dashboard(df, key_prefix):
 
     excel_data = convert_df_to_excel(edited_df)
     st.download_button(
-        "현재 목록 Excel(.xlsx) 다운로드",
+        "📥 현재 목록 Excel(.xlsx) 다운로드",
         data=excel_data,
         file_name=f"screening_result_{current_filter.lower()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
